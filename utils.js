@@ -45,3 +45,5 @@ function moneyToInt(value) {
 
 
 export { formatRut, yearsOld, renderMoneystr, moneyToInt }
+
+//exports.formatRut = formatRut

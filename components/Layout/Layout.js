@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
-import { AppBar, Container, Drawer, IconButton, Box, Divider, List, ListItem, ListItemButton, ListItemText,
-Typography } from '@mui/material'
+import {
+    AppBar, Container, Drawer, IconButton, Box, Divider, List, ListItem, ListItemButton, ListItemText,
+    Typography
+} from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import AccountCircle from '@mui/icons-material/AccountCircle'
 import ChevronLeft from '@mui/icons-material/ChevronLeft'
@@ -11,6 +13,7 @@ import { useRouter } from 'next/router'
 
 
 import { useAppContext } from '../../appProvider'
+import Snack from '../Karmextron/Snack/Snack'
 
 export default function Layout(props) {
     const { children } = props
@@ -54,32 +57,44 @@ export default function Layout(props) {
                 <List>
                     <ListItem disablePadding>
                         <ListItemButton>
-                            <ListItemText primary={'Home'}
+                            <ListItemText primary={'Nueva recepción'}
                                 onClick={() => {
                                     router.push({
                                         pathname: '/',
                                     })
-                                    setPageTitle('Home')
+                                    setPageTitle('Nueva recepción')
                                 }}
                             />
                         </ListItemButton>
                     </ListItem>
                     <ListItem disablePadding>
                         <ListItemButton>
-                            <ListItemText primary={'otherPage'}
+                            <ListItemText primary={'Recepciones'}
                                 onClick={() => {
                                     router.push({
-                                        pathname: '/otherPage',
+                                        pathname: '/receptions',
                                     })
-                                    setPageTitle('otherPage')
+                                    setPageTitle('Recepciones')
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton>
+                            <ListItemText primary={'Productores'}
+                                onClick={() => {
+                                    router.push({
+                                        pathname: '/producers',
+                                    })
+                                    setPageTitle('Productores')
                                 }}
                             />
                         </ListItemButton>
                     </ListItem>
                 </List>
             </Drawer>
-
-
+            {/* Karmextron */}
+            <Snack />
             {/* Children */}
             {children}
         </>

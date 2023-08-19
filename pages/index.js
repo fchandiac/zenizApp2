@@ -1,10 +1,10 @@
 import React from 'react'
+import NewReception from '../components/NewReception/NewReception'
 
 export default function index() {
   return (
     <>
-    <div>index</div>
-    <button id="mi_boton">Haz clic aquí ahora</button>
+      <NewReception />
     </>
   )
 }
