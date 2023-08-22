@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
     AppBar, Container, Drawer, IconButton, Box, Divider, List, ListItem, ListItemButton, ListItemText,
-    Typography
+    Typography, Dialog, DialogTitle, DialogContent, Button
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import AccountCircle from '@mui/icons-material/AccountCircle'
@@ -17,9 +17,15 @@ import Snack from '../Karmextron/Snack/Snack'
 
 export default function Layout(props) {
     const { children } = props
-    const { pageTitle, setPageTitle } = useAppContext()
+    const { pageTitle, setPageTitle, lock, setLock } = useAppContext()
     const router = useRouter()
     const [openDrawer, setOpenDrawer] = useState()
+    const [openAuthDialog, setOpenAuthDialog] = useState(false)
+
+    const updateLock = () => {
+        setLock(!lock)
+        setOpenAuthDialog(false)
+    }
 
     return (
         <>
@@ -40,6 +46,10 @@ export default function Layout(props) {
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         {pageTitle}
                     </Typography>
+                    <IconButton onClick={() => { lock ? setOpenAuthDialog(true) : updateLock() }} color={'inherit'} size="large" sx={{ mr: 1 }}>
+                        <LockOpenIcon sx={{ display: lock ? 'none' : 'block' }} />
+                        <LockIcon sx={{ display: lock ? 'block' : 'none' }} />
+                    </IconButton>
                 </Container>
             </AppBar>
             <Drawer
@@ -81,6 +91,42 @@ export default function Layout(props) {
                     </ListItem>
                     <ListItem disablePadding>
                         <ListItemButton>
+                            <ListItemText primary={'Pallets'}
+                                onClick={() => {
+                                    router.push({
+                                        pathname: '/pallets',
+                                    })
+                                    setPageTitle('Pallets')
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton>
+                            <ListItemText primary={'Nuevo despacho'}
+                                onClick={() => {
+                                    router.push({
+                                        pathname: '/newDispatch',
+                                    })
+                                    setPageTitle('Nuevo despacho')
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton>
+                            <ListItemText primary={'Despachos'}
+                                onClick={() => {
+                                    router.push({
+                                        pathname: '/dispatches',
+                                    })
+                                    setPageTitle('Despachos')
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton>
                             <ListItemText primary={'Productores'}
                                 onClick={() => {
                                     router.push({
@@ -91,10 +137,42 @@ export default function Layout(props) {
                             />
                         </ListItemButton>
                     </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton>
+                            <ListItemText primary={'Variedades'}
+                                onClick={() => {
+                                    router.push({
+                                        pathname: '/varieties',
+                                    })
+                                    setPageTitle('variedades')
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton>
+                            <ListItemText primary={'Tipos de Fruta'}
+                                onClick={() => {
+                                    router.push({
+                                        pathname: '/types',
+                                    })
+                                    setPageTitle('Tipos de Fruta')
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
                 </List>
             </Drawer>
             {/* Karmextron */}
             <Snack />
+            {/* AuthDialog */}
+            <Dialog open={openAuthDialog} maxWidth={'xs'} fullWidth>
+                <DialogTitle sx={{ padding: 2 }}>Autorización</DialogTitle>
+                <DialogContent sx={{ padding: 1 }}>
+                   <Button variant='contained' fullWidth onClick={() => { updateLock() }}>Autorizar</Button>
+                   {/* <Button variant={'outlined'} onClick={() => { setOpenAuthDialog(false) }}>Cerrar</Button> */}
+                </DialogContent>
+            </Dialog>
             {/* Children */}
             {children}
         </>

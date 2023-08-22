@@ -10,4 +10,7 @@ body {
   padding: 0.35rem;
 }
 
+.data-grid-last-column-header .MuiDataGrid-columnSeparator {
+  display: none;
+}
 

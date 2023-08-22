@@ -4,17 +4,26 @@ import AddCircleIcon from '@mui/icons-material/AddCircle'
 import { useAppContext } from '../../appProvider'
 import MoneyTextField from '../Karmextron/MoneyTextField/MoneyTextField'
 import NewProducerForm from '../Forms/NewProducerForm/NewProducerForm'
+import AddPackForm from './AddPackForm'
+import PacksGrid from './PacksGrid'
 const utils = require('../../utils')
+
+const producers = require('../../services/producers')
+const receptions = require('../../services/receptions')
+const packs = require('../../services/packs')
+const pallets = require('../../services/pallets')
+
+
 
 
 export default function NewReception() {
-    const { reception, setReception } = useAppContext()
+    const { reception, setReception, setMoney, resetReception } = useAppContext()
 
     const [receptionData, setReceptionData] = useState(reception)
-    const [packData, setPackData] = useState(packDataDefault())
+
 
     const [producersInput, setProducersInput] = useState('')
-    const [producersOptions, setProducersOptions] = useState(producersOptionsData)
+    const [producersOptions, setProducersOptions] = useState([])
 
     const [varietiesInput, setVarietiesInput] = useState('')
     const [varietiesOptions, setVarietiesOptions] = useState(varietiesOptionsData)
@@ -22,7 +31,7 @@ export default function NewReception() {
     const [typesInput, setTypesInput] = useState('')
     const [typesOptions, setTypesOptions] = useState(typesOptionsData)
 
-    const [packTraysInput, setPackTraysInput] = useState('')
+
     const [packTraysOptions, setPackTraysOptions] = useState(traysOptionsData)
 
     const [showPrices, setShowPrices] = useState(false)
@@ -31,51 +40,150 @@ export default function NewReception() {
     const [openAddPackDialog, setOpenAddPackDialog] = useState(false)
     const [openNewProducerDialog, setOpenNewProducerDialog] = useState(false)
 
+    useEffect(() => {
+        producers.findAll()
+            .then(res => {
+                let data = res.map((item) => ({
+                    id: item.id,
+                    key: item.id,
+                    rut: item.rut,
+                    label: item.name
+                }))
+                setProducersOptions(data)
+
+            })
+            .catch(err => { console.error(err) })
+    }, [])
+
 
     useEffect(() => {
-        setReception(receptionData)
+        let clp = parseInt(receptionData.clp)
+        let usd = parseFloat(receptionData.usd)
+        let change = parseInt(receptionData.change)
 
-    }, [receptionData])
+        const sumNet = reception.packs.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue.net;
+        }, 0)
 
-    // useEffect(() => {
-    //     if (showPrices && receptionData.money == 'USD') {
-    //         setShowUsd(true)
-    //     } else {
-    //         setShowUsd(false)
-    //     }
+        const sumTraysQuanty = reception.packs.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue.quanty
+        }, 0)
 
-    // }, [showPrices])
+        const sumTraysWeight = reception.packs.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue.traysWeight
+        }, 0)
+
+        const sumGross = reception.packs.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue.gross
+        }, 0)
+
+        let data = {
+            producer: receptionData.producer,
+            variety: receptionData.variety,
+            type: receptionData.type,
+            guide: receptionData.guide,
+            clp: clp,
+            usd: usd,
+            change: change,
+            money: reception.money,
+            traysQuanty: sumTraysQuanty,
+            traysWeight: sumTraysWeight,
+            gross: sumGross,
+            net: sumNet,
+            toPay: clp * sumNet,
+
+            // Pasar a estado Global showPrices: false, 
+            // pasar a estado Global showImpurities: false 
+        }
+        setReception(data)
+    }, [receptionData, reception.packs])
 
 
     const calcPrice = (clp, usd, change, money) => {
         let result
-        if (money == 1) {
+        console.log('money', money)
+        if (money == 'USD') {
             result = usd * change
         } else {
             result = clp
         }
+        console.log('result', result)
         setReceptionData({ ...receptionData, clp: result, usd: usd, change: change })
     }
 
+    const saveReception = () => {
+        console.log('Reception', reception)
+        receptions.create(
+            reception.producer.id,
+            reception.variety.id,
+            reception.type.id,
+            reception.guide,
+            reception.clp,
+            reception.usd,
+            reception.change,
+            reception.money,
+            reception.traysQuanty,
+            reception.traysWeight,
+            reception.gross,
+            reception.net,
+            reception.toPay,
+        )
+            .then(res => {
+                console.log(res)
+                let packsPromises = []
+                reception.packs.forEach(pack => {
+                    packsPromises.push(
+                        packs.create(
+                            pack.pallet.id,
+                            pack.tray.id,
+                            res.id, //reception id
+                            pack.quanty,
+                            pack.traysWeight,
+                            pack.impurity,
+                            pack.impurityWeight,
+                            pack.gross,
+                            pack.net,
+                        )
+                    )})
+
+                    //console.log('packsPromises', packsPromises)
+                Promise.all(packsPromises)
+                    .then(res => { 
+                        let palletsPromises = []
+                        reception.packs.map(pack => {
+                            palletsPromises.push(
+                                pallets.updateTrays(
+                                    pack.palletId,
+                                    pack.quanty
+                                )
+                            )
+                            Promise.all(palletsPromises)
+                            .then(res => {
+                                console.log(res)
+                                resetReception()
+                            })
+                            .catch(err => {console.error(err)})
+                        })
+                        console.log(res) 
+
+                    })
+                    .catch(err => { console.error(err) })
+            })
+            .catch(err => { console.error(err) })
 
 
-    const addPack = () => {
-        let packs = receptionData.packs
-        packs.push(packData)
-        setReceptionData({ ...receptionData, packs: packs })
-        setPackData(packDataDefault())
-        setOpenAddPackDialog(false)
-    }
-
-    const previewReception = () => {
-        console.log('ReceptionData', receptionData)
     }
 
     return (
         <>
-            <form onSubmit={(e) => { e.preventDefault(); previewReception() }}>
+            <form onSubmit={(e) => { e.preventDefault(); saveReception() }}>
                 <Grid container spacing={1}>
                     <Grid item sx={{ display: 'flex' }} xs={8}>
+                        <IconButton
+                            sx={{ flex: '0 0 auto', marginLeft: 1 }}
+                            onClick={() => { setOpenNewProducerDialog(true) }}>
+                            <AddCircleIcon fontSize='inherit' />
+                        </IconButton>
                         <Autocomplete
                             sx={{ flex: '1' }}
                             inputValue={producersInput}
@@ -92,19 +200,11 @@ export default function NewReception() {
                             options={producersOptions}
                             renderInput={(params) => <TextField {...params} label='Productor' size={'small'} fullWidth required />}
                         />
-
-
-                        <IconButton
-                            sx={{ flex: '0 0 auto', marginLeft: 1 }}
-                            onClick={() => { setOpenNewProducerDialog(true) }}>
-                            <AddCircleIcon fontSize='inherit' />
-                        </IconButton>
-
                     </Grid>
                     <Grid item xs={2}>
                         <TextField
                             label='Rut'
-                            value={utils.formatRut(receptionData.producer.rut)}
+                            value={receptionData.producer.rut}
                             inputProps={{ readOnly: true }}
                             variant="outlined"
                             size={'small'}
@@ -121,7 +221,7 @@ export default function NewReception() {
                             fullWidth
                         />
                     </Grid>
-                    <Grid item xs={5}>
+                    <Grid item xs={4}>
                         <Autocomplete
                             inputValue={varietiesInput}
                             onInputChange={(e, newInputValue) => {
@@ -137,7 +237,7 @@ export default function NewReception() {
                             renderInput={(params) => <TextField {...params} label='Variedad' size={'small'} fullWidth required />}
                         />
                     </Grid>
-                    <Grid item xs={5}>
+                    <Grid item xs={4}>
                         <Autocomplete
                             inputValue={typesInput}
                             onInputChange={(e, newInputValue) => {
@@ -153,13 +253,13 @@ export default function NewReception() {
                             renderInput={(params) => <TextField {...params} label='Tipo' size={'small'} fullWidth required />}
                         />
                     </Grid>
-                    <Grid item xs={1}>
+                    <Grid item xs={2}>
                         <FormControlLabel
                             control={<Switch checked={showPrices} onChange={() => { setShowPrices(!showPrices) }} />}
                             label='Precios'
                         />
                     </Grid>
-                    <Grid item xs={1}>
+                    <Grid item xs={2}>
                         <FormControlLabel
                             control={<Switch checked={showImpurities} onChange={() => { setShowImpurities(!showImpurities) }} />}
                             label='impurezas'
@@ -169,12 +269,15 @@ export default function NewReception() {
                         <Grid container sx={{ display: showPrices ? 'inline-block' : 'none' }}>
                             <Grid item>
                                 <FormControlLabel
-                                    control={<Switch checked={showUsd} onChange={() => { setShowUsd(!showUsd) }} />}
+                                    control={<Switch checked={showUsd} onChange={() => {
+                                        setShowUsd(!showUsd)
+                                        setMoney(showUsd ? 'CLP' : 'USD')
+                                    }} />}
                                     label='Precio en dolares'
                                 />
                             </Grid>
 
-                            <Grid item  sx={{display:'inline-block'}} >
+                            <Grid item sx={{ display: 'inline-block' }} >
                                 <MoneyTextField
                                     label='CLP'
                                     value={receptionData.clp}
@@ -187,11 +290,11 @@ export default function NewReception() {
                                     label='USD'
                                     value={receptionData.usd}
                                     type='number'
-                                    onChange={(e) => { calcPrice(receptionData.clp, e.target.value, receptionData.change, receptionData.money) }}
+                                    onChange={(e) => { calcPrice(receptionData.clp, e.target.value, receptionData.change, reception.money) }}
                                     variant="outlined"
                                     size={'small'}
                                     fullWidth
-                                    
+
                                 />
                             </Grid>
                             <Grid item xs={4} sx={{ display: showUsd ? 'inline-block' : 'none' }}>
@@ -203,14 +306,14 @@ export default function NewReception() {
                                     variant="outlined"
                                     size={'small'}
                                     fullWidth
-                                   
+
                                 />
                             </Grid>
                         </Grid>
                     </Grid>
 
                     <Grid item textAlign={'right'} xs={12}>
-                        <Button variant={'contained'} type='submit'>Resumen</Button>
+                        <Button variant={'contained'} type='submit'>guardar</Button>
                     </Grid>
                     <Grid item textAlign={'right'}>
                         <IconButton onClick={() => { setOpenAddPackDialog(true) }}>
@@ -222,74 +325,18 @@ export default function NewReception() {
 
                 </Grid>
             </form>
-            <Dialog open={openAddPackDialog} maxWidth={'xs'} fullWidth>
+
+            <PacksGrid packsList={[{ text: 'yuyu' }, { text: 'yuyu' }]} />
+
+            <Dialog open={openAddPackDialog} maxWidth={'sm'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}>Agregar Pack</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
-                    <form onSubmit={(e) => { e.preventDefault(); addPack() }}>
-                        <Grid container direction={'column'}>
-                            <Grid item>
-                                <Autocomplete
-                                    inputValue={packTraysInput}
-                                    onInputChange={(e, newInputValue) => {
-                                        setPackTraysInput(newInputValue)
-                                    }}
-                                    isOptionEqualToValue={(option, value) => null || option.id === value.id}
-                                    value={packData.tray}
-                                    onChange={(e, newValue) => {
-                                        setPackData({ ...packData, tray: newValue })
-                                    }}
-                                    disablePortal
-                                    options={packTraysOptions}
-                                    renderInput={(params) => <TextField {...params} label='Bandeja' size={'small'} fullWidth required />}
-                                />
-                            </Grid>
-                            <Grid item>
-                                <TextField
-                                    label='Cantidad'
-                                    value={packData.quanty}
-                                    onChange={(e) => { setPackData({ ...packData, quanty: e.target.value }) }}
-                                    type='number'
-                                    variant="outlined"
-                                    size={'small'}
-                                    fullWidth
-                                />
-                            </Grid>
-                            <Grid item>
-                                <TextField
-                                    label='Kg Bruto'
-                                    value={packData.gross}
-                                    onChange={(e) => { setPackData({ ...packData, gross: e.target.value }) }}
-                                    type='number'
-                                    variant="outlined"
-                                    size={'small'}
-                                    fullWidth
-                                    required
-                                />
-                            </Grid>
-                            <Grid item sx={{ display: showImpurities ? 'block' : 'none' }}>
-                                <TextField
-                                    label='Impurezas'
-                                    value={packData.impurity}
-                                    onChange={(e) => { setPackData({ ...packData, impurity: e.target.value }) }}
-                                    type='number'
-                                    variant="outlined"
-                                    size={'small'}
-                                    fullWidth
-                                />
-                            </Grid>
-                            <Grid item textAlign={'right'}>
-                                <Button variant={'contained'} type='submit'>Resumen</Button>
-                                <Button
-                                    sx={{ marginLeft: 1 }}
-                                    variant={'outlined'}
-                                    onClick={() => { setOpenAddPackDialog(false) }}
-                                >Cerrar</Button>
-                            </Grid>
-                        </Grid>
-                    </form>
+                    <AddPackForm
+                        showImpurities={showImpurities}
+                        packTraysOptions={packTraysOptions}
+                        closeDialog={() => { setOpenAddPackDialog(false) }} />
                 </DialogContent>
             </Dialog>
-
             <Dialog open={openNewProducerDialog} maxWidth={'xs'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}>Nuevo productor</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
@@ -313,18 +360,12 @@ function receptionDataDefault() {
         usd: '',
         change: '',
         money: 'CLP',
-        packs: []
+        showPrices: false,
+        showImpurities: false,
     }
 }
 
-function packDataDefault() {
-    return {
-        tray: '',
-        quanty: '',
-        gross: '',
-        impurity: ''
-    }
-}
+
 
 const producersOptionsData = [
     { id: 1001, label: 'Productor 1', key: 1001, rut: '123456789' },
@@ -351,9 +392,53 @@ const moneyOptionsData = [
 ]
 
 const traysOptionsData = [
-    { id: 1001, label: 'Bndj Negra', key: 1001 },
-    { id: 1002, label: 'Bndj Blanca', key: 1002 },
-    { id: 1003, label: 'Bndj Roja', key: 1003 },
+    { id: 1001, label: 'Bndj Negra', key: 1001, weight: .4 },
+    { id: 1002, label: 'Bndj Blanca', key: 1002, weight: .3 },
+    { id: 1003, label: 'Bndj Roja', key: 1003, weight: .5 },
 ]
+
+//**** CREATE FULL RECEPTION ****//
+
+function createFullReception(reception) {
+
+    receptions.create(
+        reception.producer.id,
+        reception.variety.id,
+        reception.type.id,
+        reception.guide,
+        reception.clp,
+        reception.usd,
+        reception.change,
+        reception.money,
+        reception.traysQuanty,
+        reception.traysWeight,
+        reception.gross,
+        reception.net,
+        reception.toPay,
+    )
+        .then(res => {
+            console.log(res)
+            packsPromises = []
+            reception.packs.forEach(pack => {
+                packsPromises.push(
+                    packs.create(
+                        pack.pallet.id,
+                        pack.tray.id,
+                        res.id, //reception id
+                        pack.quantity,
+                        pack.traysWeight,
+                        pack.impurity,
+                        pack.impurityWeight,
+                        pack.gross,
+                        pack.net,
+                    )
+                )})
+            Promise.all(packsPromises)
+                .then(res => { console.log(res) })
+                .catch(err => { console.error(err) })
+        })
+        .catch(err => { console.error(err) })
+
+}
 
 
