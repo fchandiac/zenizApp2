@@ -3,6 +3,7 @@ import DataGrid from '../../Karmextron/DataGrid/DataGrid'
 import DeleteIcon from '@mui/icons-material/Delete'
 import InfoIcon from '@mui/icons-material/Info'
 import ViewQuiltIcon from '@mui/icons-material/ViewQuilt'
+import EditIcon from '@mui/icons-material/Edit'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid } from '@mui/material'
 import PackCard from '../../Cards/PackCard/PackCard'
@@ -12,7 +13,7 @@ const receptions = require('../../../services/receptions')
 export default function ReceptionsGrid() {
     const [gridApiRef, setGridApiRef] = useState(null)
     const [receptionsList, setReceptionsList] = useState([])
-    const [openInfoDialog, setOpenInfoDialog] = useState(false)
+    const [openEditDialog, setOpenEditDialog] = useState(false)
     const [openPacksDialog, setOpenPacksDialog] = useState(false)
     const [rowData, setRowData] = useState(rowDataDefault())
 
@@ -33,7 +34,8 @@ export default function ReceptionsGrid() {
                 traysWeight: reception.trays_weight,
                 gross: reception.gross,
                 net: reception.net,
-                packs: reception.Packs
+                packs: reception.Packs,
+                toPay: reception.to_pay,
             }))
             console.log(data)
             setReceptionsList(data)
@@ -48,7 +50,7 @@ export default function ReceptionsGrid() {
         { field: 'varietyName', headerName: 'Variedad', flex: 1 },
         { field: 'typeName', headerName: 'Tipo', flex: 1, hide: true },
         { field: 'guide', headerName: 'Guía', flex: 1, hide: true },
-        { field: 'clp', headerName: 'CLP', flex: 1, hide: true },
+        { field: 'clp', headerName: 'CLP', flex: 1, hide: false },
         { field: 'usd', headerName: 'USD', flex: 1, hide: true },
         { field: 'change', headerName: 'Cambio', flex: 1, hide: true },
         { field: 'money', headerName: 'Moneda', flex: 1, hide: true },
@@ -56,6 +58,7 @@ export default function ReceptionsGrid() {
         { field: 'traysWeight', headerName: 'Peso de Bandejas', flex: 1 },
         { field: 'gross', headerName: 'Bruto', flex: 1 },
         { field: 'net', headerName: 'Neto', flex: 1 },
+        { field: 'toPay', headerName: 'A Pagar', flex: 1 },
         {
             field: 'actions',
             headerName: '',
@@ -69,7 +72,7 @@ export default function ReceptionsGrid() {
                 />,
                 <GridActionsCellItem
                     label='info'
-                    icon={<InfoIcon />}
+                    icon={<EditIcon />}
                     onClick={() => {
                         setRowData({
                             rowId: params.id,
@@ -90,7 +93,7 @@ export default function ReceptionsGrid() {
                             packs: params.row.packs
                         })
                         console.log(rowData)
-                        setOpenInfoDialog(true)
+                        setOpenEditDialog(true)
                     }}
                 />,
                 <GridActionsCellItem
@@ -126,16 +129,23 @@ export default function ReceptionsGrid() {
         <>
             <DataGrid title='Recepciones' rows={receptionsList} columns={columns} height='80vh' setGridApiRef={setGridApiRef} />
 
-            <Dialog open={openInfoDialog} maxWidth={'sm'} fullWidth>
-                <DialogTitle sx={{ padding: 2 }}> Información recepción {rowData.id}</DialogTitle>
+            <Dialog open={openEditDialog} maxWidth={'sm'} fullWidth>
+                <DialogTitle sx={{ padding: 2 }}> Editar recepción {rowData.id}</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
                     <Grid>
+                        <p>
+                            Se podra Editar:
+                             CLP -
+                             USD -
+                             Cambio -
+                             Moneda
+                        </p>
                         
 
                     </Grid>
                 </DialogContent>
                 <DialogActions sx={{ padding: 2 }}>
-                    <Button variant='contained' onClick={() => setOpenInfoDialog(false)}>Cerrar</Button>
+                    <Button variant='contained' onClick={() => setOpenEditDialog(false)}>Cerrar</Button>
                 </DialogActions>
             </Dialog>
 

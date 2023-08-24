@@ -4,7 +4,7 @@ import { useAppContext } from '../../appProvider'
 
 
 export default function PacksGrid() {
-  const { reception } = useAppContext()
+  const { reception, receptionShowImpurities } = useAppContext()
   const [list, setList] = useState([])
 
 
@@ -23,7 +23,7 @@ export default function PacksGrid() {
     { field: 'trayWeight', headerName: 'Kg unidad', flex: 1 },
     { field: 'gross', headerName: 'Kg bruto', flex: 1 },
     { field: 'traysWeight', headerName: 'Kg bandejas', flex: 1 },
-    { field: 'impurityWeight', headerName: 'Kg impurezas', flex: 1 },
+    { field: 'impurityWeight', headerName: 'Kg impurezas', flex: 1, hide: receptionShowImpurities ? false : true },
     { field: 'net', headerName: 'Kg neto', flex: 1, headerClassName: 'data-grid-last-column-header' },
   ]
 

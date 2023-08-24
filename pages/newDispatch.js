@@ -71,26 +71,52 @@ export default function newDispatch() {
   return (
     <Grid container>
       <Grid item xs={3}>
-        <Paper variant={'outlined'}>
-        <Typography p={1}>
-            Agregar pallet
-          </Typography>
-          <form onSubmit={(e) => { e.preventDefault(); addPallet() }}>
-            <Grid container direction={'column'} p={1}>
-            <Grid item>
+        <Grid container direction={'column'} spacing={1}>
+          <Grid item>
+            <Paper variant={'outlined'}>
+              <Typography p={1}>
+                Agregar pallet
+              </Typography>
+              <form onSubmit={(e) => { e.preventDefault(); addPallet() }}>
+                <Grid container direction={'column'} p={1}>
+                  <Grid item>
+                    <TextField
+                      label={'Peso Pallet Despacho'}
+                      type='number'
+                      value={dispatchWeight}
+                      onChange={(e) => { setDispatchWeight(e.target.value) }}
+                      size='small'
+                      required
+                      fullWidth
+                    />
+                  </Grid>
+                  <Grid item>
+                    <TextField
+                      label={'Pallet id'}
+                      type='number'
+                      value={palletInput}
+                      onChange={(e) => { setPalletInput(e.target.value) }}
+                      size='small'
+                      required
+                      fullWidth
+                    />
+                  </Grid>
+
+                  <Grid item>
+                    <IconButton sx={{ flex: '0 0 auto', marginLeft: 1 }} type='submit'>
+                      <LocalShippingIcon />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              </form>
+            </Paper>
+          </Grid>
+
+          <Grid item>
+            <Paper variant={'outlined'}>
+              <Grid container direction={'column'} p={1}>
                 <TextField
-                  label={'Peso Pallet Despacho'}
-                  type='number'
-                  value={dispatchWeight}
-                  onChange={(e) => { setDispatchWeight(e.target.value)}}
-                  size='small'
-                  required
-                  fullWidth
-                />
-              </Grid>
-              <Grid item>
-                <TextField
-                  label={'Pallet id'}
+                  label={'Cliente'}
                   type='number'
                   value={palletInput}
                   onChange={(e) => { setPalletInput(e.target.value) }}
@@ -99,34 +125,31 @@ export default function newDispatch() {
                   fullWidth
                 />
               </Grid>
-              
-              <Grid item>
-                <IconButton sx={{ flex: '0 0 auto', marginLeft: 1 }} type='submit'>
-                  <LocalShippingIcon />
-                </IconButton>
-              </Grid>
+            </Paper>
+            <Grid item>
             </Grid>
-          </form>
-        </Paper>
-      </Grid>
-      <Grid item xs={9}>
-        <Paper variant={'outlined'}>
-          <Typography p={1}>
-            Pallets
-          </Typography>
 
-          <Grid container spacing={1} p={1}>
-            {dispatch_.pallets.map((pallet) => (
-              <Grid item xs={4} key={pallet.id}>
-                <DispatachPalletCard pallet={pallet} />
-              </Grid>
-            ))}
           </Grid>
-
-        </Paper>
+        </Grid>
       </Grid>
-    </Grid>
-  )
+          <Grid item xs={9}>
+            <Paper variant={'outlined'}>
+              <Typography p={1}>
+                Pallets
+              </Typography>
+
+              <Grid container spacing={1} p={1}>
+                {dispatch_.pallets.map((pallet) => (
+                  <Grid item xs={4} key={pallet.id}>
+                    <DispatachPalletCard pallet={pallet} />
+                  </Grid>
+                ))}
+              </Grid>
+
+            </Paper>
+          </Grid>
+        </Grid>
+        )
 }
 
 

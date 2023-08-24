@@ -1,4 +1,4 @@
-import { Grid, Autocomplete, TextField, Button, IconButton } from '@mui/material';
+import { Grid, Autocomplete, TextField, Button, IconButton, InputAdornment } from '@mui/material';
 import React, { useState, useEffect } from 'react'
 import { useAppContext } from '../../appProvider'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
@@ -142,6 +142,9 @@ export default function AddPackForm(props) {
                             value={packData.impurity}
                             onChange={(e) => { setPackData({ ...packData, impurity: e.target.value }) }}
                             type='number'
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">%</InputAdornment>
+                            }}
                             variant="outlined"
                             size={'small'}
                             fullWidth
