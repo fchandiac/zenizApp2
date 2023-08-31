@@ -1,18 +1,38 @@
-import { Grid, Autocomplete, TextField, Button, IconButton, InputAdornment } from '@mui/material';
+import { Grid, Autocomplete, TextField, Button, IconButton, InputAdornment, Dialog, DialogTitle, DialogContent } from '@mui/material';
 import React, { useState, useEffect } from 'react'
 import { useAppContext } from '../../appProvider'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
+import EditIcon from '@mui/icons-material/Edit'
+import NewPalletForm from '../Forms/NewPalletForm/NewPalletForm'
 
 const pallets = require('../../services/pallets')
+const trays = require('../../services/trays')
+
+
 
 export default function AddPackForm(props) {
-    const { showImpurities, packTraysOptions, closeDialog } = props
+    const { showImpurities, closeDialog } = props
     const { lock, currentPallets, setCurrentPallets, addPack } = useAppContext()
     const [packTraysInput, setPackTraysInput] = useState('')
+    const [packTraysOptions, setPackTraysOptions] = useState([{id:0, label:'', key:0}])
     const [packData, setPackData] = useState(packDataDefault())
 
     const [palletsInput, setPalletsInput] = useState('')
-    const [palletsOptions, setPalletsOptions] = useState([])
+    const [palletsOptions, setPalletsOptions] = useState([{id:0, label:'', key:0}])
+
+    const [openNewPalletDialog, setOpenNewPalletDialog] = useState(false)
+
+    useEffect(() => {
+        trays.findAll().then(res => {
+            let data = res.map(item => ({
+                id: item.id,
+                key: item.id,
+                label: item.name,
+                weight: item.weight
+            }))
+            setPackTraysOptions(data)
+        })
+    },[])
 
     useEffect(() => {
         let currentPalletsMatch = Boolean((currentPallets.filter(pallet => pallet.tray_id === packData.tray.id)).length)
@@ -152,9 +172,14 @@ export default function AddPackForm(props) {
                     </Grid>
                     <Grid item sx={{ display: 'flex' }}>
                         <IconButton
-                            sx={{ flex: '0 0 auto', marginRight: 1, display: lock ? 'none' : 'block' }}
-                            onClick={() => { }}>
+                            sx={{ flex: '0 0 auto', marginRight: 1, display: lock ? 'none' : 'flex' }}
+                            onClick={() => { setOpenNewPalletDialog(true)}}>
                             <AddCircleIcon fontSize='inherit' />
+                        </IconButton>
+                        <IconButton
+                            sx={{ flex: '0 0 auto', marginRight: 1, display: lock ? 'none' : 'flex' }}
+                            onClick={() => { setOpenNewPalletDialog(true)}}>
+                            <EditIcon fontSize='inherit' />
                         </IconButton>
                         <Autocomplete
                             sx={{ flex: '1' }}
@@ -182,16 +207,23 @@ export default function AddPackForm(props) {
                     </Grid>
                 </Grid>
             </form>
+
+            <Dialog open={openNewPalletDialog} maxWidth={'xs'} fullWidth>
+                <DialogTitle sx={{ padding: 2 }}>Nuevo Pallet</DialogTitle>
+                <DialogContent sx={{ padding: 1 }}>
+                    <NewPalletForm dialog={true} closeDialog={() => {setOpenNewPalletDialog(false)}} afterSubmit />
+                </DialogContent>
+            </Dialog>
         </>
     )
 }
 
 function packDataDefault() {
     return {
-        tray: '',
+        tray: {id:0, label:'', key:0},
         quanty: '',
         gross: '',
         impurity: '',
-        pallet: {},
+        pallet: {id:0, label:'', key:0},
     }
 }

@@ -12,9 +12,9 @@ const initialState = {
         guide: '',
         variety: '',
         type: '',
-        clp: '',
-        usd: '',
-        change: '',
+        clp: 0,
+        usd: 0,
+        change: 0,
         money: 'CLP',
         traysQuanty: 0,
         traysWeight: 0,
@@ -28,9 +28,21 @@ const initialState = {
     },
     currentPallets: [{ id: 0, tray_id: 0, trays: 0, max: 0, virtualTrays: 0, virtualCapacity: 0 }], // ReceptionProccess
     dispatch_: {
-        client: { id: 0, label: '', key: 0, rut: '' },
-        dispatchWeight: 0,
+        customer: { id: 0, label: '', key: 0, rut: '' },
         pallets: [],
+        guide: '',
+        clp: 0,
+        usd: 0,
+        change: 0,
+        money: 'CLP',
+        palletsQuanty: 0,
+        palletsWeight: 0,
+        gross: 0,
+        net: 0,
+        toPay: 0,
+        showPrices: false,
+        showImpurities: false,
+        showUsd: false,
     }
 }
 
@@ -117,13 +129,46 @@ const reducer = (state, action) => {
         case 'SET_RECEPTION_NET':
             return { ...state, reception: { ...state.reception, net: action.value } }
         case 'ADD_DISPATCH_PALLET':
+            return { ...state, dispatch_: { ...state.dispatch_, pallets: [...state.dispatch_.pallets, action.value] } }
+        case 'REMOVE_DISPATCH_PALLET':
+            return { ...state, dispatch_: { ...state.dispatch_, pallets: state.dispatch_.pallets.filter(pallet => pallet.id !== action.value) } }
+        case 'SET_DISPATCH_CUSTOMER':
+            return { ...state, dispatch_: { ...state.dispatch_, customer: action.value } }
+        case 'SET_DISPATCH_GUIDE':
+            return { ...state, dispatch_: { ...state.dispatch_, guide: action.value } }
+        case 'SET_DISPATCH_CLP':
+            return { ...state, dispatch_: { ...state.dispatch_, clp: action.value } }
+        case 'SET_DISPATCH_USD':
+            return { ...state, dispatch_: { ...state.dispatch_, usd: action.value } }
+        case 'SET_DISPATCH_CHANGE':
+            return { ...state, dispatch_: { ...state.dispatch_, change: action.value } }
+        case 'SET_DISPATCH_MONEY':
+            return { ...state, dispatch_: { ...state.dispatch_, money: action.value } }
+        case 'SET_DISPATCH_SHOW_PRICES':
+            return { ...state, dispatch_: { ...state.dispatch_, showPrices: action.value } }
+        case 'SET_DISPATCH_SHOW_IMPURITIES':
+            return { ...state, dispatch_: { ...state.dispatch_, showImpurities: action.value } }
+        case 'SET_DISPATCH_SHOW_USD':
+            return { ...state, dispatch_: { ...state.dispatch_, showUsd: action.value } }
+        case 'SET_DISPATCH_GROSS':
+            return { ...state, dispatch_: { ...state.dispatch_, gross: action.value } }
+        case 'SET_DISPATCH_NET':
+            return { ...state, dispatch_: { ...state.dispatch_, net: action.value } }
+        case 'SET_DISPATCH_TO_PAY':
+            return { ...state, dispatch_: { ...state.dispatch_, toPay: action.value } }
+        case 'SET_DISPATCH_PALLETS_QUANTY':
+            return { ...state, dispatch_: { ...state.dispatch_, palletsQuanty: action.value } }
+        case 'SET_DISPATCH_PALLETS_WEIGHT':
+            return { ...state, dispatch_: { ...state.dispatch_, palletsWeight: action.value } }
+        case 'RESET_DISPATCH':
             return {
                 ...state,
-                dispatch_: {
-                    ...state.dispatch_,
-                    pallets: [...state.dispatch_.pallets, action.value]
-                }
+                dispatch_: initialState.dispatch_
             }
+            
+
+
+
 
         default:
     }
@@ -157,7 +202,7 @@ const AppProvider = ({ children }) => {
         dispatch({ type: 'ADD_PACK', value: data })
     }
 
-   
+
 
     const setReceptionShowPrices = (data) => {
         dispatch({ type: 'SET_RECEPTION_SHOW_PRICES', value: data })
@@ -180,13 +225,13 @@ const AppProvider = ({ children }) => {
         //     dispatch({ type: 'SET_MONEY', value: 'CLP' });
         //     dispatch({ type: 'SET_RECEPTION_SHOW_USD', value: data })
         // }
-        
+
     }
 
     const setReceptionProducer = (data) => {
         dispatch({ type: 'SET_RECEPTION_PRODUCER', value: data })
     }
-    
+
     const setReceptionGuide = (data) => {
         dispatch({ type: 'SET_RECEPTION_GUIDE', value: data })
     }
@@ -230,7 +275,7 @@ const AppProvider = ({ children }) => {
     const setReceptionNet = (data) => {
         dispatch({ type: 'SET_RECEPTION_NET', value: data })
     }
-    
+
     const resetReception = () => {
         dispatch({ type: 'RESET_RECEPTION' })
     }
@@ -239,7 +284,74 @@ const AppProvider = ({ children }) => {
         dispatch({ type: 'ADD_DISPATCH_PALLET', value: data })
     }
 
-  
+    const setDispatchCustomer = (data) => {
+        dispatch({ type: 'SET_DISPATCH_CUSTOMER', value: data })
+    }
+
+    const setDispatchGuide = (data) => {
+        dispatch({ type: 'SET_DISPATCH_GUIDE', value: data })
+    }
+
+    const setDispatchClp = (data) => {
+        dispatch({ type: 'SET_DISPATCH_CLP', value: data })
+    }
+
+    const setDispatchUsd = (data) => {
+        dispatch({ type: 'SET_DISPATCH_USD', value: data })
+    }
+
+    const setDispatchChange = (data) => {
+        dispatch({ type: 'SET_DISPATCH_CHANGE', value: data })
+    }
+
+    const setDispatchMoney = (data) => {
+        dispatch({ type: 'SET_DISPATCH_MONEY', value: data })
+    }
+
+    const setDispatchShowPrices = (data) => {
+        dispatch({ type: 'SET_DISPATCH_SHOW_PRICES', value: data })
+    }
+
+    const setDispatchShowImpurities = (data) => {
+        dispatch({ type: 'SET_DISPATCH_SHOW_IMPURITIES', value: data })
+    }
+
+    const setDispatchShowUsd = (data) => {
+        dispatch({ type: 'SET_DISPATCH_SHOW_USD', value: data })
+    }
+
+    const setDispatchGross = (data) => {
+        dispatch({ type: 'SET_DISPATCH_GROSS', value: data })
+    }
+
+    const setDispatchNet = (data) => {
+        dispatch({ type: 'SET_DISPATCH_NET', value: data })
+    }
+
+    const setDispatchToPay = (data) => {
+        dispatch({ type: 'SET_DISPATCH_TO_PAY', value: data })
+    }
+
+    const setDispatchPalletsQuanty = (data) => {
+        dispatch({ type: 'SET_DISPATCH_PALLETS_QUANTY', value: data })
+    }
+
+    const setDispatchPalletsWeight = (data) => {
+        dispatch({ type: 'SET_DISPATCH_PALLETS_WEIGHT', value: data })
+    }
+
+    const resetDispatch = () => {
+        dispatch({ type: 'RESET_DISPATCH' })
+    }
+
+    const removeDisptachPallet = (data) => {
+        dispatch({ type: 'REMOVE_DISPATCH_PALLET', value: data })
+    }
+
+
+
+
+
 
     return (
         <AppContext.Provider value={{
@@ -263,6 +375,23 @@ const AppProvider = ({ children }) => {
             receptionUsd: state.reception.usd,
             receptionChange: state.reception.change,
             receptionToPay: state.reception.toPay,
+
+            dispatchCustomer: state.dispatch_.customer,
+            dispatchGuide: state.dispatch_.guide,
+            dispatchClp: state.dispatch_.clp,
+            dispatchUsd: state.dispatch_.usd,
+            dispatchChange: state.dispatch_.change,
+            dispatchMoney: state.dispatch_.money,
+            dispatchShowPrices: state.dispatch_.showPrices,
+            dispatchShowImpurities: state.dispatch_.showImpurities,
+            dispatchShowUsd: state.dispatch_.showUsd,
+            dispatchGross: state.dispatch_.gross,
+            dispatchNet: state.dispatch_.net,
+            dispatchToPay: state.dispatch_.toPay,
+            dispatchPalletsQuanty: state.dispatch_.palletsQuanty,
+            dispatchPalletsWeight: state.dispatch_.palletsWeight,
+            dispatchPallets: state.dispatch_.pallets,
+
             dispatch,
             setPageTitle,
             setReception,
@@ -287,8 +416,24 @@ const AppProvider = ({ children }) => {
             setReceptionGross,
             setReceptionNet,
             resetReception,
-            addDispatchPallet
-       
+            addDispatchPallet,
+
+            setDispatchCustomer,
+            setDispatchGuide,
+            setDispatchClp,
+            setDispatchUsd,
+            setDispatchChange,
+            setDispatchMoney,
+            setDispatchShowPrices,
+            setDispatchShowImpurities,
+            setDispatchShowUsd,
+            setDispatchGross,
+            setDispatchNet,
+            setDispatchToPay,
+            setDispatchPalletsQuanty,
+            setDispatchPalletsWeight,
+            resetDispatch,
+            removeDisptachPallet
         }}>
             {children}
         </AppContext.Provider>

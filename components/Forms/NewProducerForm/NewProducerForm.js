@@ -3,20 +3,37 @@ import React, { useState } from 'react'
 import { useAppContext } from '../../../appProvider'
 
 const utils = require('../../../utils')
+const producers = require('../../../services/producers')
 
 export default function NewProducerForm(props) {
   const { dialog, closeDialog, afterSubmit } = props
   const { openSnack } = useAppContext()
   const [producerData, setProducerData] = useState(producerDataDefault())
 
-  const saveProducer = () => {
-    openSnack('Productor guardado', 'success')
-    console.log(producerData)
+  const saveProducer = async () => {
+    try {
+      const newProducer = await producers.create(
+        producerData.rut,
+        producerData.name,
+        producerData.phone,
+        producerData.mail,
+        producerData.address
+      )
+      openSnack('Productor ' + newProducer.name + ' Guardado', 'success')
+      setProducerData(producerDataDefault())
+      afterSubmit()
+    } catch (err) {
+      if (err.errors[0].message == 'rut must be unique') {
+        openSnack('Rut ya existe', 'error')
+      } else if (err.errors[0].message == 'name must be unique') {
+        openSnack('Nombre ya existe', 'error')
+      }
+    }
   }
   return (
     <>
       <form onSubmit={(e) => { e.preventDefault(); saveProducer() }} >
-        <Grid container direction={'column'}>
+        <Grid container direction={'column'} p={1}>
           <Grid item>
             <TextField
               label='Nombre'

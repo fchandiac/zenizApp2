@@ -1,12 +1,39 @@
-
 const server_url = "http://localhost:3003/"
 
 
-function create(rut, name, phone, mail, address){
-    let data = { rut, name, phone, mail, address}
+function create(
+    customer_id,
+    guide,
+    clp,
+    usd,
+    change,
+    money,
+    trays_quanty,
+    trays_weight,
+    impurity_weight,
+    gross,
+    net,
+    to_pay,
+    open,
+) {
+    let data = {
+        customer_id,
+        guide,
+        clp,
+        usd,
+        change,
+        money,
+        trays_quanty,
+        trays_weight,
+        impurity_weight,
+        gross,
+        net,
+        to_pay,
+        open,
+    }
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
-    const producer = new Promise((resolve, reject) => {
-        fetch(server_url + 'producers/create', {
+    const dispatch = new Promise((resolve, reject) => {
+        fetch(server_url + 'dispatchs/create', {
             method: 'POST',
             body: JSON.stringify(data),
             headers: { 'Content-Type': 'application/json' }
@@ -20,14 +47,13 @@ function create(rut, name, phone, mail, address){
             })
         }).catch(err => { reject(err) })
     })
-    return producer
+    return dispatch
 }
-
 
 function findAll() {
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
-    const producer = new Promise((resolve, reject) => {
-        fetch(server_url + 'producers/findAll', {
+    const dispatch = new Promise((resolve, reject) => {
+        fetch(server_url + 'dispatchs/findAll', {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         }).then(res => {
@@ -41,8 +67,7 @@ function findAll() {
         }).catch(err => { reject(err) })
     })
 
-    return producer
+    return dispatch
 }
 
-
-export { findAll, create }
+export { create, findAll }

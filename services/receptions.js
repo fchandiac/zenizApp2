@@ -33,7 +33,7 @@ function create(
     }
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
 
-    const reception= new Promise((resolve, reject) => {
+    const reception = new Promise((resolve, reject) => {
         fetch(server_url + 'receptions/create', {
             method: 'POST',
             body: JSON.stringify(data),
@@ -73,7 +73,72 @@ function findAll() {
 
 
 
+function update(
+    id,
+    clp,
+    usd,
+    change,
+    money,
+    variety,
+    type,
+    to_pay,
+    impurity_weight,
+    net) {
+
+    let data = {
+        id,
+        clp,
+        usd,
+        change,
+        money,
+        variety,
+        type,
+        to_pay,
+        impurity_weight,
+        net
+    }
+
+    const reception = new Promise((resolve, reject) => {
+        fetch(server_url + 'receptions/update', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+    return reception
+
+}
+
+
+function closeReception(id) {
+    let data = {id: id, open: false}
+    const reception = new Promise((resolve, reject) => {
+        fetch(server_url + 'receptions/updateOpen', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+    return reception
+
+}
 
 
 
-export { create, findAll }
+export { create, findAll, update, closeReception }

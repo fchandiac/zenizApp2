@@ -2,6 +2,28 @@ const server_url = "http://localhost:3003/"
 
 
 
+function create(tray_id, storage_id, weight){
+    let data = { tray_id, storage_id, weight }
+    // let server_url = ipcRenderer.sendSync('server-url', 'sync')
+    const pallet = new Promise((resolve, reject) => {
+        fetch(server_url + 'pallets/create', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+    return pallet
+}
+
+
 
 function findAllByTray(tray_id) {
     let data = { tray_id }
@@ -90,4 +112,26 @@ function findOneById(id) {
     return pallet
 }
 
-export { findAllByTray, updateTrays, findAll, findOneById }
+
+
+function updateDisptach(id, dispatch_id) {
+    let data = { id, dispatch_id}
+    // let server_url = ipcRenderer.sendSync('server-url', 'sync')
+    const pallet = new Promise((resolve, reject) => {
+        fetch(server_url + 'pallets/updateDispatch', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+    return pallet
+}
+export { findAllByTray, updateTrays, findAll, findOneById, create, updateDisptach }

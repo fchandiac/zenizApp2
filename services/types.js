@@ -1,12 +1,11 @@
 
 const server_url = "http://localhost:3003/"
 
-
-function create(rut, name, phone, mail, address){
-    let data = { rut, name, phone, mail, address}
+function create(name) {
+    let data = { name }
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
-    const producer = new Promise((resolve, reject) => {
-        fetch(server_url + 'producers/create', {
+    const type = new Promise((resolve, reject) => {
+        fetch(server_url + 'types/create', {
             method: 'POST',
             body: JSON.stringify(data),
             headers: { 'Content-Type': 'application/json' }
@@ -20,14 +19,14 @@ function create(rut, name, phone, mail, address){
             })
         }).catch(err => { reject(err) })
     })
-    return producer
+    return type
 }
 
 
 function findAll() {
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
-    const producer = new Promise((resolve, reject) => {
-        fetch(server_url + 'producers/findAll', {
+    const variety = new Promise((resolve, reject) => {
+        fetch(server_url + 'types/findAll', {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         }).then(res => {
@@ -40,9 +39,7 @@ function findAll() {
             })
         }).catch(err => { reject(err) })
     })
-
-    return producer
+    return variety
 }
 
-
-export { findAll, create }
+export { findAll, create}

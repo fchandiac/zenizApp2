@@ -2,16 +2,27 @@ import React from 'react'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Card, Box, Typography, IconButton, Grid } from '@mui/material'
 import PalletPackCard from '../PalletPackCard/PalletPackCard'
+import { useAppContext } from '../../../appProvider'
 
 export default function DispatachPalletCard(props) {
     const { pallet } = props
+    const { removeDisptachPallet } = useAppContext()
+
+    const deletePallet = () => {
+        removeDisptachPallet(pallet.id)
+    }
     return (
         <>
             <Card variant={'outlined'}>
                 <Box sx={{ p: 1, backgroundColor: '#e0e0e0' }} display="flex" flexDirection="column">
                     <Typography fontSize={16} >{'Pallet ' + pallet.id}</Typography>
                     <Typography variant={'caption'} >{pallet.trayName}</Typography>
-                    <Typography variant={'caption'} >{pallet.grossSum + ' Kg bruto'}</Typography>
+                    <Typography variant={'caption'} >{pallet.beforeGrossSum + ' Kg bruto'}</Typography>
+                    <Typography variant={'caption'} >{pallet.dispatchWeight + ' Kg bruto (despacho)'}</Typography>
+                    <Typography variant={'caption'} >{pallet.traysWeight + ' Kg bandejas'}</Typography>
+                    <Typography variant={'caption'} >{pallet.beforeNetSum + ' Kg neto'}</Typography>
+                    <Typography variant={'caption'} >{pallet.dipatchNetSum + ' Kg neto (despacho)'}</Typography>
+                    
                     <Box>
                         <Typography variant={'caption'} >{'Productores: '}</Typography>
                         {pallet.producerList.map((item, index) => (
@@ -37,7 +48,7 @@ export default function DispatachPalletCard(props) {
                     </Grid>
                 </Box>
                 <Box sx={{ paddingLeft: 1, paddingBottom: 1, paddingRight: 1 }}>
-                    <IconButton>
+                    <IconButton onClick={(e) => {deletePallet()}}>
                         <DeleteIcon fontSize={'small'} />
                     </IconButton>
                 </Box>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-
+import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import DeleteIcon from '@mui/icons-material/Delete'
 import InfoIcon from '@mui/icons-material/Info'
 import ViewQuiltIcon from '@mui/icons-material/ViewQuilt'
@@ -31,7 +31,8 @@ export default function PalletsGrid() {
                 trays: pallet.trays,
                 max: pallet.max,
                 packs: pallet.Packs,
-                dispatch: false
+                dispatch: pallet.dispatch ? 'Si' : 'No',
+                dispatchId: pallet.dispatch_id
             }))
             setPalletsList(data)
         })
@@ -46,6 +47,11 @@ export default function PalletsGrid() {
         { field: 'weight', headerName: 'Peso', flex: 1 },
         { field: 'trays', headerName: 'Bandejas', flex: 1 },
         { field: 'max', headerName: 'Max', flex: 1 },
+        { field: 'dispatch', headerName: 'Despacho', flex: 1, 
+        renderCell: (params) => {
+            return params.row.dispatch === 'Si' ? <LocalShippingIcon color='success' /> : <LocalShippingIcon />
+
+        }},
         {
             field: 'actions',
             headerName: '',

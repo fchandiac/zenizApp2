@@ -15,6 +15,8 @@ const producers = require('../../services/producers')
 const receptions = require('../../services/receptions')
 const packs = require('../../services/packs')
 const pallets = require('../../services/pallets')
+const types = require('../../services/types')
+const variesties = require('../../services/varieties')
 
 
 
@@ -58,13 +60,10 @@ export default function NewReception() {
     const [producersOptions, setProducersOptions] = useState([])
 
     const [varietiesInput, setVarietiesInput] = useState('')
-    const [varietiesOptions, setVarietiesOptions] = useState(varietiesOptionsData)
+    const [varietiesOptions, setVarietiesOptions] = useState([])
 
     const [typesInput, setTypesInput] = useState('')
-    const [typesOptions, setTypesOptions] = useState(typesOptionsData)
-
-
-    const [packTraysOptions, setPackTraysOptions] = useState(traysOptionsData)
+    const [typesOptions, setTypesOptions] = useState([])
 
     const [openAddPackDialog, setOpenAddPackDialog] = useState(false)
     const [openNewProducerDialog, setOpenNewProducerDialog] = useState(false)
@@ -82,6 +81,26 @@ export default function NewReception() {
 
             })
             .catch(err => { console.error(err) })
+        
+        variesties.findAll()
+            .then(res => {
+                let data = res.map((item) => ({
+                    id: item.id,
+                    key: item.id,
+                    label: item.name
+                }))
+                setVarietiesOptions(data)
+            })
+        
+        types.findAll()
+            .then(res => {
+                let data = res.map((item) => ({
+                    id: item.id,
+                    key: item.id,
+                    label: item.name
+                }))
+                setTypesOptions(data)
+            })
     }, [])
 
 
@@ -297,7 +316,7 @@ export default function NewReception() {
                             label='impurezas'
                         />
                     </Grid>
-                    <Grid item >
+                    <Grid item xs={12} >
                         <Grid container sx={{ display: receptionShowPrices ? 'inline-block' : 'none' }}>
                             <Grid item>
                                 <FormControlLabel
@@ -308,7 +327,7 @@ export default function NewReception() {
                                 />
                             </Grid>
 
-                            <Grid item sx={{ display: 'inline-block' }} >
+                            <Grid item sx={{ display: 'inline-block' }} xs={4} >
                                 {/* <MoneyTextField
                                     label='CLP'
                                     value={receptionClp}
@@ -326,16 +345,7 @@ export default function NewReception() {
                                     className='no-spin'
 
                                     InputProps={{
-                                        // inputProps: {
-                                        //     style: {
-                                        //         '-moz-appearance': 'textfield', // Firefox
-                                        //         '-webkit-appearance': 'textfield', // Chrome, Safari, Edge
-                                        //         appearance: 'textfield', // Resto de navegadores
-                                        //       },
-                                        // },
-
                                         startAdornment: <InputAdornment position="start">$</InputAdornment>,
-
                                     }}
                                 />
                             </Grid>
@@ -366,17 +376,13 @@ export default function NewReception() {
                             </Grid>
                         </Grid>
                     </Grid>
-
-                    <Grid item textAlign={'right'} xs={12}>
-                        <Button variant={'contained'} type='submit'>guardar</Button>
-                    </Grid>
-                    <Grid item textAlign={'right'}>
+             
+                    <Grid item xs={12}>
                         <IconButton onClick={() => { setOpenAddPackDialog(true) }}>
                             <AddCircleIcon fontSize='large' />
                         </IconButton>
                         Packs
                     </Grid>
-
                     <Grid item textAlign={'right'} xs={12}>
                         <PacksGrid />
                     </Grid>
@@ -389,13 +395,13 @@ export default function NewReception() {
                         </Paper>
                     </Grid>
                     <Grid item xs={4}>
-                        
+
                         <Paper variant='outlined'>
                             <Typography p={1}>
                                 Resumen recepción
                             </Typography>
-                            <Grid container spacing={1} direction={'column'}>
-                                <Grid item>
+                            <Grid container spacing={1} p={1}>
+                                <Grid item xs={6}>
                                     <TextField
                                         label='Bandejas'
                                         value={reception.traysQuanty}
@@ -404,9 +410,9 @@ export default function NewReception() {
                                         size={'small'}
                                         fullWidth
                                     />
-                                    
+
                                 </Grid>
-                                <Grid item>
+                                <Grid item xs={6}>
                                     <TextField
                                         label='Kg bandejas'
                                         value={reception.traysWeight}
@@ -416,7 +422,7 @@ export default function NewReception() {
                                         fullWidth
                                     />
                                 </Grid>
-                                <Grid item>
+                                <Grid item xs={6}>
                                     <TextField
                                         label='Kg bruto'
                                         value={reception.gross}
@@ -426,7 +432,7 @@ export default function NewReception() {
                                         fullWidth
                                     />
                                 </Grid>
-                                <Grid item>
+                                <Grid item xs={6}>
                                     <TextField
                                         label='Kg neto'
                                         value={reception.net}
@@ -436,15 +442,22 @@ export default function NewReception() {
                                         fullWidth
                                     />
                                 </Grid>
-                                <Grid item sx={{display: receptionShowPrices ? 'inline-block': 'none'}}>
+                                <Grid item xs={6} sx={{ display: receptionShowPrices ? 'inline-block' : 'none' }}>
                                     <TextField
                                         label='A pagar'
                                         value={reception.toPay}
                                         inputProps={{ readOnly: true }}
                                         variant="outlined"
                                         size={'small'}
+                                        InputProps={{
+                                            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                        }}
                                         fullWidth
                                     />
+                                </Grid>
+                                <Grid item xs={6} textAlign={'right'}>
+                                    <Button variant={'contained'} type='submit'>guardar</Button>
+
                                 </Grid>
                             </Grid>
                         </Paper>
@@ -453,16 +466,11 @@ export default function NewReception() {
 
             </form>
 
-
-
-
-
             <Dialog open={openAddPackDialog} maxWidth={'sm'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}>Agregar Pack</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
                     <AddPackForm
                         showImpurities={receptionShowImpurities}
-                        packTraysOptions={packTraysOptions}
                         closeDialog={() => { setOpenAddPackDialog(false) }} />
                 </DialogContent>
             </Dialog>
