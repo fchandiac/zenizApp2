@@ -64,3 +64,29 @@ npm i escpos-usb@3.0.0-alpha.4 --save
 
 
 
+  <Autocomplete
+                            sx={{ flex: '1' }}
+                            inputValue={producersInput}
+                            onInputChange={(e, newInputValue) => {
+                                setProducersInput(newInputValue)
+                            }}
+                            //isOptionEqualToValue={(option, value) => null || option.id === value.id}
+                            isOptionEqualToValue={(option, value) => option.value === value.velue}
+                            // {(option, value) => option.value === value.value}
+                            value={receptionProducer}
+                            onChange={(e, newValue) => {
+
+                                setReceptionProducer(newValue)
+                            }}
+                            // disablePortal
+                            // getOptionLabel={(option) => option.label}
+                            options={producersOptions}
+                            renderInput={(params) => <TextField {...params} label='Productor' size={'small'} fullWidth required />}
+                        />
+
+receptionProducer = { id: 0, label: '', key: 0, rut: '' }
+
+producersOptions = [
+    { id: 1, label: 'uno', key: 1, rut: '1' },
+{ id: 2, label: 'dos', key: 2, rut: '2' },
+]

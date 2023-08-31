@@ -150,9 +150,6 @@ export default function newDispatch() {
     return traysWeight
   }
 
-
-
-
   const formatPallet = (pallet) => ({ // PALLET
     id: pallet.id,
     weight: pallet.weight,

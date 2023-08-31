@@ -241,13 +241,12 @@ export default function NewReception() {
                             onInputChange={(e, newInputValue) => {
                                 setProducersInput(newInputValue)
                             }}
-                            isOptionEqualToValue={(option, value) => null || option.id === value.id}
                             value={receptionProducer}
                             onChange={(e, newValue) => {
 
                                 setReceptionProducer(newValue)
                             }}
-                            disablePortal
+                            getOptionLabel={(option) => option.label}
                             options={producersOptions}
                             renderInput={(params) => <TextField {...params} label='Productor' size={'small'} fullWidth required />}
                         />
@@ -255,7 +254,7 @@ export default function NewReception() {
                     <Grid item xs={2}>
                         <TextField
                             label='Rut'
-                            value={receptionProducer.rut}
+                            value={receptionProducer == null ? '' : receptionProducer.rut }
                             inputProps={{ readOnly: true }}
                             variant="outlined"
                             size={'small'}

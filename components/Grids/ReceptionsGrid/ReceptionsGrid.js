@@ -74,7 +74,6 @@ export default function ReceptionsGrid() {
         })
 
         types.findAll().then(res => {
-            console.log(res)
             let data = res.map(type => ({
                 id: type.id,
                 key: type.id,
@@ -154,12 +153,12 @@ export default function ReceptionsGrid() {
     const closeReception = async () => {
         const closeReception = await receptions.closeReception(rowData.id)
         const producerAccount = await producerAccounts.findAllByProducerId(rowData.producerId)
-        let beforeBalance =  0
+        let beforeBalance = 0
 
         if (producerAccount.length > 0) {
             beforeBalance = producerAccount.reduce((accumulator, currentValue) => {
                 return accumulator + currentValue.balance;
-              }, 0);
+            }, 0);
         }
 
         let newBalance = beforeBalance + rowData.toPay
@@ -176,29 +175,59 @@ export default function ReceptionsGrid() {
 
         console.log(newCredit)
 
-       
-       
+
+
         //await producerAccounts.create()
 
 
     }
 
     const columns = [
-        { field: 'id', headerName: 'Id', flex: .5, type: 'number' },
+        { field: 'id', headerName: 'Id', flex: .5, type: 'number', valueFormatter: (params) => params.value },
         { field: 'producerName', headerName: 'Productor', flex: 1 },
         { field: 'producerRut', headerName: 'Rut', flex: 1 },
         { field: 'varietyName', headerName: 'Variedad', flex: 1 },
         { field: 'typeName', headerName: 'Tipo', flex: 1, hide: true },
         { field: 'guide', headerName: 'Guía', flex: 1, hide: true },
-        { field: 'clp', headerName: 'CLP', flex: 1, hide: false },
+        {
+            field: 'clp', headerName: 'CLP', flex: 1, hide: false,
+            valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+        },
         { field: 'usd', headerName: 'USD', flex: 1, hide: true },
         { field: 'change', headerName: 'Cambio', flex: 1, hide: true },
         { field: 'money', headerName: 'Moneda', flex: 1, hide: true },
         { field: 'traysQuanty', headerName: 'Cantidad de Bandejas', flex: 1 },
-        { field: 'traysWeight', headerName: 'Peso de Bandejas', flex: 1 },
-        { field: 'gross', headerName: 'Bruto', flex: 1 },
-        { field: 'net', headerName: 'Neto', flex: 1 },
-        { field: 'toPay', headerName: 'A Pagar', flex: 1 },
+        {
+            field: 'traysWeight', headerName: 'Bandejas', flex: 1,
+            valueFormatter: (params) =>
+                new Intl.NumberFormat('es-CL', {
+                    style: 'decimal',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(params.value) + ' kg'
+        },
+        {
+            field: 'gross', headerName: 'Bruto', flex: 1,
+            valueFormatter: (params) =>
+                new Intl.NumberFormat('es-CL', {
+                    style: 'decimal',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(params.value) + ' kg'
+        },
+        {
+            field: 'net', headerName: 'Neto', flex: 1,
+            valueFormatter: (params) =>
+                new Intl.NumberFormat('es-CL', {
+                    style: 'decimal',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(params.value) + ' kg'
+        },
+        {
+            field: 'toPay', headerName: 'A Pagar', flex: 1,
+            valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+        },
         {
             field: 'actions',
             headerName: '',
@@ -278,7 +307,7 @@ export default function ReceptionsGrid() {
                                 id: params.row.id,
                                 producerName: params.row.producerName,
                                 producerRut: params.row.producerRut,
-                                producerId: params.row.producerId, 
+                                producerId: params.row.producerId,
                                 open: params.row.open,
                                 packs: params.row.packs,
                                 toPay: params.row.toPay
@@ -292,7 +321,7 @@ export default function ReceptionsGrid() {
                             } else if (params.row.toPay == 0) {
                                 openSnack('No se puede cerrar una recepción con monto A pagar 0', 'error')
                             }
-                            
+
                         }
 
                     }}
@@ -420,9 +449,9 @@ export default function ReceptionsGrid() {
             <Dialog open={openPacksDialog} maxWidth={'sm'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}> Packs recepción {rowData.id}</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
-                    <Grid>
+                    <Grid container spacing={1}>
                         {rowData.packs.map((pack) => (
-                            <Grid item key={pack.id}>
+                            <Grid item key={pack.id} xs={3}>
                                 <PackCard pack={pack} />
                             </Grid>
                         ))}

@@ -218,14 +218,6 @@ const AppProvider = ({ children }) => {
 
     const setReceptionShowUsd = (data) => {
         dispatch({ type: 'SET_RECEPTION_SHOW_USD', value: data })
-        // if (data == true) {
-        //     dispatch({ type: 'SET_MONEY', value: 'USD' });
-        //     dispatch({ type: 'SET_RECEPTION_SHOW_USD', value: data })
-        // } else {
-        //     dispatch({ type: 'SET_MONEY', value: 'CLP' });
-        //     dispatch({ type: 'SET_RECEPTION_SHOW_USD', value: data })
-        // }
-
     }
 
     const setReceptionProducer = (data) => {
@@ -281,7 +273,14 @@ const AppProvider = ({ children }) => {
     }
 
     const addDispatchPallet = (data) => {
-        dispatch({ type: 'ADD_DISPATCH_PALLET', value: data })
+        let findPallet = !! state.dispatch_.pallets.find(pallet => pallet.id === data.id)
+        if (findPallet) {
+            openSnack('Pallet ya agregado', 'error')
+        } else {
+            dispatch({ type: 'ADD_DISPATCH_PALLET', value: data })
+        }
+
+        
     }
 
     const setDispatchCustomer = (data) => {
