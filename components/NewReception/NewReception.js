@@ -136,7 +136,7 @@ export default function NewReception() {
             setReceptionTraysWeight(sumTraysWeight)
             setReceptionGross(sumGross)
             setReceptionNet(sumNet)
-            let toPay = clp == NaN ? 0 : clp * sumNet
+            let toPay = clp * sumNet
             setReceptionToPay(toPay)
         }
     }, [reception.packs])
@@ -155,72 +155,58 @@ export default function NewReception() {
         setReceptionClp(result)
         setReceptionUsd(usd)
         setReceptionChange(change)
+        setReceptionToPay(result * reception.net)
+ 
     }
 
     const previewReception = () => {
         console.log('Reception', reception)
     }
 
-    const saveReception = () => {
-        console.log('Reception', reception)
-        receptions.create(
-            reception.producer.id,
-            reception.variety.id,
-            reception.type.id,
-            reception.guide,
-            reception.clp,
-            parseFloat(reception.usd),
-            parseFloat(reception.change),
-            reception.money,
-            reception.traysQuanty,
-            reception.traysWeight,
-            reception.gross,
-            reception.net,
-            reception.toPay,
-        )
-            .then(res => {
-                console.log(res)
-                let packsPromises = []
-                reception.packs.forEach(pack => {
-                    packsPromises.push(
-                        packs.create(
-                            pack.pallet.id,
-                            pack.tray.id,
-                            res.id, //reception id
-                            pack.quanty,
-                            pack.traysWeight,
-                            pack.impurity,
-                            pack.impurityWeight,
-                            pack.gross,
-                            pack.net,
-                        )
-                    )
-                })
+    const saveReception = async () => {
+        try {
+            const newReception_ = await receptions.create(
+                reception.producer.id,
+                reception.variety.id,
+                reception.type.id,
+                reception.guide,
+                reception.clp,
+                reception.usd,
+                reception.change,
+                reception.money,
+                reception.traysQuanty,
+                reception.traysWeight,
+                reception.gross,
+                reception.net,
+                reception.toPay,
+            )
 
-                //console.log('packsPromises', packsPromises)
-                Promise.all(packsPromises)
-                    .then(res => {
-                        let palletsPromises = []
-                        reception.packs.map(pack => {
-                            palletsPromises.push(
-                                pallets.updateTrays(
-                                    pack.palletId,
-                                    pack.quanty
-                                )
-                            )
-                            Promise.all(palletsPromises)
-                                .then(res => {
-                                    console.log(res)
-                                    resetReception()
-                                })
-                                .catch(err => { console.error(err) })
-                        })
-                        console.log(res)
-
-                    })
-                    .catch(err => { console.error(err) })
+            reception.packs.forEach(async (pack) => {
+                const newPack = await packs.create(
+                    pack.pallet.id,
+                    pack.tray.id,
+                    newReception_.id, //reception id
+                    pack.quanty,
+                    pack.traysWeight,
+                    pack.impurity,
+                    pack.impurityWeight,
+                    pack.gross,
+                    pack.net,
+                )
             })
-            .catch(err => { console.error(err) })
+            
+            reception.packs.forEach(async (pack) => {
+                const updatePallet = await pallets.updateTrays(pack.pallet.id, pack.quanty)
+                resetReception()
+            })
+              resetReception()
+
+
+
+            console.log('Reception', newReception_ )
+        } catch (err) {
+            console.error(err)
+        }
 
 
     }
@@ -336,7 +322,8 @@ export default function NewReception() {
                                 <TextField
                                     label='CLP'
                                     value={receptionClp}
-                                    onChange={(e) => { setReceptionClp(utils.moneyToInt(e.target.value)) }}
+                                    // onChange={(e) => { setReceptionClp(utils.moneyToInt(e.target.value)) }}
+                                    onChange={(e) => { calcPrice(e.target.value, receptionUsd, receptionChange) }}
                                     variant="outlined"
                                     type='number'
                                     size={'small'}

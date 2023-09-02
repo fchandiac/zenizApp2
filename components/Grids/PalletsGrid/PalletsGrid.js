@@ -21,22 +21,22 @@ export default function PalletsGrid() {
 
     useEffect(() => {
         pallets.findAll()
-        .then(res => {
-            console.log(res)
-            let data = res.map(pallet => ({
-                id: pallet.id, 
-                storageName: pallet.Storage.name,
-                trayName: pallet.Tray.name,
-                weight: pallet.weight,
-                trays: pallet.trays,
-                max: pallet.max,
-                packs: pallet.Packs,
-                dispatch: pallet.dispatch ? 'Si' : 'No',
-                dispatchId: pallet.dispatch_id
-            }))
-            setPalletsList(data)
-        })
-        .catch(err => {console.log(err)})
+            .then(res => {
+                console.log(res)
+                let data = res.map(pallet => ({
+                    id: pallet.id,
+                    storageName: pallet.Storage.name,
+                    trayName: pallet.Tray.name,
+                    weight: pallet.weight,
+                    trays: pallet.trays,
+                    max: pallet.max,
+                    packs: pallet.Packs,
+                    dispatch: pallet.dispatch ? 'Si' : 'No',
+                    dispatchId: pallet.dispatch_id
+                }))
+                setPalletsList(data)
+            })
+            .catch(err => { console.log(err) })
 
     }, [])
 
@@ -47,11 +47,13 @@ export default function PalletsGrid() {
         { field: 'weight', headerName: 'Peso', flex: 1 },
         { field: 'trays', headerName: 'Bandejas', flex: 1 },
         { field: 'max', headerName: 'Max', flex: 1 },
-        { field: 'dispatch', headerName: 'Despacho', flex: 1, 
-        renderCell: (params) => {
-            return params.row.dispatch === 'Si' ? <LocalShippingIcon color='success' /> : <LocalShippingIcon />
+        {
+            field: 'dispatch', headerName: 'Despacho', flex: 1,
+            renderCell: (params) => {
+                return params.row.dispatch === 'Si' ? <LocalShippingIcon color='success' /> : <LocalShippingIcon />
 
-        }},
+            }
+        },
         {
             field: 'actions',
             headerName: '',
@@ -77,7 +79,7 @@ export default function PalletsGrid() {
                             max: params.row.max,
                             packs: params.row.packs
                         })
-       
+
                         setOpenPacksDialog(true)
                     }}
                 />
@@ -105,15 +107,15 @@ export default function PalletsGrid() {
 
                 </DialogContent>
                 <DialogActions sx={{ padding: 2 }}>
-                    <Button variant='contained' onClick={() =>setOpenPacksDialog(false)}>Cerrar</Button>
+                    <Button variant='contained' onClick={() => setOpenPacksDialog(false)}>Cerrar</Button>
                 </DialogActions>
             </Dialog>
         </>
     )
 }
 
-function rowDataDefault(){
-    return({
+function rowDataDefault() {
+    return ({
         rowId: '',
         id: '',
         storageName: '',

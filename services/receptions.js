@@ -15,7 +15,8 @@ function create(
     trays_quanty,
     trays_weight,
     gross,
-    net
+    net,
+    to_pay
 ) {
     let data = {
         producer_id,
@@ -29,7 +30,8 @@ function create(
         trays_quanty,
         trays_weight,
         gross,
-        net
+        net,
+        to_pay
     }
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
 

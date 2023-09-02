@@ -39,6 +39,7 @@ export default function ProducerAccountsGrid(props) {
         switch (type) {
             case 0 : return 'Recepción'
             case 1: return 'Anticipo'
+            case 2: return 'Liquidación'
         }
     }
 
@@ -47,7 +48,10 @@ export default function ProducerAccountsGrid(props) {
         { field: 'credit', headerName: 'Crédito', flex: 1 },
         { field: 'debit', headerName: 'Débito', flex: 1 },
         { field: 'balance', headerName: 'Saldo', flex: 1 },
-        { field: 'referenceType', headerName: 'Tipo referecia', flex: 1, valueFormatter: (params) => (refereceType(params.value)) },
+        { field: 'referenceType', headerName: 'Tipo referecia', flex: 1, 
+        valueFormatter: (params) => (refereceType(params.value)) ,
+        cellClassName: (params) => (params.value === 2 ? 'data-grid-cell-green' : '' )
+    },
         { field: 'referenceId', headerName: 'Id referencia', flex: 1 },
         { field: 'date', headerName: 'fecha', headerClassName: 'data-grid-last-column-header', flex: 1, valueFormatter: (params) => (moment(params.value).format('DD-MM-YYYY HH:mm')) },
     ]

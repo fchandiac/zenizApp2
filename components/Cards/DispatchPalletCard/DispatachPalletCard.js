@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Card, Box, Typography, IconButton, Grid, Popover, Paper, Divider } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
@@ -8,25 +8,14 @@ import { useAppContext } from '../../../appProvider'
 export default function DispatachPalletCard(props) {
     const { pallet } = props
     const { removeDisptachPallet } = useAppContext()
-    const [anchorEl, setAnchorEl] = React.useState(null);
-
-
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-    const open = Boolean(anchorEl);
-    const id = open ? 'simple-popover' : undefined;
-
+    const [anchorElPopOver, setAnchorElPopOver] = useState(null)
+    const openMoreInfo = Boolean(anchorElPopOver)
+    const id = openMoreInfo ? 'simple-popover' : undefined
 
     const deletePallet = () => {
         removeDisptachPallet(pallet.id) // remove Pallet from dispatch
     }
-    const moreinfo = (e) => {
-        setAnchorEl(e.currentTarget)
-        console.log('more info')
-    }
+
     return (
         <>
             <Card variant={'outlined'}>
@@ -34,33 +23,11 @@ export default function DispatachPalletCard(props) {
                     <Typography fontSize={16} sx={{ flex: '1' }}>{'Pallet ' + pallet.id}</Typography>
                     <IconButton
                         sx={{ flex: '0 0 auto', marginLeft: 1 }}
-                        onClick={moreinfo}
+                        onClick={(e) => { setAnchorElPopOver(e.currentTarget) }}
                         aria-describedby={id}
                     >
                         <MoreVertIcon fontSize={'small'} />
                     </IconButton>
-
-                    {/* <Typography variant={'caption'} >{pallet.trayName}</Typography>
-                    <Typography variant={'caption'} >{pallet.beforeGrossSum + ' Kg bruto'}</Typography>
-                    <Typography variant={'caption'} >{pallet.dispatchWeight + ' Kg bruto (despacho)'}</Typography>
-                    <Typography variant={'caption'} >{pallet.traysWeight + ' Kg bandejas'}</Typography>
-                    <Typography variant={'caption'} >{pallet.beforeNetSum + ' Kg neto'}</Typography>
-                    <Typography variant={'caption'} >{pallet.dipatchNetSum + ' Kg neto (despacho)'}</Typography> */}
-
-                    {/* <Box>
-                        <Typography variant={'caption'} >{'Productores: '}</Typography>
-                        {pallet.producerList.map((item, index) => (
-                            <Typography fontSize={10} key={index}>{item}</Typography>
-                        ))}
-
-                    </Box>
-                    <Box>
-                        <Typography variant={'caption'} >{'Variedades: '}</Typography>
-                        {pallet.varietyList.map((item, index) => (
-                            <Typography fontSize={10} key={index}>{item}</Typography>
-                        ))}
-
-                    </Box> */}
                 </Box>
                 <Box sx={{ p: 1 }} >
                     <Grid container spacing={1}>
@@ -80,9 +47,9 @@ export default function DispatachPalletCard(props) {
 
             <Popover
                 id={id}
-                open={open}
-                anchorEl={anchorEl}
-                onClose={handleClose}
+                open={openMoreInfo}
+                anchorEl={anchorElPopOver}
+                onClose={() => { setAnchorElPopOver(null)}}
                 anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left',

@@ -3,9 +3,10 @@ const AppContext = createContext()
 const useAppContext = () => useContext(AppContext)
 
 
+
 const initialState = {
     snack: { open: false, message: '', type: 'error' },
-    pageTitle: 'Nueva recepción',
+    pageTitle: '',
     lock: true,
     reception: {
         producer: { id: 0, label: '', key: 0, rut: '' },
@@ -43,6 +44,37 @@ const initialState = {
         showPrices: false,
         showImpurities: false,
         showUsd: false,
+    },
+    user: {
+        id: 0,
+        user: '',
+        pass: '',
+        name: '',
+        mail: '',
+        Profile: {
+            id: 0,
+            name: '',
+            delete: false,
+            edit: false,
+            reports: false,
+            pallets: false,
+            trays: false,
+            types: false,
+            varieties: false,
+            producers: false,
+            customers: false,
+            users: false,
+            records: false,
+            dispatchs: false,
+            receptions: false,
+            advances: false,
+            customers_accounts: false,
+            producers_accounts: false,
+            new_reception: false,
+            new_dispatch: false,
+            settlements: false,
+        }
+
     }
 }
 
@@ -165,7 +197,8 @@ const reducer = (state, action) => {
                 ...state,
                 dispatch_: initialState.dispatch_
             }
-            
+        case 'SET_USER':
+            return { ...state, user: action.value }
 
 
 
@@ -191,6 +224,7 @@ const AppProvider = ({ children }) => {
     }
 
     const openSnack = (message, type) => {
+        console.log('openSnack_____')
         dispatch({ type: 'OPEN_SNACK', value: { message, type } })
     }
 
@@ -273,14 +307,14 @@ const AppProvider = ({ children }) => {
     }
 
     const addDispatchPallet = (data) => {
-        let findPallet = !! state.dispatch_.pallets.find(pallet => pallet.id === data.id)
+        let findPallet = !!state.dispatch_.pallets.find(pallet => pallet.id === data.id)
         if (findPallet) {
             openSnack('Pallet ya agregado', 'error')
         } else {
             dispatch({ type: 'ADD_DISPATCH_PALLET', value: data })
         }
 
-        
+
     }
 
     const setDispatchCustomer = (data) => {
@@ -347,8 +381,9 @@ const AppProvider = ({ children }) => {
         dispatch({ type: 'REMOVE_DISPATCH_PALLET', value: data })
     }
 
-
-
+    const setUser = (data) => {
+        dispatch({ type: 'SET_USER', value: data })
+    }
 
 
 
@@ -390,6 +425,7 @@ const AppProvider = ({ children }) => {
             dispatchPalletsQuanty: state.dispatch_.palletsQuanty,
             dispatchPalletsWeight: state.dispatch_.palletsWeight,
             dispatchPallets: state.dispatch_.pallets,
+            user: state.user,
 
             dispatch,
             setPageTitle,
@@ -432,7 +468,8 @@ const AppProvider = ({ children }) => {
             setDispatchPalletsQuanty,
             setDispatchPalletsWeight,
             resetDispatch,
-            removeDisptachPallet
+            removeDisptachPallet,
+            setUser
         }}>
             {children}
         </AppContext.Provider>

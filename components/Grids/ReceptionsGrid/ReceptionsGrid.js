@@ -4,6 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import InfoIcon from '@mui/icons-material/Info'
 import ViewQuiltIcon from '@mui/icons-material/ViewQuilt'
 import EditIcon from '@mui/icons-material/Edit'
+import DoneAllIcon from '@mui/icons-material/DoneAll'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, FormControlLabel,
@@ -58,7 +59,9 @@ export default function ReceptionsGrid() {
                 net: reception.net,
                 packs: reception.Packs,
                 toPay: reception.to_pay,
-                open: reception.open
+                open: reception.open,
+                settlement: reception.settlement
+                
             }))
             setReceptionsList(data)
 
@@ -93,9 +96,7 @@ export default function ReceptionsGrid() {
             result = clp
         }
         console.log('result', result)
-
         setRowData({ ...rowData, clp: result, usd: usd, change: change })
-
     }
 
     const editReception = () => {
@@ -228,6 +229,13 @@ export default function ReceptionsGrid() {
             field: 'toPay', headerName: 'A Pagar', flex: 1,
             valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
         },
+        { 
+            field: 'settlement', headerName: 'Liquidación', flex: 1, 
+            renderCell: (params) => {
+                return params.row.settlement ? <DoneAllIcon color='success' /> : ''
+
+            }
+        },
         {
             field: 'actions',
             headerName: '',
@@ -237,7 +245,7 @@ export default function ReceptionsGrid() {
                     label='delete'
                     icon={<DeleteIcon />}
                     onClick={() => {
-
+                        openSnack('La recepción ya esta cerrada', 'error')
                     }}
                 />,
                 <GridActionsCellItem
@@ -301,6 +309,7 @@ export default function ReceptionsGrid() {
                     label='open'
                     icon={params.row.open ? <LockOpenIcon /> : <LockIcon />}
                     onClick={() => {
+
                         if (params.row.toPay > 0 && params.row.open) {
                             setRowData({
                                 rowId: params.id,
