@@ -65,7 +65,6 @@ export default function DispatachPalletCard(props) {
                         ))}
                     </Box>
                     <Box flexDirection={'column'} paddingBottom={1}>
-
                         <Typography variant={'caption'} fontWeight="bold">{'Variedades: '}</Typography>
                         {pallet.varietyList.map((item, index) => (
                             <Typography fontSize={10} key={index}>{item}</Typography>

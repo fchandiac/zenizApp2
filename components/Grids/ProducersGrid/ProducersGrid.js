@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import DataGrid from '../../Karmextron/DataGrid/DataGrid'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import ListAltIcon from '@mui/icons-material/ListAlt';
 import InfoIcon from '@mui/icons-material/Info'
 import ViewQuiltIcon from '@mui/icons-material/ViewQuilt'
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker'
 import EditIcon from '@mui/icons-material/Edit'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import {
@@ -14,6 +14,10 @@ import {
 import ProducerAccountsGrid from '../ProducerAccountsGrid/ProducerAccountsGrid';
 import moment from 'moment'
 import { useAppContext } from '../../../appProvider'
+import SettlementDialog from './SettlementDialog'
+import ProducerAcountTab from '../../Tabs/ProducerAccountTab'
+import Statements from '../../Tabs/ProducerAccountTab/Statements'
+import ProducerReportsTab from '../../Tabs/ProducerReportsTab/ProducerReportsTab';
 
 
 
@@ -31,11 +35,13 @@ export default function ProducersGrid(props) {
   const [openAccountDialog, setOpenAccountDialog] = useState(false)
   const [advanceData, setAdvanceData] = useState({ producerId: 0, amount: 0, description: '' })
   const [accountsGridState, setAccountsGridState] = useState(false)
-  const [filterDates, setFilterDates] = useState({ start: moment(new Date).format('YYYY-MM-DD'), end: moment(new Date).format('YYYY-MM-DD 23:59') })
+  const [openSettlementDialog, setOpenSettlementDialog] = useState(false)
+  const [openReportsDialog, setOpenReportsDialog] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       const producersData = await producers.findAll()
+
 
       let data = producersData.map((producer) => ({
         id: producer.id,
@@ -44,8 +50,14 @@ export default function ProducersGrid(props) {
         phone: producer.phone,
         email: producer.email,
         rut: producer.rut,
-        accounts: producer.ProducerAccounts
+        accounts: producer.ProducerAccounts,
       }))
+
+      data.map(async (producer) => {
+        const currentBalance = await producerAccounts.producerAccountBalance(producer.id)
+        producer.balance = currentBalance
+      })
+
       setProducersList(data)
     }
     fetchData()
@@ -53,6 +65,7 @@ export default function ProducersGrid(props) {
 
   const newAdvance = async () => {
     const currentBalance = await producerAccounts.producerAccountBalance(advanceData.producerId)
+
     const newAdvance = await advances.create(advanceData.producerId, advanceData.amount, advanceData.description)
     await producerAccounts.create(
       advanceData.producerId,
@@ -69,31 +82,18 @@ export default function ProducersGrid(props) {
 
   }
 
-  const newSettlement = async () => {
-    const currentBalance = await producerAccounts.producerAccountBalance(rowData.id)
-    if (currentBalance <= 0) {
-      openSnack('No hay saldo a liquidar', 'error')
-    } else {
-      const newSettlement = await settlements.create(rowData.id, currentBalance, 'Liquidación')
-      await producerAccounts.create(
-        rowData.id,
-        currentBalance,
-        0,
-        0,
-        newSettlement.id,
-        2,
-        'Liquidación'
-      )
-
-      setAccountsGridState(!accountsGridState)
-
-    }
-
-
+  const updateRowData = (params) => {
+    setRowData({
+      rowId: params.id,
+      id: params.row.id,
+      name: params.row.name,
+      rut: params.row.rut,
+      phone: params.row.phone,
+      address: params.row.address,
+      email: params.row.email,
+      accounts: params.row.accounts
+    })
   }
-
-
-
 
   const columns = [
     { field: 'id', headerName: 'Id', flex: .5, type: 'number' },
@@ -103,26 +103,48 @@ export default function ProducersGrid(props) {
     { field: 'address', headerName: 'Dirección', flex: 1 },
     { field: 'email', headerName: 'Email', flex: 1 },
     {
+      field: 'balance', headerName: 'Saldo', flex: 1,
+      valueFormatter: (params) => params.value == undefined ? 0 : params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+    },
+    {
       field: 'actions',
       headerName: '',
       headerClassName: 'data-grid-last-column-header',
       type: 'actions', flex: 2, getActions: (params) => [
         <GridActionsCellItem
+          label='Delete'
+          icon={<DeleteIcon />}
+          onClick={() => {
+            updateRowData(params)
+            setOpenReportsDialog(true)
+
+          }}
+        />,
+        <GridActionsCellItem
+          label='Edit'
+          icon={<EditIcon />}
+          onClick={() => {
+            updateRowData(params)
+            setOpenReportsDialog(true)
+
+          }}
+        />,
+        <GridActionsCellItem
           label='accounts'
           icon={<AccountBalanceIcon />}
           onClick={() => {
-            setRowData({
-              rowId: params.id,
-              id: params.row.id,
-              name: params.row.name,
-              rut: params.row.rut,
-              phone: params.row.phone,
-              address: params.row.address,
-              email: params.row.email,
-              accounts: params.row.accounts
-            })
+            updateRowData(params)
             setAdvanceData({ ...advanceData, producerId: params.row.id })
             setOpenAccountDialog(true)
+          }}
+        />,
+        <GridActionsCellItem
+          label='Reports'
+          icon={<ListAltIcon />}
+          onClick={() => {
+            updateRowData(params)
+            setOpenReportsDialog(true)
+
           }}
         />,
       ]
@@ -137,99 +159,103 @@ export default function ProducersGrid(props) {
       <Dialog open={openAccountDialog} maxWidth={'lg'} fullWidth>
         <DialogTitle sx={{ padding: 2 }}> Cuenta Productor</DialogTitle>
         <DialogContent sx={{ padding: 1 }}>
-          <Grid container spacing={1}>
-            <Grid item xs={3}>
-              <Grid container spacing={1} direction={'column'}>
-                <Grid item>
-                  <Paper sx={{ padding: 1 }} variant='outlined'>
-                    <Typography>
-                      Periodo
-                    </Typography>
-                    <Grid container spacing={1} direction={'column'} paddingTop={1}>
-                      <Grid item>
-                        <DesktopDatePicker
-                          label="Fecha incial"
-                          inputFormat='DD-MM-YYYY'
-                          value={filterDates.start}
-                          onChange={(e) => { setFilterDates({ ...filterDates, start: e }) }}
-                          renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
-                        />
-                      </Grid>
-                      <Grid item>
-                        <DesktopDatePicker
-                          label="Fecha final"
-                          inputFormat='DD-MM-YYYY'
-                          value={filterDates.end}
-                          onChange={(e) => { setFilterDates({ ...filterDates, end: e }) }}
-                          renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
-                        />
-                      </Grid>
-                    </Grid>
-                  </Paper>
-                </Grid>
-                <Grid item>
-                  <Paper sx={{ padding: 1 }} variant='outlined'>
-                    <Typography>
-                      Nuevo Anticipo
-                    </Typography>
-                    <form onSubmit={(e) => { e.preventDefault(); newAdvance(advanceData.producerId) }}>
-                      <Grid container spacing={1} direction={'column'} paddingTop={1}>
-                        <Grid item>
-                          <TextField
-                            label='Monto'
-                            variant='outlined'
-                            size='small'
-                            type='number'
-                            value={advanceData.amount}
-                            onChange={(e) => setAdvanceData({ ...advanceData, amount: e.target.value })}
-                            InputProps={{
-                              startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                            }}
-                            fullWidth
-                            required
-                          />
-                        </Grid>
-                        <Grid item>
-                          <TextField
-                            label='Descripción'
-                            variant='outlined'
-                            size='small'
-                            value={advanceData.description}
-                            onChange={(e) => setAdvanceData({ ...advanceData, description: e.target.value })}
-                            fullWidth
-                            rows={4}
-                            multiline
-                          />
-                        </Grid>
-                        <Grid item textAlign={'right'}>
-                          <Button variant='contained' type={'submit'}>Guardar</Button>
-                        </Grid>
-                      </Grid>
-                    </form>
+          <ProducerAcountTab
+            movements={(
+              <Grid container spacing={1}>
+                <Grid item xs={3}>
+                  <Grid container spacing={1} direction={'column'}>
+                    <Grid item>
+                      <Paper sx={{ padding: 1 }} variant='outlined'>
+                        <Typography>
+                          Nuevo Anticipo
+                        </Typography>
+                        <form onSubmit={(e) => { e.preventDefault(); newAdvance(advanceData.producerId) }}>
+                          <Grid container spacing={1} direction={'column'} paddingTop={1}>
+                            <Grid item>
+                              <TextField
+                                label='Monto'
+                                variant='outlined'
+                                size='small'
+                                type='number'
+                                value={advanceData.amount}
+                                onChange={(e) => setAdvanceData({ ...advanceData, amount: e.target.value })}
+                                InputProps={{
+                                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                }}
+                                fullWidth
+                                required
+                              />
+                            </Grid>
+                            <Grid item>
+                              <TextField
+                                label='Descripción'
+                                variant='outlined'
+                                size='small'
+                                value={advanceData.description}
+                                onChange={(e) => setAdvanceData({ ...advanceData, description: e.target.value })}
+                                fullWidth
+                                rows={4}
+                                multiline
+                              />
+                            </Grid>
+                            <Grid item textAlign={'right'}>
+                              <Button variant='contained' type={'submit'}>Guardar</Button>
+                            </Grid>
+                          </Grid>
+                        </form>
 
-                  </Paper>
-                </Grid>
-                <Grid item>
-                  <Paper sx={{ padding: 1 }} variant='outlined'>
-                    <Grid container spacing={1} direction={'column'} paddingTop={1}>
-                      <Grid item>
-                        <Button variant='contained' onClick={() => newSettlement()}>Liquidar</Button>
-                      </Grid>
+                      </Paper>
                     </Grid>
+                    <Grid item>
+                      <Paper sx={{ padding: 1 }} variant='outlined'>
+                        <Grid container spacing={1} direction={'column'} paddingTop={1}>
+                          <Grid item>
+                            <Button variant='contained' onClick={() => setOpenSettlementDialog(true)}>Liquidar</Button>
+                          </Grid>
+                        </Grid>
 
-                  </Paper>
+                      </Paper>
+                    </Grid>
+                  </Grid>
+                </Grid>
+                <Grid item xs={9}>
+                  <ProducerAccountsGrid producer={rowData} update={accountsGridState} />
                 </Grid>
               </Grid>
-            </Grid>
-            <Grid item xs={9}>
-              <ProducerAccountsGrid producer={rowData} update={accountsGridState} />
-            </Grid>
-          </Grid>
+            )}
+            statements={(
+              <Statements producerId={rowData.id} />
+            )}
+          />
+
         </DialogContent>
         <DialogActions sx={{ padding: 2 }}>
           <Button variant='outlined' onClick={() => setOpenAccountDialog(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
+
+      <SettlementDialog
+        open={openSettlementDialog}
+        setOpen={setOpenSettlementDialog}
+        title={'Liquidación'}
+        producer_id={rowData.id}
+        accountsGridState={accountsGridState}
+        setAccountsGridState={setAccountsGridState}
+
+      />
+
+      <Dialog open={openReportsDialog} maxWidth={'lg'} fullWidth>
+        <DialogTitle sx={{ padding: 2 }}>Reportes productor {rowData.name}</DialogTitle>
+        <DialogContent sx={{ padding: 1 }}>
+          <ProducerReportsTab producerId={rowData.id} />
+          
+        </DialogContent>
+        <DialogActions sx={{ padding: 2 }}>
+          <Button variant='outlined' onClick={() => setOpenReportsDialog(false)}>Cerrar</Button>
+        </DialogActions>
+      </Dialog>
+
+
     </>
   )
 }

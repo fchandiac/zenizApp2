@@ -1,7 +1,9 @@
-import { Box, Grid, Paper } from '@mui/material'
+import { Box, Grid, Paper, TextField } from '@mui/material'
 import React, { useState } from 'react'
 import NewProducerForm from '../components/Forms/NewProducerForm/NewProducerForm'
 import ProducersGrid from '../components/Grids/ProducersGrid/ProducersGrid'
+import ProducersTab from '../components/Tabs/PrducerTab'
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker'
 
 export default function producers() {
   const [updateGrid, setUpdateGrid] = useState(false)
@@ -13,7 +15,8 @@ export default function producers() {
 
   return (
     <>
-      <Grid container spacing={1}>
+    <ProducersTab 
+      producers={( <Grid container spacing={1}>
         <Grid item xs={3}>
           <Paper variant={'outlined'}>
             <Box paddingLeft={2} paddingTop={2}>
@@ -22,10 +25,15 @@ export default function producers() {
             <NewProducerForm afterSubmit={updateGrid_} />
           </Paper>
         </Grid>
-        <Grid item xs={8}>
+        <Grid item xs={9}>
           <ProducersGrid update={updateGrid} />
         </Grid>
-      </Grid>
+      </Grid>)}
+     
+     
+    />
+  
+     
     </>
   )
 }

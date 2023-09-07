@@ -22,4 +22,25 @@ function create(producer_id, amount, description) {
     return settlement
 }
 
-export { create }
+
+
+function findAllBetweenDates(start, end) {
+    const settlements = new Promise((resolve, reject) => {
+        fetch(server_url + 'settlements/findAllBetweenDates', {
+            method: 'POST',
+            body: JSON.stringify({start, end}),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+    return settlements
+}
+
+export { create, findAllBetweenDates }

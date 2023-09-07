@@ -20,6 +20,7 @@ const initialState = {
         traysQuanty: 0,
         traysWeight: 0,
         gross: 0,
+        impurityWeight: 0,
         net: 0,
         toPay: 0,
         packs: [],
@@ -27,6 +28,7 @@ const initialState = {
         showImpurities: false,
         showUsd: false,
     },
+    returnetTrays: [],
     currentPallets: [{ id: 0, tray_id: 0, trays: 0, max: 0, virtualTrays: 0, virtualCapacity: 0 }], // ReceptionProccess
     dispatch_: {
         customer: { id: 0, label: '', key: 0, rut: '' },
@@ -158,6 +160,8 @@ const reducer = (state, action) => {
             return { ...state, reception: { ...state.reception, traysWeight: action.value } }
         case 'SET_RECEPTION_GROSS':
             return { ...state, reception: { ...state.reception, gross: action.value } }
+        case 'SET_RECEPTION_IMPURITY_WEIGHT':
+            return { ...state, reception: { ...state.reception, impurityWeight: action.value } }
         case 'SET_RECEPTION_NET':
             return { ...state, reception: { ...state.reception, net: action.value } }
         case 'ADD_DISPATCH_PALLET':
@@ -199,9 +203,35 @@ const reducer = (state, action) => {
             }
         case 'SET_USER':
             return { ...state, user: action.value }
+        case 'SET_RETURNET_TRAYS':
+            return { ...state, returnetTrays: action.value }
+        case 'UPDATE_DISPATCH_PALLET':
+            return { ...state, dispatch_: { ...state.dispatch_, pallets: state.dispatch_.pallets.map(pallet => pallet.id === action.value.id ? action.value : pallet) } }
+        case 'UPDATE_PACKS_ON_PALLET':
+            const updatedPallets = state.dispatch_.pallets.map(pallet => {
+                if (pallet.id === action.value.id) {
+                    // Encuentra el pallet que coincide con el ID proporcionado en la acción.
+                    // Actualiza la información de los packs en ese pallet.
+                    return {
+                        ...pallet,
+                        packs: action.value.packs, // Reemplaza los packs existentes con los nuevos packs de la acción.
+                    };
+                } else {
+                    // Para los demás pallets, no se realiza ningún cambio.
+                    return pallet;
+                }
+            });
 
+            return {
+                ...state,
+                dispatch_: {
+                    ...state.dispatch_,
+                    pallets: updatedPallets, // Reemplaza la lista de pallets con los pallets actualizados.
+                },
+            }
 
-
+            case 'REMOVE_ALL_DISPATCH_PALLET':
+                return { ...state, dispatch_: { ...state.dispatch_, pallets: [] } }
 
         default:
     }
@@ -230,6 +260,10 @@ const AppProvider = ({ children }) => {
 
     const setCurrentPallets = (data) => {
         dispatch({ type: 'SET_CURRENT_PALLETS', value: data })
+    }
+
+    const setReturnetTrays = (data) => {
+        dispatch({ type: 'SET_RETURNET_TRAYS', value: data })
     }
 
     const addPack = (data) => {
@@ -302,6 +336,11 @@ const AppProvider = ({ children }) => {
         dispatch({ type: 'SET_RECEPTION_NET', value: data })
     }
 
+    const setReceptionImpurityWeight = (data) => {
+        dispatch({ type: 'SET_RECEPTION_IMPURITY_WEIGHT', value: data })
+    }
+
+
     const resetReception = () => {
         dispatch({ type: 'RESET_RECEPTION' })
     }
@@ -313,9 +352,16 @@ const AppProvider = ({ children }) => {
         } else {
             dispatch({ type: 'ADD_DISPATCH_PALLET', value: data })
         }
-
-
     }
+
+    const updateDispatchPallet = (id, pallet) => {
+        dispatch({ type: 'UPDATE_DISPATCH_PALLET', value: { id, pallet } })
+    }
+
+    const updateDispatchPalletPacks = (id, packs) => {
+        dispatch({ type: 'UPDATE_PACKS_ON_PALLET', value: { id, packs } })
+    }
+
 
     const setDispatchCustomer = (data) => {
         dispatch({ type: 'SET_DISPATCH_CUSTOMER', value: data })
@@ -357,6 +403,7 @@ const AppProvider = ({ children }) => {
         dispatch({ type: 'SET_DISPATCH_GROSS', value: data })
     }
 
+
     const setDispatchNet = (data) => {
         dispatch({ type: 'SET_DISPATCH_NET', value: data })
     }
@@ -385,7 +432,9 @@ const AppProvider = ({ children }) => {
         dispatch({ type: 'SET_USER', value: data })
     }
 
-
+    const removeAllDispatchPallet = () => {
+        dispatch({ type: 'REMOVE_ALL_DISPATCH_PALLET' })
+    }
 
     return (
         <AppContext.Provider value={{
@@ -407,6 +456,7 @@ const AppProvider = ({ children }) => {
             receptionType: state.reception.type,
             receptionClp: state.reception.clp,
             receptionUsd: state.reception.usd,
+            receptionImpurityWeight: state.reception.impurityWeight,
             receptionChange: state.reception.change,
             receptionToPay: state.reception.toPay,
 
@@ -426,6 +476,8 @@ const AppProvider = ({ children }) => {
             dispatchPalletsWeight: state.dispatch_.palletsWeight,
             dispatchPallets: state.dispatch_.pallets,
             user: state.user,
+
+            returnetTrays: state.returnetTrays,
 
             dispatch,
             setPageTitle,
@@ -450,8 +502,10 @@ const AppProvider = ({ children }) => {
             setReceptionTraysWeight,
             setReceptionGross,
             setReceptionNet,
+            setReceptionImpurityWeight,
             resetReception,
             addDispatchPallet,
+            updateDispatchPalletPacks,
 
             setDispatchCustomer,
             setDispatchGuide,
@@ -468,8 +522,12 @@ const AppProvider = ({ children }) => {
             setDispatchPalletsQuanty,
             setDispatchPalletsWeight,
             resetDispatch,
+            removeAllDispatchPallet,
             removeDisptachPallet,
-            setUser
+            updateDispatchPallet,
+            setUser,
+
+            setReturnetTrays
         }}>
             {children}
         </AppContext.Provider>

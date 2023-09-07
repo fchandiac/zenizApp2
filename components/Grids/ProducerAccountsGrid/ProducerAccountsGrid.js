@@ -37,23 +37,42 @@ export default function ProducerAccountsGrid(props) {
 
     const refereceType = (type) => {
         switch (type) {
-            case 0 : return 'Recepción'
+            case 0: return 'Recepción'
             case 1: return 'Anticipo'
             case 2: return 'Liquidación'
         }
     }
 
+    const getRowClassName = (params) =>  {
+        // Verifica el valor de 'estadoPago' en la fila actual
+        if (params.row.ereferenceType === 2) {
+          // Si el estado de pago es verdadero, devuelve una clase CSS para fondo verde
+          return 'row-settlement';
+        }
+        // De lo contrario, no se aplica ninguna clase adicional
+        return '';
+      }
+
     const columns = [
-        { field: 'id', headerName: 'Id', flex: .5, type: 'number' },
-        { field: 'credit', headerName: 'Crédito', flex: 1 },
-        { field: 'debit', headerName: 'Débito', flex: 1 },
-        { field: 'balance', headerName: 'Saldo', flex: 1 },
-        { field: 'referenceType', headerName: 'Tipo referecia', flex: 1, 
-        valueFormatter: (params) => (refereceType(params.value)) ,
-        cellClassName: (params) => (params.value === 2 ? 'data-grid-cell-green' : '' )
+        { field: 'id', headerName: 'Id', flex: .3, type: 'number', valueFormatter: (params) => params.value },
+        {
+            field: 'credit', headerName: 'Abonos', flex: .4,
+            valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+        },
+        { field: 'debit', headerName: 'Cargos', flex: .4,
+        valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+     },
+        { field: 'balance', headerName: 'Saldo', flex: .4, 
+        valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
     },
-        { field: 'referenceId', headerName: 'Id referencia', flex: 1 },
-        { field: 'date', headerName: 'fecha', headerClassName: 'data-grid-last-column-header', flex: 1, valueFormatter: (params) => (moment(params.value).format('DD-MM-YYYY HH:mm')) },
+        {
+            field: 'referenceType', headerName: 'Referencia', flex: .5,
+            valueFormatter: (params) => (refereceType(params.value)),
+            cellClassName: (params) => (params.value === 2 ? 'data-grid-cell-green' : '')
+        },
+        { field: 'referenceId', headerName: 'Id referencia', flex: .5 },
+        { field: 'description', headerName: 'Descripción', flex: 1 },
+        { field: 'date', headerName: 'fecha', headerClassName: 'data-grid-last-column-header', flex: .5, valueFormatter: (params) => (moment(params.value).format('DD-MM-YYYY HH:mm')) },
     ]
 
     return (

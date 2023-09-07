@@ -14,6 +14,8 @@ import PackCard from '../../Cards/PackCard/PackCard'
 import LockIcon from '@mui/icons-material/Lock'
 import LockOpenIcon from '@mui/icons-material/LockOpen'
 import { useAppContext } from '../../../appProvider'
+import moment from 'moment'
+import InfoDataGrid from './InfoDataGrid'
 
 
 const receptions = require('../../../services/receptions')
@@ -21,10 +23,14 @@ const variesties = require('../../../services/varieties')
 const types = require('../../../services/types')
 const producerAccounts = require('../../../services/producerAccounts')
 
-export default function ReceptionsGrid() {
+
+
+
+export default function ReceptionsGrid(props) {
+    const { receptionsList, title } = props
     const { openSnack } = useAppContext()
     const [gridApiRef, setGridApiRef] = useState(null)
-    const [receptionsList, setReceptionsList] = useState([])
+
     const [openEditDialog, setOpenEditDialog] = useState(false)
     const [openPacksDialog, setOpenPacksDialog] = useState(false)
     const [rowData, setRowData] = useState(rowDataDefault())
@@ -37,36 +43,7 @@ export default function ReceptionsGrid() {
 
 
     useEffect(() => {
-        receptions.findAll().then(res => {
-            let data = res.map(reception => ({
-                id: reception.id,
-                producerName: reception.Producer.name,
-                producerRut: reception.Producer.rut,
-                producerId: reception.Producer.id,
-                varietyName: reception.Variety.name,
-                variety: reception.Variety,
-                typeName: reception.Type.name,
-                type: reception.Type,
-                guide: reception.guide,
-                clp: reception.clp,
-                usd: reception.usd,
-                change: reception.change,
-                money: reception.money,
-                traysQuanty: reception.trays_quanty,
-                traysWeight: reception.trays_weight,
-                impurityWeight: reception.impurity_weight,
-                gross: reception.gross,
-                net: reception.net,
-                packs: reception.Packs,
-                toPay: reception.to_pay,
-                open: reception.open,
-                settlement: reception.settlement
-                
-            }))
-            setReceptionsList(data)
-
-        })
-
+        console.log('receptionsList', receptionsList)
         variesties.findAll().then(res => {
             let data = res.map(variety => ({
                 id: variety.id,
@@ -109,7 +86,7 @@ export default function ReceptionsGrid() {
         let type = rowData.type
         let toPay = rowData.toPay
         let impurityWeight = rowData.impurityWeight
-        let net = rowData.net
+        let net = rowData.gross - rowData.traysWeight
 
         if (showUsd) {
             money = 'USD'
@@ -123,8 +100,8 @@ export default function ReceptionsGrid() {
             usd,
             change,
             money,
-            variety,
-            type,
+            variety.id,
+            type.id,
             toPay,
             impurityWeight,
             net).then(res => {
@@ -135,12 +112,13 @@ export default function ReceptionsGrid() {
                     change: change,
                     money: money,
                     variety: variety,
-                    varietyName: variety.name,
+                    varietyName: variety.label,
                     type: type,
-                    typeName: type.name,
+                    typeName: type.label,
                     toPay: toPay,
                     impurityWeight: impurityWeight,
-                    net: net
+                    net: net,
+                    impurityWeight: impurityWeight
                 }])
                 setOpenEditDialog(false)
             })
@@ -153,15 +131,8 @@ export default function ReceptionsGrid() {
 
     const closeReception = async () => {
         const closeReception = await receptions.closeReception(rowData.id)
-        const producerAccount = await producerAccounts.findAllByProducerId(rowData.producerId)
-        let beforeBalance = 0
 
-        if (producerAccount.length > 0) {
-            beforeBalance = producerAccount.reduce((accumulator, currentValue) => {
-                return accumulator + currentValue.balance;
-            }, 0);
-        }
-
+        const beforeBalance = await producerAccounts.producerAccountBalance(rowData.producerId)
         let newBalance = beforeBalance + rowData.toPay
 
         const newCredit = await producerAccounts.create(
@@ -174,13 +145,15 @@ export default function ReceptionsGrid() {
             'Cierre de recepción' + rowData.id
         )
 
-        console.log(newCredit)
+        setLockReceptionDialog(false)
 
-
-
-        //await producerAccounts.create()
-
-
+        gridApiRef.current.updateRows([{
+            id: rowData.rowId,
+            open: false
+            
+        }])
+     
+      
     }
 
     const columns = [
@@ -216,6 +189,7 @@ export default function ReceptionsGrid() {
                     maximumFractionDigits: 2,
                 }).format(params.value) + ' kg'
         },
+        { field: 'impurityWeight', headerName: 'Impurezas', flex: 1, hide: false },
         {
             field: 'net', headerName: 'Neto', flex: 1,
             valueFormatter: (params) =>
@@ -229,12 +203,9 @@ export default function ReceptionsGrid() {
             field: 'toPay', headerName: 'A Pagar', flex: 1,
             valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
         },
-        { 
-            field: 'settlement', headerName: 'Liquidación', flex: 1, 
-            renderCell: (params) => {
-                return params.row.settlement ? <DoneAllIcon color='success' /> : ''
-
-            }
+        {
+            field: 'settlementId', headerName: 'Liquidación', flex: 1,
+            
         },
         {
             field: 'actions',
@@ -242,6 +213,7 @@ export default function ReceptionsGrid() {
             headerClassName: 'data-grid-last-column-header',
             type: 'actions', flex: 2, getActions: (params) => [
                 <GridActionsCellItem
+                    sx={{ display: params.row.settlement ? 'none' : 'inline-flex' }}
                     label='delete'
                     icon={<DeleteIcon />}
                     onClick={() => {
@@ -249,9 +221,11 @@ export default function ReceptionsGrid() {
                     }}
                 />,
                 <GridActionsCellItem
+                    sx={{ display: params.row.open ? 'inline-flex' : 'none' }}
                     label='edit'
                     icon={<EditIcon />}
                     onClick={() => {
+                        console.log('ROW', params.row)
                         setRowData({
                             rowId: params.id,
                             id: params.row.id,
@@ -274,7 +248,6 @@ export default function ReceptionsGrid() {
                             packs: params.row.packs,
                             showUsd: false
                         })
-                        console.log(rowData)
                         setOpenEditDialog(true)
                     }}
                 />,
@@ -332,16 +305,24 @@ export default function ReceptionsGrid() {
                             }
 
                         }
-
                     }}
-                />
+                />,
+                <GridActionsCellItem
+                    sx={{ display: params.row.settlement ? 'inline-flex' : 'none' }}
+                    label='settlement'
+                    icon={ <DoneAllIcon color='success' /> }
+                    onClick={() => {
+                        console.log('ROW', params.row)
+                    }}
+                />,
 
             ]
         }
     ]
     return (
         <>
-            <DataGrid title='Recepciones' rows={receptionsList} columns={columns} height='80vh' setGridApiRef={setGridApiRef} />
+            {/* <DataGrid title={title} rows={receptionsList} columns={columns} height='80vh' setGridApiRef={setGridApiRef} /> */}
+            <InfoDataGrid title={title} rows={receptionsList} columns={columns} height='80vh' setGridApiRef={setGridApiRef} />
 
             <Dialog open={openEditDialog} maxWidth={'xs'} fullWidth>
                 <form onSubmit={(e) => { e.preventDefault(); editReception() }}>
@@ -408,7 +389,7 @@ export default function ReceptionsGrid() {
                                     onChange={(e, newValue) => {
                                         setRowData({ ...rowData, variety: newValue })
                                     }}
-                                    getOptionLabel={(option) => option.name}
+                                    getOptionLabel={(option) => option.label}
                                     disablePortal
                                     options={variestiesOptions}
                                     renderInput={(params) => <TextField {...params} label='Variedad' size={'small'} fullWidth />}
@@ -426,7 +407,7 @@ export default function ReceptionsGrid() {
                                     onChange={(e, newValue) => {
                                         setRowData({ ...rowData, type: newValue })
                                     }}
-                                    getOptionLabel={(option) => option.name}
+                                    getOptionLabel={(option) => option.label}
                                     disablePortal
                                     options={typesOptions}
                                     renderInput={(params) => <TextField {...params} label='Tipo' size={'small'} fullWidth />}
@@ -475,6 +456,7 @@ export default function ReceptionsGrid() {
                 <DialogTitle sx={{ padding: 2 }}> Cierre recepción {rowData.id}</DialogTitle>
                 <DialogContent sx={{ padding: 2 }}>
                     <Typography variant={'subtitle2'}>¿Esta seguro que desea cerrar la recepción {rowData.id}, del productor {rowData.producerName}?</Typography>
+                    <Typography variant='caption'>El cierre de la receptión generara un abono en la cuenta del productor.</Typography>
                 </DialogContent>
                 <DialogActions sx={{ padding: 2 }}>
                     <Button variant='contained' onClick={() => { closeReception() }}>Cerrar recepción</Button>
@@ -507,5 +489,7 @@ function rowDataDefault() {
         packs: [],
         showUsd: false,
         toPay: '',
+        variety: { key: 0, label: '', id: 0 },
+        type: { key: 0, label: '', id: 0 }
     })
 }

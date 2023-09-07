@@ -19,6 +19,7 @@ export default function PacksGrid() {
   const columns = [
     { field: 'id', headerName: '#', flex: 1 },
     { field: 'palletId', headerName: 'Pallet', flex: 1 },
+    { field: 'trayName', headerName: 'Bandeja', flex: 1 },
     { field: 'quanty', headerName: 'Cant. bandejas', flex: 1 },
     { field: 'trayWeight', headerName: 'Kg unidad', flex: 1 },
     { field: 'gross', headerName: 'Kg bruto', flex: 1 },

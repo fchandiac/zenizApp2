@@ -9,7 +9,7 @@ import {
 } from '@mui/x-data-grid'
 
 
-import { React, useEffect, useState } from 'react'
+import React, {useEffect, useState } from 'react'
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import TablePagination from '@mui/material/TablePagination'
@@ -24,7 +24,7 @@ const theme = createTheme(
 );
 
 function CustomToolbar(props) {
-    const { gridHeader } = props
+    const { gridHeader, headerVariant } = props
 
     return (
         <Box sx={{ p: 2, m: 1 }}>
@@ -35,7 +35,7 @@ function CustomToolbar(props) {
                 spacing={2}
             >
                 <GridToolbarQuickFilter />
-                <Typography variant="h6" gutterBottom component="div">{gridHeader}</Typography>
+                <Typography variant={headerVariant} gutterBottom component="div">{gridHeader}</Typography>
             </Stack>
         </Box>
     )
@@ -122,7 +122,17 @@ function CustomPagination(props) {
 }
 
 export default function InfoDataGrid(props) {
-    const { rows, columns, title, height, setGridApiRef, infoField, infoTitle, money } = props
+    const { rows, columns, title, headerVariant, height, setGridApiRef, infoField, infoTitle, money } = props
+    const [variant, setVariant] = useState('h6')
+    useEffect(() => {
+        if(headerVariant == undefined || headerVariant == null || headerVariant == ''){
+            setVariant('h6')
+        }else{
+            setVariant(headerVariant)
+        }
+       
+    }, [])
+
 
 
     return (
@@ -138,6 +148,7 @@ export default function InfoDataGrid(props) {
                     toolbar: {
                         showQuickFilter: true,
                         gridHeader: title,
+                        headerVariant: variant
                     },
                     pagination: {
                         excelFileName: title,

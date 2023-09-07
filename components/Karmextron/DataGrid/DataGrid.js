@@ -1,5 +1,5 @@
 import { DataGrid, esES, GridToolbarQuickFilter, useGridApiContext} from '@mui/x-data-grid'
-import { React, useEffect } from 'react'
+import React, {useState, useEffect}from 'react'
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { Button, Stack, Typography, Box, IconButton } from '@mui/material'
@@ -15,7 +15,7 @@ const theme = createTheme(
 
 
 function CustomToolbar(props) {
-    const { gridHeader } = props
+    const { gridHeader, headerVariant } = props
 
     return (
         <Box sx={{ p: 2 , m:1}}>
@@ -26,7 +26,7 @@ function CustomToolbar(props) {
                 spacing={2}
             >
                 <GridToolbarQuickFilter />
-                <Typography variant="h5" gutterBottom component="div">{gridHeader}</Typography>
+                <Typography variant={headerVariant}  component="div">{gridHeader}</Typography>
             </Stack>
         </Box>
     )
@@ -80,7 +80,16 @@ function CustomFooter(props) {
 }
 
 export default function AppDataGrid(props) {
-    const { rows, columns, title, height, setGridApiRef } = props
+    const { rows, columns, title, height, setGridApiRef, headerVariant } = props
+    const [variant, setVariant] = React.useState('h6')
+    useEffect(() => {
+        if(headerVariant == undefined || headerVariant == null || headerVariant == ''){
+            setVariant('h6')
+        }else{
+            setVariant(headerVariant)
+        }
+       
+    }, [])
     return (
         <Box sx={{ width: '100%', height: height }}>
             <ThemeProvider theme={theme}>
@@ -90,10 +99,12 @@ export default function AppDataGrid(props) {
                     columns={columns}
                     components={{ Toolbar: CustomToolbar, Footer: CustomFooter }}
                     density='compact'
+                    getRowHeight={() => 'auto'}
                     componentsProps={{
                         toolbar: {
                             showQuickFilter: true,
-                            gridHeader: title
+                            gridHeader: title,
+                            headerVariant: variant
                         },
                         footer: {
                             excelFileName: title,

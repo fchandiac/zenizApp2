@@ -63,6 +63,7 @@ export default function index() {
                   size={'small'}
                   fullWidth
                   required
+                  autoFocus
                 />
               </Grid>
               <Grid item>

@@ -18,6 +18,13 @@ body {
   background-color: #64dd17;
 }
 
+.row-reception {
+  background-color: #ff6d00;
+}
+.row-settlement {
+  background-color: #64dd17;
+}
+
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { 
   -webkit-appearance: none; 

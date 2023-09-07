@@ -9,6 +9,8 @@ import MoneyTextField from '../Karmextron/MoneyTextField/MoneyTextField'
 import NewProducerForm from '../Forms/NewProducerForm/NewProducerForm'
 import AddPackForm from './AddPackForm'
 import PacksGrid from './PacksGrid'
+import PrintDialog from '../PrintDialog/PrintDialog'
+import ReceptionToPrint from './ReceptionToPrint'
 const utils = require('../../utils')
 
 const producers = require('../../services/producers')
@@ -23,6 +25,7 @@ const variesties = require('../../services/varieties')
 
 export default function NewReception() {
     const {
+        openSnack,
         reception,
         setReception,
         resetReception,
@@ -38,6 +41,7 @@ export default function NewReception() {
         receptionUsd,
         receptionChange,
         receptionToPay,
+        receptionInpuruityWeight,
         setReceptionShowPrices,
         setReceptionShowImpurities,
         setReceptionShowUsd,
@@ -53,6 +57,7 @@ export default function NewReception() {
         setReceptionTraysWeight,
         setReceptionGross,
         setReceptionNet,
+        setReceptionImpurityWeight
     } = useAppContext()
 
 
@@ -68,6 +73,8 @@ export default function NewReception() {
     const [openAddPackDialog, setOpenAddPackDialog] = useState(false)
     const [openNewProducerDialog, setOpenNewProducerDialog] = useState(false)
 
+    const [openPrintDialog, setOpenPrintDialog] = useState(false)
+
     useEffect(() => {
         producers.findAll()
             .then(res => {
@@ -81,17 +88,20 @@ export default function NewReception() {
 
             })
             .catch(err => { console.error(err) })
-        
+
         variesties.findAll()
             .then(res => {
                 let data = res.map((item) => ({
                     id: item.id,
                     key: item.id,
-                    label: item.name
+                    label: item.name,
+                    clp: item.clp,
+                    usd: item.usd,
+                    money: item.money,
                 }))
                 setVarietiesOptions(data)
             })
-        
+
         types.findAll()
             .then(res => {
                 let data = res.map((item) => ({
@@ -102,9 +112,6 @@ export default function NewReception() {
                 setTypesOptions(data)
             })
     }, [])
-
-
-
 
     useEffect(() => { // setPacks
         let clp = parseInt(receptionClp)
@@ -124,12 +131,17 @@ export default function NewReception() {
             return accumulator + currentValue.gross
         }, 0)
 
+        const sumImpurityWeight = reception.packs.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue.impurityWeight
+        }, 0)
+
         if (reception.packs.length == 0) {
             setReceptionTraysQuanty(0)
             setReceptionTraysWeight(0)
             setReceptionGross(0)
             setReceptionNet(0)
             setReceptionToPay(0)
+            setReceptionImpurityWeight(0)
 
         } else {
             setReceptionTraysQuanty(sumTraysQuanty)
@@ -138,7 +150,9 @@ export default function NewReception() {
             setReceptionNet(sumNet)
             let toPay = clp * sumNet
             setReceptionToPay(toPay)
+            setReceptionImpurityWeight(sumImpurityWeight)
         }
+
     }, [reception.packs])
 
 
@@ -156,7 +170,7 @@ export default function NewReception() {
         setReceptionUsd(usd)
         setReceptionChange(change)
         setReceptionToPay(result * reception.net)
- 
+
     }
 
     const previewReception = () => {
@@ -164,50 +178,59 @@ export default function NewReception() {
     }
 
     const saveReception = async () => {
-        try {
-            const newReception_ = await receptions.create(
-                reception.producer.id,
-                reception.variety.id,
-                reception.type.id,
-                reception.guide,
-                reception.clp,
-                reception.usd,
-                reception.change,
-                reception.money,
-                reception.traysQuanty,
-                reception.traysWeight,
-                reception.gross,
-                reception.net,
-                reception.toPay,
-            )
 
-            reception.packs.forEach(async (pack) => {
-                const newPack = await packs.create(
-                    pack.pallet.id,
-                    pack.tray.id,
-                    newReception_.id, //reception id
-                    pack.quanty,
-                    pack.traysWeight,
-                    pack.impurity,
-                    pack.impurityWeight,
-                    pack.gross,
-                    pack.net,
+        console.log('Reception', reception)
+        if (reception.packs.length == 0) {
+            openSnack('No hay packs cargados a la rcepción', 'error')
+        } else {
+            try {
+                const newReception_ = await receptions.create(
+                    reception.producer.id,
+                    reception.variety.id,
+                    reception.type.id,
+                    reception.guide,
+                    reception.clp,
+                    reception.usd,
+                    reception.change,
+                    reception.money,
+                    reception.traysQuanty,
+                    reception.traysWeight,
+                    reception.gross,
+                    reception.net,
+                    reception.impurityWeight,
+                    reception.toPay,
                 )
-            })
-            
-            reception.packs.forEach(async (pack) => {
-                const updatePallet = await pallets.updateTrays(pack.pallet.id, pack.quanty)
+
+                reception.packs.forEach(async (pack) => {
+                    const newPack = await packs.create(
+                        pack.pallet.id,
+                        pack.tray.id,
+                        newReception_.id, //reception id
+                        pack.quanty,
+                        pack.traysWeight,
+                        pack.impurity,
+                        pack.impurityWeight,
+                        pack.gross,
+                        pack.net,
+                    )
+                })
+
+                reception.packs.forEach(async (pack) => {
+                    const updatePallet = await pallets.updateTrays(pack.pallet.id, pack.quanty)
+                    resetReception()
+                })
+
+                openSnack('Recepción guardada', 'success')
+                setOpenPrintDialog(true)
                 resetReception()
-            })
-              resetReception()
 
 
 
-            console.log('Reception', newReception_ )
-        } catch (err) {
-            console.error(err)
+                console.log('Reception', newReception_)
+            } catch (err) {
+                console.error(err)
+            }
         }
-
 
     }
 
@@ -240,7 +263,7 @@ export default function NewReception() {
                     <Grid item xs={2}>
                         <TextField
                             label='Rut'
-                            value={receptionProducer == null ? '' : receptionProducer.rut }
+                            value={receptionProducer == null ? '' : receptionProducer.rut}
                             inputProps={{ readOnly: true }}
                             variant="outlined"
                             size={'small'}
@@ -267,6 +290,16 @@ export default function NewReception() {
                             value={receptionVariety}
                             onChange={(e, newValue) => {
                                 setReceptionVariety(newValue)
+                                if (receptionShowPrices) {
+                                    if (newValue.money == 'CLP') {
+                                        setReceptionShowUsd(false)
+                                        calcPrice(newValue.clp, 0, 0)
+                                    } else if (newValue.money == 'USD') {
+                                        setReceptionShowUsd(true)
+                                        calcPrice(0, newValue.usd, 0)
+                                    }
+                                    console.log('VarietyOnChange', newValue)
+                                }
                             }}
                             disablePortal
                             options={varietiesOptions}
@@ -291,7 +324,13 @@ export default function NewReception() {
                     </Grid>
                     <Grid item xs={2}>
                         <FormControlLabel
-                            control={<Switch checked={receptionShowPrices} onChange={() => { setReceptionShowPrices(!receptionShowPrices) }} />}
+                            control={<Switch checked={receptionShowPrices} onChange={() => {
+                                setReceptionShowPrices(!receptionShowPrices)
+                                if (!receptionShowPrices == false) {
+                                    calcPrice(0, 0, 0)
+                                }
+                            }
+                            } />}
                             label='Precios'
                         />
                     </Grid>
@@ -362,7 +401,7 @@ export default function NewReception() {
                             </Grid>
                         </Grid>
                     </Grid>
-             
+
                     <Grid item xs={12}>
                         <IconButton onClick={() => { setOpenAddPackDialog(true) }}>
                             <AddCircleIcon fontSize='large' />
@@ -381,7 +420,6 @@ export default function NewReception() {
                         </Paper>
                     </Grid>
                     <Grid item xs={4}>
-
                         <Paper variant='outlined'>
                             <Typography p={1}>
                                 Resumen recepción
@@ -394,42 +432,70 @@ export default function NewReception() {
                                         inputProps={{ readOnly: true }}
                                         variant="outlined"
                                         size={'small'}
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">unidades</InputAdornment>,
+                                        }}
                                         fullWidth
                                     />
 
                                 </Grid>
                                 <Grid item xs={6}>
                                     <TextField
-                                        label='Kg bandejas'
+                                        label='Bandejas'
                                         value={reception.traysWeight}
                                         inputProps={{ readOnly: true }}
                                         variant="outlined"
                                         size={'small'}
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">Kg</InputAdornment>,
+                                        }}
                                         fullWidth
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
                                     <TextField
-                                        label='Kg bruto'
+                                        label='Bruto'
                                         value={reception.gross}
                                         inputProps={{ readOnly: true }}
                                         variant="outlined"
                                         size={'small'}
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">Kg</InputAdornment>,
+                                        }}
                                         fullWidth
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
                                     <TextField
-                                        label='Kg neto'
+                                        label='Neto'
                                         value={reception.net}
                                         inputProps={{ readOnly: true }}
                                         variant="outlined"
                                         size={'small'}
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">Kg</InputAdornment>,
+                                        }}
                                         fullWidth
                                     />
                                 </Grid>
-                                <Grid item xs={6} sx={{ display: receptionShowPrices ? 'inline-block' : 'none' }}>
+                                <Grid item xs={6} sx={{display: receptionShowImpurities ? 'inline-block' : 'none'}}>
                                     <TextField
+                                        
+                                        label='impurezas'
+                                        value={reception.impurityWeight}
+                                        inputProps={{ readOnly: true }}
+                                        variant="outlined"
+                                        size={'small'}
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">Kg</InputAdornment>,
+                                
+                                        }}
+                                        fullWidth
+                                    />
+                                </Grid>
+                                <Grid item xs={6} sx={{display: receptionShowPrices ? 'inline-block' : 'none'}}>
+                                    <TextField
+                                        
                                         label='A pagar'
                                         value={reception.toPay}
                                         inputProps={{ readOnly: true }}
@@ -441,7 +507,7 @@ export default function NewReception() {
                                         fullWidth
                                     />
                                 </Grid>
-                                <Grid item xs={6} textAlign={'right'}>
+                                <Grid item xs={12} textAlign={'right'}>
                                     <Button variant={'contained'} type='submit'>guardar</Button>
 
                                 </Grid>
@@ -470,6 +536,13 @@ export default function NewReception() {
                     />
                 </DialogContent>
             </Dialog>
+            <PrintDialog 
+            open={openPrintDialog} 
+            setOpen={setOpenPrintDialog} 
+            title='Recepción' 
+            width={'8cm'}
+            content={ReceptionToPrint({reception: reception})} 
+            />
         </>
     )
 }

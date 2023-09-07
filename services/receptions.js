@@ -16,6 +16,7 @@ function create(
     trays_weight,
     gross,
     net,
+    impurity_weight,
     to_pay
 ) {
     let data = {
@@ -31,6 +32,7 @@ function create(
         trays_weight,
         gross,
         net,
+        impurity_weight,
         to_pay
     }
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
@@ -143,4 +145,104 @@ function closeReception(id) {
 
 
 
-export { create, findAll, update, closeReception }
+
+function findAllBetweenDates(start, end) {
+    let data = {start, end}
+    const reception = new Promise((resolve, reject) => {
+        fetch(server_url + 'receptions/findAllBetweenDates', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+    return reception
+
+}
+
+
+function findAllByProducerBetweenDates(producer_id, start, end) {
+    let data = {producer_id, start, end}
+    const reception = new Promise((resolve, reject) => {
+        fetch(server_url + 'receptions/findAllByProducerBetweenDates', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+    return reception
+
+}
+
+function updateSettlement(id, settlement_id) {
+    let data = {id, settlement_id}
+    const reception = new Promise((resolve, reject) => {
+        fetch(server_url + 'receptions/updateSettlement', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+    return reception
+}
+
+
+
+function findOneById(id) {
+    let data = { id }
+    // let server_url = ipcRenderer.sendSync('server-url', 'sync')
+    const reception = new Promise((resolve, reject) => {
+        fetch(server_url + 'receptions/findOneById', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => {
+            reject(err)
+        })
+    })
+    return reception
+}
+
+
+
+export { 
+    create, 
+    findAll, 
+    update, 
+    closeReception, 
+    findAllBetweenDates, 
+    findAllByProducerBetweenDates, 
+    updateSettlement,
+    findOneById
+}

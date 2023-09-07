@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {
     AppBar, Container, Drawer, IconButton, Box, Divider, List, ListItem, ListItemButton, ListItemText,
-    Typography, Dialog, DialogTitle, DialogContent, Button, Paper, Popover
+    Typography, Dialog, DialogTitle, DialogContent, Button, Paper, Popover, Grid, TextField, DialogActions
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import AccountCircle from '@mui/icons-material/AccountCircle'
@@ -14,6 +14,7 @@ import { useRouter } from 'next/router'
 
 import { useAppContext } from '../../appProvider'
 import Snack from '../Karmextron/Snack/Snack'
+const users = require('../../services/users')
 
 export default function Layout(props) {
     const { children } = props
@@ -22,15 +23,31 @@ export default function Layout(props) {
     const [openDrawer, setOpenDrawer] = useState()
     const [openAuthDialog, setOpenAuthDialog] = useState(false)
     const [anchorElPopOver, setAnchorElPopOver] = useState(null)
+
+    const [userAuthData, setUserAuthData] = useState(userAuthDataDefault())
+
     const openUserInfo = Boolean(anchorElPopOver)
-    const id = openUserInfo? 'simple-popover' : undefined
+    const id = openUserInfo ? 'simple-popover' : undefined
 
-    const updateLock = () => {
-        setLock(!lock)
-        setOpenAuthDialog(false)
+    const updateLock = async () => {
+        const findUser = await users.findOneByUser(userAuthData.user)
+        if (findUser == null) {
+            openSnack('Usuario no encontrado', 'error')
+        } else {
+            console.log(findUser)
+            if (findUser.pass == userAuthData.pass) {
+                if (findUser.Profile.auth == true) {
+                    setLock(!lock)
+                    setOpenAuthDialog(false)
+                    setUserAuthData(userAuthDataDefault())
+                } else {
+                    openSnack('Usuario sin permisos para autorizar', 'error')
+                }
+            } else {
+                openSnack('Contraseña incorrecta', 'error')
+            }
+        }
     }
-
-
 
     return (
         <>
@@ -55,13 +72,13 @@ export default function Layout(props) {
                         <Typography variant={'subtitle2'} component="div" sx={{ flexGrow: 1 }}>
                             {user.name}
                         </Typography>
-                        <IconButton 
-                        onClick={(e) => { setAnchorElPopOver(e.currentTarget) }}
-                        color={'inherit'}
+                        <IconButton
+                            onClick={(e) => { setAnchorElPopOver(e.currentTarget) }}
+                            color={'inherit'}
                         >
                             <AccountCircle />
                         </IconButton>
-                        <IconButton onClick={() => { lock ? setOpenAuthDialog(true) : updateLock() }} color={'inherit'} size="large" sx={{ mr: 1 }}>
+                        <IconButton onClick={() => { lock ? setOpenAuthDialog(true) : setLock(!lock) }} color={'inherit'} size="large" sx={{ mr: 1 }}>
                             <LockOpenIcon sx={{ display: lock ? 'none' : 'inline-block' }} />
                             <LockIcon sx={{ display: lock ? 'inline-block' : 'none' }} />
                         </IconButton>
@@ -70,32 +87,32 @@ export default function Layout(props) {
                 </Container>
             </AppBar>
             <Popover
-            id={id}
-            open={openUserInfo}
-            anchorEl={anchorElPopOver}
-            onClose={() => { setAnchorElPopOver(null)}}
-            anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-            }}
+                id={id}
+                open={openUserInfo}
+                anchorEl={anchorElPopOver}
+                onClose={() => { setAnchorElPopOver(null) }}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
             >
-            <Paper sx={{ p: 1 }}>
-                    <Typography variant={'caption'} fontWeight="bold">{user.user }</Typography>
+                <Paper sx={{ p: 1 }}>
+                    <Typography variant={'caption'} fontWeight="bold">{user.user}</Typography>
                     <Divider />
                     <Box flexDirection={'column'} paddingTop={1} paddingBottom={1}>
-                    <Typography  fontSize={10}>{'Nombre: ' + user.name}</Typography>
-                    <Typography  fontSize={10}>{'Perfil: ' + user.Profile.name}</Typography>
+                        <Typography fontSize={10}>{'Nombre: ' + user.name}</Typography>
+                        <Typography fontSize={10}>{'Perfil: ' + user.Profile.name}</Typography>
                     </Box>
                     <Divider />
                     <Box flexDirection={'column'} display={'flex'} paddingTop={1}>
-                        <Button variant={'outlined'} onClick={() => { 
+                        <Button variant={'outlined'} onClick={() => {
                             setAnchorElPopOver(null)
                             router.push({
                                 pathname: '/',
                             })
                             setPageTitle('')
-                            
-                         }}>Cerrar sesión</Button>
+
+                        }}>Cerrar sesión</Button>
 
                     </Box>
                 </Paper>
@@ -153,6 +170,18 @@ export default function Layout(props) {
                     </ListItem>
                     <ListItem disablePadding>
                         <ListItemButton>
+                            <ListItemText primary={'Almacenes'}
+                                onClick={() => {
+                                    router.push({
+                                        pathname: '/storages',
+                                    })
+                                    setPageTitle('Almacenes')
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton>
                             <ListItemText primary={'Nuevo despacho'}
                                 onClick={() => {
                                     router.push({
@@ -201,6 +230,18 @@ export default function Layout(props) {
                     </ListItem>
                     <ListItem disablePadding>
                         <ListItemButton>
+                            <ListItemText primary={'Bandejas'}
+                                onClick={() => {
+                                    router.push({
+                                        pathname: '/trays',
+                                    })
+                                    setPageTitle('Bandejas')
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton>
                             <ListItemText primary={'Variedades'}
                                 onClick={() => {
                                     router.push({
@@ -229,17 +270,57 @@ export default function Layout(props) {
 
             <Dialog open={openAuthDialog} maxWidth={'xs'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}>Autorización</DialogTitle>
-                <DialogContent sx={{ padding: 1 }}>
-                    <Button variant='contained' fullWidth onClick={() => { updateLock() }}>Autorizar</Button>
-                    {/* <Button variant={'outlined'} onClick={() => { setOpenAuthDialog(false) }}>Cerrar</Button> */}
-                </DialogContent>
+                <form onSubmit={(e) => { e.preventDefault(); updateLock() }}>
+                    <DialogContent sx={{ padding: 1 }}>
+                        <Grid container spacing={1} direction={'column'}>
+                            <Grid item marginTop={1}>
+                                <TextField
+                                    label="Usuario"
+                                    value={userAuthData.user}
+                                    onChange={(e) => setUserAuthData({ ...userAuthData, user: e.target.value })}
+                                    variant="outlined"
+                                    size={'small'}
+                                    fullWidth
+                                    required
+                                />
+                            </Grid>
+                            <Grid item>
+                                <TextField
+                                    label="Contraseña"
+                                    value={userAuthData.pass}
+                                    onChange={(e) => setUserAuthData({ ...userAuthData, pass: e.target.value })}
+                                    variant="outlined"
+                                    type='password'
+                                    size={'small'}
+                                    fullWidth
+                                    required
+                                />
+                            </Grid>
+                        </Grid>
+
+                        {/* <Button variant={'outlined'} onClick={() => { setOpenAuthDialog(false) }}>Cerrar</Button> */}
+                    </DialogContent>
+                    <DialogActions sx={{ padding: 1 }}>
+                        <Button variant='contained' type='submit'>Autorizar</Button>
+                        <Button variant='outlined' onClick={() => { setOpenAuthDialog(false) }}>Cerrar</Button>
+                    </DialogActions>
+                </form>
             </Dialog>
-            {/* Children */}
+            
 
             <Snack />
 
-            
+
+            {/* Children */}
             {children}
         </>
     )
+}
+
+
+function userAuthDataDefault() {
+    return {
+        user: '',
+        pass: ''
+    }
 }
