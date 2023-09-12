@@ -170,18 +170,6 @@ export default function Layout(props) {
                     </ListItem>
                     <ListItem disablePadding>
                         <ListItemButton>
-                            <ListItemText primary={'Almacenes'}
-                                onClick={() => {
-                                    router.push({
-                                        pathname: '/storages',
-                                    })
-                                    setPageTitle('Almacenes')
-                                }}
-                            />
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton>
                             <ListItemText primary={'Nuevo despacho'}
                                 onClick={() => {
                                     router.push({
@@ -260,6 +248,18 @@ export default function Layout(props) {
                                         pathname: '/types',
                                     })
                                     setPageTitle('Tipos de Fruta')
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton>
+                            <ListItemText primary={'Usuarios'}
+                                onClick={() => {
+                                    router.push({
+                                        pathname: '/users',
+                                    })
+                                    setPageTitle('Usuarios')
                                 }}
                             />
                         </ListItemButton>

@@ -1,4 +1,4 @@
-import { Grid, IconButton, Paper, TextField, Typography, Autocomplete, Button } from '@mui/material'
+import { Grid, IconButton, Paper, TextField, Typography, Autocomplete, Button, Box } from '@mui/material'
 import React, { useState, useEffect } from 'react'
 import { useAppContext } from '../appProvider'
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
@@ -214,21 +214,20 @@ export default function newDispatch() {
                     />
                   </Grid>
                   <Grid item>
-                    <TextField
-                      label={'Pallet id'}
-                      type='number'
-                      value={palletInput}
-                      onChange={(e) => { setPalletInput(e.target.value) }}
-                      size='small'
-                      required
-                      fullWidth
-                    />
-                  </Grid>
-
-                  <Grid item>
-                    <IconButton sx={{ flex: '0 0 auto', marginLeft: 1 }} type='submit'>
-                      <LocalShippingIcon />
-                    </IconButton>
+                    <Box sx={{display: 'flex'}}>
+                      <TextField
+                        label={'Pallet id'}
+                        type='number'
+                        value={palletInput}
+                        onChange={(e) => { setPalletInput(e.target.value) }}
+                        size='small'
+                        required
+                        fullWidth
+                      />
+                      <IconButton sx={{ flex: '0 0 auto', marginLeft: 1 }} type='submit'>
+                        <LocalShippingIcon />
+                      </IconButton>
+                    </Box>
                   </Grid>
                 </Grid>
               </form>

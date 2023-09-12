@@ -45,7 +45,7 @@ function CustomToolbar(props) {
 
 
 function CustomPagination(props) {
-    const { excelFileName, setGridApiRef, infoField, infoTitle, money } = props
+    const { excelFileName, setGridApiRef, infoField, infoTitle, money, info } = props
     const apiRef = useGridApiContext()
     const page = useGridSelector(apiRef, gridPageSelector)
     const pageCount = useGridSelector(apiRef, gridPageCountSelector)
@@ -98,7 +98,15 @@ function CustomPagination(props) {
     return (
         <Box sx={{ p: 1 }} width={'100%'}>
             <Stack justifyContent="space-between" direction={'row'} alignItems="center">
-                <Typography>{infoTitle + ' ' +  renderTotal}</Typography>
+                <Typography 
+                >{()=> {
+                    if (info == true) {
+                        return infoTitle + ' ' +  renderTotal
+                    } else {
+                        return ''
+                    }
+                    
+                }}</Typography>
                 <Stack
                     direction="row-reverse"
                     justifyContent="space-between"
@@ -122,7 +130,9 @@ function CustomPagination(props) {
 }
 
 export default function InfoDataGrid(props) {
-    const { rows, columns, title, headerVariant, height, setGridApiRef, infoField, infoTitle, money } = props
+    const { 
+        rows, columns, title, headerVariant, height, setGridApiRef, infoField, infoTitle, money, 
+        getRowClassName, info } = props
     const [variant, setVariant] = useState('h6')
     useEffect(() => {
         if(headerVariant == undefined || headerVariant == null || headerVariant == ''){
@@ -130,7 +140,6 @@ export default function InfoDataGrid(props) {
         }else{
             setVariant(headerVariant)
         }
-       
     }, [])
 
 
@@ -144,6 +153,7 @@ export default function InfoDataGrid(props) {
                 pagination
                 components={{ Toolbar: CustomToolbar, Pagination: CustomPagination }}
                 getRowHeight={() => 'auto'}
+                getRowClassName={getRowClassName}
                 componentsProps={{
                     toolbar: {
                         showQuickFilter: true,
@@ -155,8 +165,10 @@ export default function InfoDataGrid(props) {
                         setGridApiRef: setGridApiRef,
                         infoField: infoField,
                         infoTitle: infoTitle,
-                        money: money
+                        money: money,
+                        info: info
                     }
+                    
 
                 }}
             />

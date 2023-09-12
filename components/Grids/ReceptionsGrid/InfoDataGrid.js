@@ -56,13 +56,18 @@ function CustomPagination(props) {
     }, [])
 
     let rows = Array.from(apiRef.current.getVisibleRowModels())
-    // let total = 0
-    // rows.map(row => {
-    //     total += row[1][infoField]
-    // })
-    // let renderTotal = money ? renderMoneystr(total) : total
-    let renderTotalToPay = 0
-    let renderTotalNet = 0
+    let totaltoPay = 0
+    let totalNet = 0
+    rows.map(row => {
+        totaltoPay += row[1]['toPay']
+        totalNet += row[1]['net']
+    })
+    let renderTotalToPay = renderMoneystr(totaltoPay)
+    let renderTotalNet = new Intl.NumberFormat('es-CL', {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(totalNet) + ' kg'
 
 
 
@@ -100,8 +105,8 @@ function CustomPagination(props) {
     return (
         <Box sx={{ p: 1 }} width={'100%'}>
             <Stack justifyContent="space-between" direction={'row'} alignItems="center">
-                <Typography>{'Total a pagar ' +  renderTotalToPay}</Typography>
-                <Typography>{'Total Neto ' + renderTotalNet}</Typography>
+                <Typography variant={'subtitle2'}>{'Total a pagar ' +  renderTotalToPay}</Typography>
+                <Typography variant={'subtitle2'}>{'Total Neto ' + renderTotalNet}</Typography>
                 <Stack
                     direction="row-reverse"
                     justifyContent="space-between"
@@ -127,6 +132,8 @@ function CustomPagination(props) {
 export default function InfoDataGrid(props) {
     const { rows, columns, title, headerVariant, height, setGridApiRef } = props
     const [variant, setVariant] = useState('h6')
+
+
     useEffect(() => {
         if(headerVariant == undefined || headerVariant == null || headerVariant == ''){
             setVariant('h6')
@@ -147,6 +154,7 @@ export default function InfoDataGrid(props) {
                 pagination
                 components={{ Toolbar: CustomToolbar, Pagination: CustomPagination }}
                 getRowHeight={() => 'auto'}
+                getRowClassName={(params) => 'row-tiny'}
                 componentsProps={{
                     toolbar: {
                         showQuickFilter: true,

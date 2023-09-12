@@ -4,20 +4,25 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import InfoIcon from '@mui/icons-material/Info'
 import ViewQuiltIcon from '@mui/icons-material/ViewQuilt'
 import { GridActionsCellItem } from '@mui/x-data-grid'
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid } from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, Box } from '@mui/material'
+import PrintIcon from '@mui/icons-material/Print'
+import Barcode from 'react-barcode'
 
 import DataGrid from '../../Karmextron/DataGrid/DataGrid'
 import PalletPackCard from '../../Cards/PalletPackCard/PalletPackCard';
+import PrintDialog from '../../PrintDialog/PrintDialog'
 
 const pallets = require('../../../services/pallets')
 
 
-export default function PalletsGrid() {
+export default function PalletsGrid(props) {
+    const {update} = props
     const [gridApiRef, setGridApiRef] = useState(null)
     const [palletsList, setPalletsList] = useState([])
     const [openInfoDialog, setOpenInfoDialog] = useState(false)
     const [openPacksDialog, setOpenPacksDialog] = useState(false)
     const [rowData, setRowData] = useState(rowDataDefault())
+    const [openPrintDialog, setOpenPrintDialog] = useState(false)
 
     useEffect(() => {
         pallets.findAll()
@@ -26,19 +31,19 @@ export default function PalletsGrid() {
                 let data = res.map(pallet => ({
                     id: pallet.id,
                     storageName: pallet.Storage.name,
-                    trayName: pallet.Tray.name,
+                    trayName: pallet.Tray == null ? '': pallet.Tray.name,
                     weight: pallet.weight,
                     trays: pallet.trays,
                     max: pallet.max,
                     packs: pallet.Packs,
                     dispatch: pallet.dispatch ? 'Si' : 'No',
-                    dispatchId: pallet.dispatch_id
+                    dispatchId: pallet.dispatch_id == null ? '' : pallet.dispatch_id
                 }))
                 setPalletsList(data)
             })
             .catch(err => { console.log(err) })
 
-    }, [])
+    }, [update])
 
     const columns = [
         { field: 'id', headerName: 'Id', flex: .5, type: 'number' },
@@ -50,18 +55,41 @@ export default function PalletsGrid() {
         {
             field: 'dispatch', headerName: 'Despacho', flex: 1,
             renderCell: (params) => {
-                return params.row.dispatch === 'Si' ? <LocalShippingIcon color='success' /> : <LocalShippingIcon />
+                return params.row.dispatch === 'Si' ? 
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <LocalShippingIcon color='success' sx={{paddingRight:1}} /> 
+                {params.row.dispatchId}
+                </Box>: 
+                <LocalShippingIcon />
 
             }
         },
         {
             field: 'actions',
             headerName: '',
-            type: 'actions', flex: .5, getActions: (params) => [
+            type: 'actions', flex: .8, getActions: (params) => [
                 <GridActionsCellItem
                     label='delete'
                     icon={<DeleteIcon />}
                     onClick={() => {
+
+                    }}
+                />,
+                <GridActionsCellItem
+                    label='print'
+                    icon={<PrintIcon />}
+                    onClick={() => {
+                        setRowData({
+                            rowId: params.id,
+                            id: params.row.id,
+                            storageName: params.row.storageName,
+                            trayName: params.row.trayName,
+                            weight: params.row.weight,
+                            trays: params.row.trays,
+                            max: params.row.max,
+                            packs: params.row.packs
+                        })
+                        setOpenPrintDialog(true)
 
                     }}
                 />,
@@ -86,6 +114,7 @@ export default function PalletsGrid() {
             ]
         }
     ]
+
     return (
         <>
 
@@ -101,7 +130,6 @@ export default function PalletsGrid() {
                                 <PalletPackCard pack={pack} />
                             </Grid>
                         ))}
-
                     </Grid>
 
 
@@ -110,6 +138,19 @@ export default function PalletsGrid() {
                     <Button variant='contained' onClick={() => setOpenPacksDialog(false)}>Cerrar</Button>
                 </DialogActions>
             </Dialog>
+
+            <PrintDialog
+                open={openPrintDialog}
+                setOpen={setOpenPrintDialog}
+                title='Imprimir etiqueta'
+                maxWidth={'xs'}
+            >
+                <Typography variant={'subtitle1'} fontWeight="bold" align='center'>{'ZENIZ'}</Typography>
+                <Typography variant={'subtitle2'} fontWeight="bold" align='center'>{'Pallet ' + rowData.id}</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Barcode value={rowData.id.toString()} />
+                </Box>
+            </PrintDialog>
         </>
     )
 }

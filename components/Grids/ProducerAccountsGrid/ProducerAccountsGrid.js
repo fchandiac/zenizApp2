@@ -71,7 +71,7 @@ export default function ProducerAccountsGrid(props) {
             cellClassName: (params) => (params.value === 2 ? 'data-grid-cell-green' : '')
         },
         { field: 'referenceId', headerName: 'Id referencia', flex: .5 },
-        { field: 'description', headerName: 'Descripción', flex: 1 },
+        { field: 'description', headerName: 'Descripción', flex: 1, cellClassName: 'row-tiny' },
         { field: 'date', headerName: 'fecha', headerClassName: 'data-grid-last-column-header', flex: .5, valueFormatter: (params) => (moment(params.value).format('DD-MM-YYYY HH:mm')) },
     ]
 

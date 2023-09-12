@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
 import {
     Card, CardActionArea, CardContent, CardHeader, IconButton, Typography, Box,
-    Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, TextField
+    Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, TextField, Grid
 } from '@mui/material'
 import ContentCutIcon from '@mui/icons-material/ContentCut'
 import IosShareIcon from '@mui/icons-material/IosShare'
 import { useAppContext } from '../../../appProvider'
+import PrintIcon from '@mui/icons-material/Print'
+import PrintDialog from '../../PrintDialog/PrintDialog'
+import Barcode from 'react-barcode'
 
 const pallets = require('../../../services/pallets')
 const packs = require('../../../services/packs')
@@ -22,6 +25,7 @@ export default function PalletPackCard(props) {
     const [targetPalletToMove, setTargetPalletToMove] = useState(null)
     const [openDivideDialog, setOpenDivideDialog] = useState(false)
     const [divideValues, setDivideValues] = useState({packQuantyA: 0, packQuantyB: 0})
+    const [openPrintDialog, setOpenPrintDialog] = useState(false)
 
 
     const movePack = async () => {
@@ -79,6 +83,11 @@ export default function PalletPackCard(props) {
                     >
                         <IosShareIcon fontSize={'small'} />
                     </IconButton>
+                    <IconButton
+                        onClick={(e) => { setOpenPrintDialog(true) }}
+                    >
+                        <PrintIcon fontSize={'small'} />
+                    </IconButton>
                 </Box>
             </Card>
 
@@ -111,6 +120,9 @@ export default function PalletPackCard(props) {
                 <DialogTitle sx={{ padding: 2 }}>Mover Pack</DialogTitle>
                 <form onSubmit={(e) => { e.preventDefault(); dividePack() }}>
                 <DialogContent sx={{ padding: 1 }}>
+
+                    <Grid container spacing={1} direction={'column'}>
+                        <Grid item>
                     <TextField
                         label='pack A'
                         variant='outlined'
@@ -122,7 +134,8 @@ export default function PalletPackCard(props) {
                         autoFocus
                         size='small'
                     />
-
+                        </Grid>
+                        <Grid item>
                     <TextField
                         label='pack B'
                         variant='outlined'
@@ -133,13 +146,32 @@ export default function PalletPackCard(props) {
                         size='small'
                         required
                     />
+                        </Grid>
+                    </Grid>
                 </DialogContent>
                 <DialogActions sx={{ padding: 2 }}>
-                    <Button variant={'contained'} type='submit'>Mover</Button>
+                    <Button variant={'contained'} type='submit'>Dividir</Button>
                     <Button variant={'outlined'} onClick={() => { setOpenDivideDialog(false) }}>Cerrar</Button>
                 </DialogActions>
                 </form>
             </Dialog>
+
+            <PrintDialog 
+                open={openPrintDialog}
+                setOpen={setOpenPrintDialog}
+                maxWidth={'xs'}
+                title={'Imprimir etiqueta'}
+            >
+                <Typography variant={'subtitle1'} fontWeight="bold" align='center'>{'ZENIZ'}</Typography>
+                <Typography variant={'subtitle2'} fontWeight="bold" align='center'>{'Pack ' + pack.id}</Typography>
+                <Typography variant={'subtitle2'} fontWeight="bold" align='center'>{'Recepción' + pack.Reception.id}</Typography>
+                <Typography variant={'subtitle2'} fontWeight="bold" align='center'>{pack.Reception.Producer.name}</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Barcode value={pack.id.toString()} />
+                </Box>
+
+            </PrintDialog>
+
         </>
     )
 }

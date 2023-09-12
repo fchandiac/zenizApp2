@@ -205,6 +205,12 @@ const reducer = (state, action) => {
             return { ...state, user: action.value }
         case 'SET_RETURNET_TRAYS':
             return { ...state, returnetTrays: action.value }
+        case 'ADD_RETURNET_TRAY':
+            return { ...state, returnetTrays: [...state.returnetTrays, action.value] }
+        case 'REMOVE_RETURNET_TRAY':
+            return { ...state, returnetTrays: state.returnetTrays.filter(tray => tray.id !== action.value) }
+        case 'RESET_RETURNET_TRAYS':
+            return { ...state, returnetTrays: [] }
         case 'UPDATE_DISPATCH_PALLET':
             return { ...state, dispatch_: { ...state.dispatch_, pallets: state.dispatch_.pallets.map(pallet => pallet.id === action.value.id ? action.value : pallet) } }
         case 'UPDATE_PACKS_ON_PALLET':
@@ -436,6 +442,19 @@ const AppProvider = ({ children }) => {
         dispatch({ type: 'REMOVE_ALL_DISPATCH_PALLET' })
     }
 
+    const addReturnetTrays = (data) => {
+        dispatch({ type: 'ADD_RETURNET_TRAY', value: data })
+    }
+
+    const removeReturnetTray = (data) => {
+        dispatch({ type: 'REMOVE_RETURNET_TRAY', value: data })
+    }
+    
+    const resetReturnetTrays = () => {
+        dispatch({ type: 'RESET_RETURNET_TRAYS' })
+    }
+
+
     return (
         <AppContext.Provider value={{
             snack: state.snack,
@@ -527,7 +546,10 @@ const AppProvider = ({ children }) => {
             updateDispatchPallet,
             setUser,
 
-            setReturnetTrays
+            setReturnetTrays,
+            addReturnetTrays,
+            removeReturnetTray,
+            resetReturnetTrays
         }}>
             {children}
         </AppContext.Provider>

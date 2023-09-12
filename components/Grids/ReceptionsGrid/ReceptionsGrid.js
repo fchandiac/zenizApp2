@@ -16,6 +16,10 @@ import LockOpenIcon from '@mui/icons-material/LockOpen'
 import { useAppContext } from '../../../appProvider'
 import moment from 'moment'
 import InfoDataGrid from './InfoDataGrid'
+import PrintIcon from '@mui/icons-material/Print'
+import PrintDialog from '../../PrintDialog/PrintDialog'
+import ReceptionToPrint from '../../NewReception/ReceptionToPrint'
+import { set } from 'date-fns'
 
 
 const receptions = require('../../../services/receptions')
@@ -40,6 +44,8 @@ export default function ReceptionsGrid(props) {
     const [variestiesOptions, setVariestiesOptions] = useState([])
     const [typeInput, setTypeInput] = useState('')
     const [typesOptions, setTypesOptions] = useState([])
+
+    const [openPrintDialog, setOpenPrintDialog] = useState(false)
 
 
     useEffect(() => {
@@ -86,10 +92,14 @@ export default function ReceptionsGrid(props) {
         let type = rowData.type
         let toPay = rowData.toPay
         let impurityWeight = rowData.impurityWeight
-        let net = rowData.gross - rowData.traysWeight
+        let net = rowData.net
+
 
         if (showUsd) {
             money = 'USD'
+            if (clp > 0) {
+                money = 'CLP'
+            }
         }
         net = net - impurityWeight
         toPay = net * clp
@@ -104,24 +114,24 @@ export default function ReceptionsGrid(props) {
             type.id,
             toPay,
             impurityWeight,
-            net).then(res => {
-                gridApiRef.current.updateRows([{
-                    id: rowData.rowId,
-                    clp: clp,
-                    usd: usd,
-                    change: change,
-                    money: money,
-                    variety: variety,
-                    varietyName: variety.label,
-                    type: type,
-                    typeName: type.label,
-                    toPay: toPay,
-                    impurityWeight: impurityWeight,
-                    net: net,
-                    impurityWeight: impurityWeight
-                }])
-                setOpenEditDialog(false)
-            })
+            net
+        ).then(res => {
+            gridApiRef.current.updateRows([{
+                id: rowData.rowId,
+                clp: clp,
+                usd: usd,
+                change: change,
+                money: money,
+                variety: variety,
+                varietyName: variety.label,
+                type: type,
+                typeName: type.label,
+                toPay: toPay,
+                impurityWeight: impurityWeight,
+                net: net,
+            }])
+            setOpenEditDialog(false)
+        })
             .catch(err => { console.log(err) })
 
 
@@ -150,29 +160,61 @@ export default function ReceptionsGrid(props) {
         gridApiRef.current.updateRows([{
             id: rowData.rowId,
             open: false
-            
+
         }])
-     
-      
+
+
+    }
+
+    const setRow = (params) => {
+        setRowData({
+            rowId: params.id,
+            id: params.row.id,
+            producerName: params.row.producerName,
+            producerRut: params.row.producerRut,
+            varietyName: params.row.varietyName,
+            variety: params.row.variety,
+            typeName: params.row.typeName,
+            type: params.row.type,
+            guide: params.row.guide,
+            clp: params.row.clp,
+            usd: params.row.usd,
+            change: params.row.change,
+            money: params.row.money,
+            traysQuanty: params.row.traysQuanty,
+            traysWeight: params.row.traysWeight,
+            impurityWeight: params.row.impurityWeight,
+            gross: params.row.gross,
+            net: params.row.net,
+            packs: params.row.packs
+        })
     }
 
     const columns = [
-        { field: 'id', headerName: 'Id', flex: .5, type: 'number', valueFormatter: (params) => params.value },
-        { field: 'producerName', headerName: 'Productor', flex: 1 },
-        { field: 'producerRut', headerName: 'Rut', flex: 1 },
-        { field: 'varietyName', headerName: 'Variedad', flex: 1 },
-        { field: 'typeName', headerName: 'Tipo', flex: 1, hide: true },
-        { field: 'guide', headerName: 'Guía', flex: 1, hide: true },
+        { field: 'id', headerName: 'Id', flex: .3, type: 'number', headerClassName: 'row-header-tiny', valueFormatter: (params) => params.value },
+        { field: 'producerName', headerName: 'Productor', flex: .8, headerClassName: 'row-header-tiny' },
+        { field: 'producerRut', headerName: 'Rut', flex: .5, headerClassName: 'row-header-tiny' },
+        { field: 'varietyName', headerName: 'Variedad', flex: .5, headerClassName: 'row-header-tiny' },
+        { field: 'typeName', headerName: 'Tipo', flex: .3, hide: true, headerClassName: 'row-header-tiny' },
+        { field: 'guide', headerName: 'Guía', flex: .3, hide: true, headerClassName: 'row-header-tiny', },
         {
-            field: 'clp', headerName: 'CLP', flex: 1, hide: false,
+            field: 'clp', headerName: 'CLP', flex: .3, hide: false, headerClassName: 'row-header-tiny',
             valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
         },
-        { field: 'usd', headerName: 'USD', flex: 1, hide: true },
-        { field: 'change', headerName: 'Cambio', flex: 1, hide: true },
-        { field: 'money', headerName: 'Moneda', flex: 1, hide: true },
-        { field: 'traysQuanty', headerName: 'Cantidad de Bandejas', flex: 1 },
+        { field: 'usd', headerName: 'USD', flex: .3, hide: true, headerClassName: 'row-header-tiny' },
+        { field: 'change', headerName: 'Cambio', flex: .3, hide: true, headerClassName: 'row-header-tiny' },
+        { field: 'money', headerName: 'Moneda', flex: .35, hide: false, headerClassName: 'row-header-tiny' },
         {
-            field: 'traysWeight', headerName: 'Bandejas', flex: 1,
+            field: 'traysQuanty', headerName: 'Bandejas', flex: .35, headerClassName: 'row-header-tiny',
+            valueFormatter: (params) =>
+                new Intl.NumberFormat('es-CL', {
+                    style: 'decimal',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                }).format(params.value) + ' unds'
+        },
+        {
+            field: 'traysWeight', headerName: 'Bandejas', flex: .35, headerClassName: 'row-header-tiny',
             valueFormatter: (params) =>
                 new Intl.NumberFormat('es-CL', {
                     style: 'decimal',
@@ -181,17 +223,7 @@ export default function ReceptionsGrid(props) {
                 }).format(params.value) + ' kg'
         },
         {
-            field: 'gross', headerName: 'Bruto', flex: 1,
-            valueFormatter: (params) =>
-                new Intl.NumberFormat('es-CL', {
-                    style: 'decimal',
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }).format(params.value) + ' kg'
-        },
-        { field: 'impurityWeight', headerName: 'Impurezas', flex: 1, hide: false },
-        {
-            field: 'net', headerName: 'Neto', flex: 1,
+            field: 'gross', headerName: 'Bruto', flex: .35, headerClassName: 'row-header-tiny',
             valueFormatter: (params) =>
                 new Intl.NumberFormat('es-CL', {
                     style: 'decimal',
@@ -200,101 +232,78 @@ export default function ReceptionsGrid(props) {
                 }).format(params.value) + ' kg'
         },
         {
-            field: 'toPay', headerName: 'A Pagar', flex: 1,
+            field: 'impurityWeight', headerName: 'Impurezas', flex: .4, hide: false, headerClassName: 'row-header-tiny',
+            valueFormatter: (params) =>
+                new Intl.NumberFormat('es-CL', {
+                    style: 'decimal',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(params.value) + ' kg'
+        },
+        {
+            field: 'net', headerName: 'Neto', flex: .35, headerClassName: 'row-header-tiny',
+            valueFormatter: (params) =>
+                new Intl.NumberFormat('es-CL', {
+                    style: 'decimal',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(params.value) + ' kg'
+        },
+        {
+            field: 'toPay', headerName: 'A Pagar', flex: .4, headerClassName: 'row-header-tiny',
             valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
         },
         {
-            field: 'settlementId', headerName: 'Liquidación', flex: 1,
-            
+            field: 'settlementId', headerName: 'Liquidación', flex: .3, hide: true, headerClassName: 'row-header-tiny'
+
         },
         {
             field: 'actions',
             headerName: '',
             headerClassName: 'data-grid-last-column-header',
-            type: 'actions', flex: 2, getActions: (params) => [
+            type: 'actions', flex: 1, getActions: (params) => [
                 <GridActionsCellItem
-                    sx={{ display: params.row.settlement ? 'none' : 'inline-flex' }}
+                    size={'small'}
+                    sx={{ display: params.row.settlement ? 'none' : 'inline-flex', }}
                     label='delete'
-                    icon={<DeleteIcon />}
+                    icon={<DeleteIcon sx={{ fontSize: 16 }} />}
                     onClick={() => {
+                        setRow(params)
                         openSnack('La recepción ya esta cerrada', 'error')
+                    }}
+                />,
+                <GridActionsCellItem
+                    label='print'
+                    icon={<PrintIcon sx={{ fontSize: 16 }} />}
+                    onClick={() => {
+                        setRow(params)
+                        setOpenPrintDialog(true)
                     }}
                 />,
                 <GridActionsCellItem
                     sx={{ display: params.row.open ? 'inline-flex' : 'none' }}
                     label='edit'
-                    icon={<EditIcon />}
+                    icon={<EditIcon sx={{ fontSize: 16 }} />}
                     onClick={() => {
-                        console.log('ROW', params.row)
-                        setRowData({
-                            rowId: params.id,
-                            id: params.row.id,
-                            producerName: params.row.producerName,
-                            producerRut: params.row.producerRut,
-                            varietyName: params.row.varietyName,
-                            variety: params.row.variety,
-                            typeName: params.row.typeName,
-                            type: params.row.type,
-                            guide: params.row.guide,
-                            clp: params.row.clp,
-                            usd: params.row.usd,
-                            change: params.row.change,
-                            money: params.row.money,
-                            traysQuanty: params.row.traysQuanty,
-                            traysWeight: params.row.traysWeight,
-                            impurityWeight: params.row.impurityWeight,
-                            gross: params.row.gross,
-                            net: params.row.net,
-                            packs: params.row.packs,
-                            showUsd: false
-                        })
+                        setRow(params)
                         setOpenEditDialog(true)
                     }}
                 />,
                 <GridActionsCellItem
                     label='packs'
-                    icon={<ViewQuiltIcon />}
+                    icon={<ViewQuiltIcon sx={{ fontSize: 16 }} />}
                     onClick={() => {
-                        setRowData({
-                            rowId: params.id,
-                            id: params.row.id,
-                            producerName: params.row.producerName,
-                            producerRut: params.row.producerRut,
-                            varietyName: params.row.varietyName,
-                            typeName: params.row.typeName,
-                            guide: params.row.guide,
-                            clp: params.row.clp,
-                            usd: params.row.usd,
-                            change: params.row.change,
-                            money: params.row.money,
-                            traysQuanty: params.row.traysQuanty,
-                            traysWeight: params.row.traysWeight,
-                            impurityWeight: params.row.impurityWeight,
-                            gross: params.row.gross,
-                            net: params.row.net,
-                            packs: params.row.packs
-                        })
-                        console.log(rowData)
+                        setRow(params)
                         setOpenPacksDialog(true)
                     }}
                 />,
                 <GridActionsCellItem
                     label='open'
-                    icon={params.row.open ? <LockOpenIcon /> : <LockIcon />}
+                    icon={params.row.open ? <LockOpenIcon sx={{ fontSize: 16 }} /> : <LockIcon sx={{ fontSize: 16 }} />}
                     onClick={() => {
 
                         if (params.row.toPay > 0 && params.row.open) {
-                            setRowData({
-                                rowId: params.id,
-                                id: params.row.id,
-                                producerName: params.row.producerName,
-                                producerRut: params.row.producerRut,
-                                producerId: params.row.producerId,
-                                open: params.row.open,
-                                packs: params.row.packs,
-                                toPay: params.row.toPay
-
-                            })
+                            setRow(params)
                             setLockReceptionDialog(true)
 
                         } else {
@@ -310,7 +319,7 @@ export default function ReceptionsGrid(props) {
                 <GridActionsCellItem
                     sx={{ display: params.row.settlement ? 'inline-flex' : 'none' }}
                     label='settlement'
-                    icon={ <DoneAllIcon color='success' /> }
+                    icon={<DoneAllIcon color='success' sx={{ fontSize: 16 }} />}
                     onClick={() => {
                         console.log('ROW', params.row)
                     }}
@@ -339,17 +348,20 @@ export default function ReceptionsGrid(props) {
                             </Grid>
                             <Grid item>
                                 <TextField
-                                    label='CLP'
+                                    label='Precio'
                                     value={rowData.clp}
                                     onChange={(e) => { setRowData({ ...rowData, clp: e.target.value }) }}
                                     variant="outlined"
                                     type='number'
                                     size={'small'}
                                     fullWidth
+                                    autoFocus
                                     className='no-spin'
                                     InputProps={{
                                         startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                        endAdornment: <InputAdornment position="end">CLP</InputAdornment>,
                                     }}
+                                    inputProps={{ min: 0 }}
                                 />
                             </Grid>
                             <Grid item sx={{ display: rowData.showUsd ? 'inline-block' : 'none' }}>
@@ -357,11 +369,18 @@ export default function ReceptionsGrid(props) {
                                     label='USD'
                                     value={rowData.usd}
                                     type='number'
-                                    // calcPrice(receptionClp, e.target.value, receptionChange, receptionMoney)
                                     onChange={(e) => { calcPrice(rowData.clp, e.target.value, rowData.change) }}
                                     variant="outlined"
+                                    className='no-spin'
                                     size={'small'}
                                     fullWidth
+                                    InputProps={{
+                                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                        endAdornment: <InputAdornment position="end">USD</InputAdornment>,
+
+                                    }}
+                                    inputProps={{ min: 0 }}
+
 
                                 />
                             </Grid>
@@ -375,6 +394,11 @@ export default function ReceptionsGrid(props) {
                                     variant="outlined"
                                     size={'small'}
                                     fullWidth
+                                    InputProps={{
+                                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                        endAdornment: <InputAdornment position="end">CLP</InputAdornment>,
+                                    }}
+                                    inputProps={{ min: 0 }}
 
                                 />
                             </Grid>
@@ -415,11 +439,42 @@ export default function ReceptionsGrid(props) {
                             </Grid>
                             <Grid item>
                                 <TextField
-                                    label='Kg Impurezas'
+                                    label='Impurezas'
+                                    value={rowData.impuritypercent}
+                                    type={'number'}
+                                    onChange={(e) => {
+                                        setRowData({
+                                            ...rowData,
+                                            impuritypercent: e.target.value,
+                                            impurityWeight: (rowData.net * e.target.value) / 100
+                                        })
+
+                                    }}
+                                    variant="outlined"
+                                    size={'small'}
+                                    fullWidth
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                    }}
+                                    inputProps={{
+                                        min: 0,
+                                        max: 100,
+                                    }}
+
+                                />
+                            </Grid>
+                            <Grid item>
+                                <TextField
+                                    label='Impurezas'
                                     value={rowData.impurityWeight}
                                     type='number'
                                     // calcPrice(receptionClp, e.target.value, receptionChange, receptionMoney)
-                                    onChange={(e) => { setRowData({ ...rowData, impurityWeight: e.target.value }) }}
+                                    InputProps={
+                                        {
+                                            endAdornment: <InputAdornment position="end">kg</InputAdornment>,
+                                            readOnly: true
+                                        }
+                                    }
                                     variant="outlined"
                                     size={'small'}
                                     fullWidth
@@ -463,6 +518,17 @@ export default function ReceptionsGrid(props) {
                     <Button variant='outlined' onClick={() => setLockReceptionDialog(false)}>Cerrar</Button>
                 </DialogActions>
             </Dialog>
+
+            <PrintDialog
+                open={openPrintDialog}
+                setOpen={setOpenPrintDialog}
+                title={'Recepcción ' + rowData.id}
+                maxWidth={'xs'}
+            >
+                <ReceptionToPrint receptionId={rowData.id} returnetTrays={[]} />
+            </PrintDialog>
+
+
         </>
     )
 }
@@ -490,6 +556,7 @@ function rowDataDefault() {
         showUsd: false,
         toPay: '',
         variety: { key: 0, label: '', id: 0 },
-        type: { key: 0, label: '', id: 0 }
+        type: { key: 0, label: '', id: 0 },
+        impuritypercent: 0,
     })
 }

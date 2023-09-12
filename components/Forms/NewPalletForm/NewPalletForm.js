@@ -6,11 +6,11 @@ import { set } from 'date-fns'
 const utils = require('../../../utils')
 const storages = require('../../../services/storages')
 const trays = require('../../../services/trays')
+const pallets = require('../../../services/pallets')
 
 export default function NewPalletForm(props) {
-    const { dialog, closeDialog, afterSubmit } = props
+    const { dialog, closeDialog, afterSubmit, palletData, setPalletData } = props
     const { openSnack } = useAppContext()
-    const [palletData, setPalletData] = useState(palletDataDefault())
     const [storagesInput, setStoragesInput] = useState('')
     const [storagesOptions, setStoragesOptions] = useState([{ id: 0, key: 0, label: '' }])
     const [traysInput, setTraysInput] = useState('')
@@ -36,10 +36,21 @@ export default function NewPalletForm(props) {
         })
     }, [])
 
-    const savePallet = () => {
+    const savePallet = async () => {
         openSnack('Nuevo pallet guardado', 'success')
-        closeDialog()
-        console.log(palletData)
+        const newPallet = await pallets.create(
+            palletData.tray.id,
+            palletData.storage.id,
+            palletData.weight,
+        )
+
+        console.log('newPallet', newPallet)
+        
+        if(dialog != false){
+            closeDialog()
+        }
+        afterSubmit()
+   
     }
     return (
         <>
@@ -51,8 +62,6 @@ export default function NewPalletForm(props) {
                             onInputChange={(e, newInputValue) => {
                                 setStoragesInput(newInputValue)
                             }}
-                            // isOptionEqualToValue={(option, value) => null || option.id === value.id}
-                            //isOptionEqualToValue={(option, value) => option.id === value.id}
                             
                             value={palletData.storage}
                             onChange={(e, newValue) => {
@@ -90,6 +99,7 @@ export default function NewPalletForm(props) {
                             variant="outlined"
                             size={'small'}
                             fullWidth
+                            required
                         />
                     </Grid>
                     <Grid item textAlign={'right'}>

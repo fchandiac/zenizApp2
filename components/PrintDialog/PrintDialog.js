@@ -4,31 +4,26 @@ import {
     Switch, TextField, InputAdornment, Autocomplete,
 } from '@mui/material'
 
+import { useReactToPrint } from 'react-to-print' 
+
+
 export default function PrintDialog(props) {
-    const { open, setOpen, title, content,  width} = props
-
-
+    const { open, setOpen, title, children, maxWidth} = props
     const printRef = useRef(null)
 
-  
+    const print = useReactToPrint({
+        content: () => printRef.current,
+      })
 
-    const print = () => {
-        const content = printRef.current;
 
-    if (content) {
-      // Abre un cuadro de diálogo de impresión del navegador.
-      window.print();
-    }
-       
-    }
   return (
     <>
-            <Dialog open={open} fullWidth maxWidth={false} style={{ maxWidth: width }}>
+            <Dialog open={open} fullWidth maxWidth={maxWidth} >
                 <DialogTitle sx={{ padding: 2, displayPrint: false }}>
                     {title}
                 </DialogTitle>
                 <DialogContent sx={{ padding: 1 }} ref={printRef}>
-                    {content}
+                    {children}
                 </DialogContent>
                 <DialogActions sx={{ padding: 2, displayPrint: false }}>
                     <Button variant='contained' onClick={() => print()}>Imprimir</Button>

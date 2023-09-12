@@ -55,9 +55,10 @@ export default function otherPage() {
   return (
     <>
       <Grid container spacing={1}>
-        <Grid item xs={2}>
-          <Grid item>
+        <Grid item xs={1.5}>
+          <Grid item fontSize={12}>
             <DesktopDatePicker
+              className='small-date-picker'
               label="Fecha incial"
               inputFormat='DD-MM-YYYY'
               value={filterDates.start}
@@ -65,11 +66,16 @@ export default function otherPage() {
                 console.log(e)
                 setFilterDates({ ...filterDates, start: e })
               }}
-              renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
+              renderInput={(params) => <TextField 
+                {...params} 
+                size="small"
+                fullWidth
+                />}
             />
           </Grid>
           <Grid item>
             <DesktopDatePicker
+            className='small-date-picker'
               label="Fecha final"
               inputFormat='DD-MM-YYYY'
               value={filterDates.end}
@@ -78,7 +84,7 @@ export default function otherPage() {
             />
           </Grid>
         </Grid>
-        <Grid item xs={10}>
+        <Grid item xs={10.5}>
           <ReceptionsGrid receptionsList={receptionsList} title={title} />
         </Grid>
       </Grid>

@@ -6,11 +6,12 @@ import React, { useState, useEffect } from 'react'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import { useAppContext } from '../../appProvider'
 import MoneyTextField from '../Karmextron/MoneyTextField/MoneyTextField'
-import NewProducerForm from '../Forms/NewProducerForm/NewProducerForm'
+import NewProducerForm from '../Forms/ProducerForm/ProducerForm'
 import AddPackForm from './AddPackForm'
 import PacksGrid from './PacksGrid'
 import PrintDialog from '../PrintDialog/PrintDialog'
 import ReceptionToPrint from './ReceptionToPrint'
+import ReturnedTrays from './ReturnedTrays'
 const utils = require('../../utils')
 
 const producers = require('../../services/producers')
@@ -19,6 +20,8 @@ const packs = require('../../services/packs')
 const pallets = require('../../services/pallets')
 const types = require('../../services/types')
 const variesties = require('../../services/varieties')
+const trays = require('../../services/trays')
+const traysMovements = require('../../services/traysMovements')
 
 
 
@@ -42,6 +45,7 @@ export default function NewReception() {
         receptionChange,
         receptionToPay,
         receptionInpuruityWeight,
+        returnetTrays,
         setReceptionShowPrices,
         setReceptionShowImpurities,
         setReceptionShowUsd,
@@ -57,7 +61,8 @@ export default function NewReception() {
         setReceptionTraysWeight,
         setReceptionGross,
         setReceptionNet,
-        setReceptionImpurityWeight
+        setReceptionImpurityWeight,
+        resetReturnetTrays
     } = useAppContext()
 
 
@@ -74,6 +79,8 @@ export default function NewReception() {
     const [openNewProducerDialog, setOpenNewProducerDialog] = useState(false)
 
     const [openPrintDialog, setOpenPrintDialog] = useState(false)
+
+    const [lastReceptionId, setLastReceptionId] = useState(0)
 
     useEffect(() => {
         producers.findAll()
@@ -179,7 +186,7 @@ export default function NewReception() {
 
     const saveReception = async () => {
 
-        console.log('Reception', reception)
+
         if (reception.packs.length == 0) {
             openSnack('No hay packs cargados a la rcepción', 'error')
         } else {
@@ -201,32 +208,70 @@ export default function NewReception() {
                     reception.toPay,
                 )
 
-                reception.packs.forEach(async (pack) => {
-                    const newPack = await packs.create(
-                        pack.pallet.id,
-                        pack.tray.id,
-                        newReception_.id, //reception id
-                        pack.quanty,
-                        pack.traysWeight,
-                        pack.impurity,
-                        pack.impurityWeight,
-                        pack.gross,
-                        pack.net,
-                    )
-                })
+                // reception.packs.forEach(async (pack) => {
+                //     console.log('packReception')
+                //     const newPack = await packs.create(
+                //         pack.pallet.id,
+                //         pack.tray.id,
+                //         newReception_.id, //reception id
+                //         pack.quanty,
+                //         pack.traysWeight,
+                //         pack.impurity,
+                //         pack.impurityWeight,
+                //         pack.gross,
+                //         pack.net,
+                //     )
+                //     const tray_ = await trays.findOneById(pack.tray.id)
+                //     let currentBalance = tray_.stock + parseInt(pack.quanty)
+                //     await trays.updateStock(tray_.id, currentBalance)
+
+                //     await traysMovements.create(
+                //         tray_.id,
+                //         reception.producer.id,
+                //         newReception_.id,
+                //         pack.quanty,
+                //         3,
+                //         currentBalance,
+                //         'Recibidas recepción ' + newReception_.id + ' pack ' + newPack.id
+                //     )
+
+                // })
+
+                setLastReceptionId(newReception_.id)
 
                 reception.packs.forEach(async (pack) => {
                     const updatePallet = await pallets.updateTrays(pack.pallet.id, pack.quanty)
-                    resetReception()
                 })
 
-                openSnack('Recepción guardada', 'success')
-                setOpenPrintDialog(true)
-                resetReception()
+                processPacks(reception, newReception_)
+                    .then(() => {
+                        returnetTrays.forEach(async (tray) => {
+                            console.log('returned')
+                            const tray_ = await trays.findOneById(tray.tray.id)
+                            let currentBalance = tray_.stock - parseInt(tray.quanty)
+                            await trays.updateStock(tray_.id, currentBalance)
 
+                            await traysMovements.create(
+                                tray_.id,
+                                reception.producer.id,
+                                newReception_.id,
+                                tray.quanty,
+                                2,
+                                currentBalance,
+                                'Devueltas en recepción ' + newReception_.id
+                            )
+                            // console.log('newMov', newMov)
+                        })
+                        openSnack('Recepción guardada', 'success')
+                        setOpenPrintDialog(true)
+                        resetReception()
+                        resetReturnetTrays()
+                    })
+                    .catch(err => {
+                        console.error(err)
+                        openSnack('Error al guardar recepción', 'error')
+                    })
 
-
-                console.log('Reception', newReception_)
             } catch (err) {
                 console.error(err)
             }
@@ -412,12 +457,8 @@ export default function NewReception() {
                         <PacksGrid />
                     </Grid>
 
-                    <Grid item xs={8}>
-                        <Paper variant='outlined'>
-                            <Typography p={1}>
-                                Bandejas devueltas
-                            </Typography>
-                        </Paper>
+                    <Grid item xs={8} padding={1}>
+                        <ReturnedTrays />
                     </Grid>
                     <Grid item xs={4}>
                         <Paper variant='outlined'>
@@ -478,9 +519,9 @@ export default function NewReception() {
                                         fullWidth
                                     />
                                 </Grid>
-                                <Grid item xs={6} sx={{display: receptionShowImpurities ? 'inline-block' : 'none'}}>
+                                <Grid item xs={6} sx={{ display: receptionShowImpurities ? 'inline-block' : 'none' }}>
                                     <TextField
-                                        
+
                                         label='impurezas'
                                         value={reception.impurityWeight}
                                         inputProps={{ readOnly: true }}
@@ -488,14 +529,14 @@ export default function NewReception() {
                                         size={'small'}
                                         InputProps={{
                                             endAdornment: <InputAdornment position="end">Kg</InputAdornment>,
-                                
+
                                         }}
                                         fullWidth
                                     />
                                 </Grid>
-                                <Grid item xs={6} sx={{display: receptionShowPrices ? 'inline-block' : 'none'}}>
+                                <Grid item xs={6} sx={{ display: receptionShowPrices ? 'inline-block' : 'none' }}>
                                     <TextField
-                                        
+
                                         label='A pagar'
                                         value={reception.toPay}
                                         inputProps={{ readOnly: true }}
@@ -536,13 +577,14 @@ export default function NewReception() {
                     />
                 </DialogContent>
             </Dialog>
-            <PrintDialog 
-            open={openPrintDialog} 
-            setOpen={setOpenPrintDialog} 
-            title='Recepción' 
-            width={'8cm'}
-            content={ReceptionToPrint({reception: reception})} 
-            />
+            <PrintDialog
+                open ={openPrintDialog}
+                setOpen={setOpenPrintDialog}
+                title='Recepción'
+                maxWidth={'xs'}
+            >
+                <ReceptionToPrint receptionId={lastReceptionId} returnetTrays={returnetTrays} />
+            </PrintDialog>
         </>
     )
 }
@@ -582,47 +624,41 @@ const traysOptionsData = [
 
 //**** CREATE FULL RECEPTION ****//
 
-function createFullReception(reception) {
 
-    receptions.create(
-        reception.producer.id,
-        reception.variety.id,
-        reception.type.id,
-        reception.guide,
-        reception.clp,
-        reception.usd,
-        reception.change,
-        reception.money,
-        reception.traysQuanty,
-        reception.traysWeight,
-        reception.gross,
-        reception.net,
-        reception.toPay,
-    )
-        .then(res => {
-            console.log(res)
-            packsPromises = []
-            reception.packs.forEach(pack => {
-                packsPromises.push(
-                    packs.create(
-                        pack.pallet.id,
-                        pack.tray.id,
-                        res.id, //reception id
-                        pack.quantity,
-                        pack.traysWeight,
-                        pack.impurity,
-                        pack.impurityWeight,
-                        pack.gross,
-                        pack.net,
-                    )
-                )
-            })
-            Promise.all(packsPromises)
-                .then(res => { console.log(res) })
-                .catch(err => { console.error(err) })
-        })
-        .catch(err => { console.error(err) })
 
+async function processPacks(reception, newReception_) {
+    const promises = reception.packs.map(async (pack) => {
+        console.log('packReception')
+        const newPack = await packs.create(
+            pack.pallet.id,
+            pack.tray.id,
+            newReception_.id, //reception id
+            pack.quanty,
+            pack.traysWeight,
+            pack.impurity,
+            pack.impurityWeight,
+            pack.gross,
+            pack.net,
+        );
+
+        const tray_ = await trays.findOneById(pack.tray.id);
+        let currentBalance = tray_.stock + parseInt(pack.quanty);
+        await trays.updateStock(tray_.id, currentBalance);
+
+        await traysMovements.create(
+            tray_.id,
+            reception.producer.id,
+            newReception_.id,
+            pack.quanty,
+            3,
+            currentBalance,
+            'Recibidas recepción ' + newReception_.id + ' pack ' + newPack.id
+        );
+    });
+
+    // Esperar a que todas las promesas se completen antes de continuar
+    await Promise.all(promises);
+
+    // Continuar con el código después de que todas las operaciones se completen
+    console.log('Todas las operaciones completadas');
 }
-
-

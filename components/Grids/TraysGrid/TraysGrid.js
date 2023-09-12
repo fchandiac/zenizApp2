@@ -11,7 +11,7 @@ import {
     Switch, TextField, InputAdornment, Autocomplete, Paper
 } from '@mui/material'
 import moment from 'moment'
-import TrayForm from '../../Forms/TrayForm/TrayForm';
+import TrayForm from '../../Forms/TrayForm/TrayForm'
 
 const trays = require('../../../services/trays')
 

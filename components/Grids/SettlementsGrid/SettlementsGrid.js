@@ -43,6 +43,7 @@ export default function SettlementsGrid(props) {
                     label='print'
                     icon={<PrintIcon />}
                     onClick={() => {
+                        console.log(params.row)
                         setRowData({
                             id: params.row.id,
                             producerName: params.row.producerName,
@@ -69,11 +70,11 @@ export default function SettlementsGrid(props) {
             <PrintDialog 
             open={openPrintDialog} 
             setOpen={setOpenPrintDialog} 
-            title='Comprobante de Pago' 
-            width={'27cm'}
-            content={SettlementToPrint({settlement:rowData}) } 
-
-            />
+            title='Comprobante Liquidación' 
+            maxWidth={'lg'}
+            >
+                <SettlementToPrint settlement={rowData} />
+            </PrintDialog>
         </>
     )
 }

@@ -5,10 +5,10 @@ import { useAppContext } from '../../../appProvider'
 const utils = require('../../../utils')
 const producers = require('../../../services/producers')
 
-export default function NewProducerForm(props) {
-  const { dialog, closeDialog, afterSubmit } = props
+export default function ProducerForm(props) {
+  const { dialog, edit, closeDialog, afterSubmit, producerData, setProducerData } = props
   const { openSnack } = useAppContext()
-  const [producerData, setProducerData] = useState(producerDataDefault())
+  
 
   const saveProducer = async () => {
     try {

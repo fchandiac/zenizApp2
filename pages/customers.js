@@ -1,19 +1,49 @@
-import { Grid } from '@mui/material'
-import React from 'react'
-import NewProducerForm from '../components/Forms/NewProducerForm/NewProducerForm'
+import { Grid, Paper, Box } from '@mui/material'
+import React, {useState, useEffect} from 'react'
+import CustomerForm from '../components/Forms/CustomerForm/CustomerForm'
+import CustomersGrid from '../components/Grids/CustomersGrid/CustomersGrid'
 
-export default function producers() {
+
+export default function customer() {
+  const [customerData, setCustomerData] = useState(customerDataDefault())
+  const [updateGrid, setUpdateGrid] = useState(false)
+
+  const updateGrid_ = () => {
+    setUpdateGrid(!updateGrid)
+  }
   return (
     <>
-    <Grid container spacing={1}>
+      <Grid container spacing={1}>
         <Grid item xs={3} >
-            <NewProducerForm />
+          <Paper variant='outlined'>
+            <Box paddingLeft={2} paddingTop={2}>
+              Nuevo Productor
+            </Box>
+            <CustomerForm 
+            customerData={customerData} 
+            setCustomerData={setCustomerData}
+            afterSubmit={() => {
+              setCustomerData(customerDataDefault())
+              updateGrid_()
+            }}
+             />
+          </Paper>
         </Grid>
-        <Grid item xs={8}>
-            <h1>Customers</h1>
+        <Grid item xs={9}>
+          <CustomersGrid update={updateGrid} />
         </Grid>
-    </Grid>
+      </Grid>
 
     </>
   )
+}
+
+function customerDataDefault() {
+  return ({
+    name: '',
+    rut: '',
+    phone: '',
+    mail: '',
+    address: '',
+  })
 }

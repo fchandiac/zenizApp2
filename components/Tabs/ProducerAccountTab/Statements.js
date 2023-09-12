@@ -46,11 +46,9 @@ export default function Statements(props) {
             setMovements(formatData)
             setProducer(await producers.findOneById(producerId))
             const startBalance_ = await producerAccounts.findFirstByProducerIdBetweenDate(producerId, filterDates.start, filterDates.end)
-            setStartBalance(startBalance_.balance)
-   
-
+            setStartBalance(startBalance_ == null? '': startBalance_.balance)
             const endBalance_ = await producerAccounts.findLastByProducerIdBetweenDates(producerId, filterDates.start, filterDates.end)
-            setEndBalance(endBalance_.balance)
+            setEndBalance(endBalance_ == null? '': endBalance_.balance)
 
 
         }

@@ -15,24 +15,61 @@ body {
 }
 
 .data-grid-cell-green {
-  background-color: #64dd17;
+  background-color: #8bc34a54;
+
+}
+
+.data-grid-cell-red {
+  background-color: #f4433657;
+}
+
+.data-grid-cell-orange {
+  background-color: #f4433657;
 }
 
 .row-reception {
   background-color: #ff6d00;
 }
+
 .row-settlement {
-  background-color: #64dd17;
+  background-color: #aed581;
 }
 
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
+.row-tiny {
+  font-size: .65rem;
+  min-height: fit-content;
+  padding: .2rem;
+  text-align: right;
+}
+
+.row-header-tiny {
+  font-size: .65rem;
+  font-weight: bold;
+  padding: .2rem;
+  text-align: right;
+}
+
+.css-h2cton-MuiPaper-root-MuiTableContainer-root{
+  border-radius: 0;
+  border-bottom: 0
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .test {
   background-color: rgb(30, 255, 0);
 }
 
+.small-date-picker .MuiInputBase-root {
+  font-size: .8rem;
+}
 
+.small-date-picker .css-i4bv87-MuiSvgIcon-root {
+  height: 1.2rem;
+  padding: 0;
+  margin: 0;
+}

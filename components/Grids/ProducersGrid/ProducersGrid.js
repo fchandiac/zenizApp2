@@ -18,6 +18,9 @@ import SettlementDialog from './SettlementDialog'
 import ProducerAcountTab from '../../Tabs/ProducerAccountTab'
 import Statements from '../../Tabs/ProducerAccountTab/Statements'
 import ProducerReportsTab from '../../Tabs/ProducerReportsTab/ProducerReportsTab';
+import PrintDialog from '../../PrintDialog/PrintDialog';
+import AdvanceToPrint from './AdvanceToPrint';
+import ProducerForm from '../../Forms/ProducerForm/ProducerForm';
 
 
 
@@ -37,6 +40,9 @@ export default function ProducersGrid(props) {
   const [accountsGridState, setAccountsGridState] = useState(false)
   const [openSettlementDialog, setOpenSettlementDialog] = useState(false)
   const [openReportsDialog, setOpenReportsDialog] = useState(false)
+  const [advancePintData, setAdvancePrintData] = useState(advancePrintDataDefault)
+  const [openPrintAdvanceDialog, setOpenPrintAdvanceDialog] = useState(false)
+  const [openEditDialog, setOpenEditDialog] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +54,7 @@ export default function ProducersGrid(props) {
         name: producer.name,
         address: producer.address,
         phone: producer.phone,
-        email: producer.email,
+        mail: producer.mail,
         rut: producer.rut,
         accounts: producer.ProducerAccounts,
       }))
@@ -77,6 +83,11 @@ export default function ProducersGrid(props) {
       advanceData.description
     )
 
+    const printAdvance = await advances.findOneById(newAdvance.id)
+    console.log('PrintInfo', printAdvance)
+    setAdvancePrintData(printAdvance)
+    setOpenPrintAdvanceDialog(true)
+
     setAdvanceData({ producerId: rowData.id, amount: 0, description: '' })
     setAccountsGridState(!accountsGridState)
 
@@ -95,13 +106,37 @@ export default function ProducersGrid(props) {
     })
   }
 
+  const updateProducer = async () => {
+    const producer = await producers.update(
+      rowData.id,
+      rowData.rut,
+      rowData.name,
+      rowData.phone,
+      rowData.mail,
+      rowData.address
+    )
+
+    openSnack('Productor actualizado', 'success')
+
+    gridApiRef.current.updateRows([{
+      id: row.id,
+      rut: row.rut,
+      name: row.name,
+      phone: row.phone,
+      mail: row.mail,
+      address: row.address,
+    }])
+  }
+
+
+
   const columns = [
-    { field: 'id', headerName: 'Id', flex: .5, type: 'number' },
-    { field: 'name', headerName: 'Nombre', flex: 1 },
+    { field: 'id', headerName: 'Id', flex: .5, type: 'number', valueFormatter: (params) => params.value },
+    { field: 'name', headerName: 'Nombre', flex: 1.5 },
     { field: 'rut', headerName: 'Rut', flex: 1 },
     { field: 'phone', headerName: 'Teléfono', flex: 1 },
     { field: 'address', headerName: 'Dirección', flex: 1 },
-    { field: 'email', headerName: 'Email', flex: 1 },
+    { field: 'mail', headerName: 'Email', flex: 1 },
     {
       field: 'balance', headerName: 'Saldo', flex: 1,
       valueFormatter: (params) => params.value == undefined ? 0 : params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
@@ -110,7 +145,7 @@ export default function ProducersGrid(props) {
       field: 'actions',
       headerName: '',
       headerClassName: 'data-grid-last-column-header',
-      type: 'actions', flex: 2, getActions: (params) => [
+      type: 'actions', flex: 1.5, getActions: (params) => [
         <GridActionsCellItem
           label='Delete'
           icon={<DeleteIcon />}
@@ -125,7 +160,7 @@ export default function ProducersGrid(props) {
           icon={<EditIcon />}
           onClick={() => {
             updateRowData(params)
-            setOpenReportsDialog(true)
+            setOpenEditDialog(true)
 
           }}
         />,
@@ -248,13 +283,38 @@ export default function ProducersGrid(props) {
         <DialogTitle sx={{ padding: 2 }}>Reportes productor {rowData.name}</DialogTitle>
         <DialogContent sx={{ padding: 1 }}>
           <ProducerReportsTab producerId={rowData.id} />
-          
+
         </DialogContent>
         <DialogActions sx={{ padding: 2 }}>
           <Button variant='outlined' onClick={() => setOpenReportsDialog(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
 
+      <PrintDialog
+        open={openPrintAdvanceDialog}
+        setOpen={setOpenPrintAdvanceDialog}
+        title={'Anticipo'}
+        width={'20cm'}
+      >
+        <AdvanceToPrint advance={advancePintData} />
+      </PrintDialog>
+
+      <Dialog open={openEditDialog} maxWidth={'xs'} fullWidth>
+        <DialogTitle sx={{ padding: 2 }}>Editar productor {rowData.id}</DialogTitle>
+        <DialogContent sx={{ padding: 1 }}>
+          <ProducerForm
+            dialog={openEditDialog}
+            edit={true}
+            closeDialog={() => { setOpenEditDialog(false) }}
+            afterSubmit = {() =>{
+              updateProducer()
+              setOpenEditDialog(false)
+            }}
+            producerData={rowData}
+            setProducerData={setRowData}
+          />
+        </DialogContent>
+      </Dialog>
 
     </>
   )
@@ -267,7 +327,30 @@ function rowDataDefault() {
     rut: '',
     phone: '',
     address: '',
-    email: '',
+    mail: '',
     accounts: []
+  })
+}
+
+function advancePrintDataDefault() {
+  return ({
+    id: 0,
+    producer_id: 0,
+    amount: 0,
+    description: '',
+    createdAt: moment().format('YYYY-MM-DD'),
+    updatedAt: moment().format('YYYY-MM-DD'),
+    ProducerId: 0,
+    Producer: {
+      id: 0,
+      rut: '',
+      name: '',
+      phone: '',
+      mail: '',
+      address: '',
+      createdAt: moment().format('YYYY-MM-DD'),
+      updatedAt: moment().format('YYYY-MM-DD')
+    }
+
   })
 }

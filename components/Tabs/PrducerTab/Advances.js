@@ -3,6 +3,7 @@ import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker'
 import { Grid, TextField } from '@mui/material'
 import moment from 'moment'
 import SettlementsGrid from '../../Grids/SettlementsGrid/SettlementsGrid'
+import AdvancesGrid from '../../Grids/AdvancesGrid/AdvancesGrid'
 
 const settlements_ = require('../../../services/settlements')
 const advances_ = require('../../../services/advances')
@@ -28,7 +29,7 @@ export default function Settlements() {
                 createdAt: advance.createdAt,
             }))
             console.log(advancesByDates)
-            // setAdvancesList(formattedAdvances)
+            setAdvancesList(formattedAdvances)
         }
             
         fetchData()
@@ -68,7 +69,10 @@ export default function Settlements() {
                     </Grid>
                 </Grid>
                 <Grid item xs={10}>
-                   {/* <SettlementsGrid title={title} settlementsList={settlementsList} /> */}
+                  <AdvancesGrid 
+                  advancesList={advancesList}
+                  
+                  />
                 </Grid>
             </Grid>
         </>

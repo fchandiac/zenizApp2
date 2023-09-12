@@ -1,8 +1,8 @@
 import React from 'react'
-import PalletsGrid from '../components/Grids/PalletsGrid/PalletsGrid'
+import PalletsTab from '../components/Tabs/PalletsTab/PalletsTab'
 
 export default function pallets() {
   return (
-    <PalletsGrid />
+   <PalletsTab />
   )
 }
