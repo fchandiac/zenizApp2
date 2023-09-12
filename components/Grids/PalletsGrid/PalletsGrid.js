@@ -12,6 +12,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import DataGrid from '../../Karmextron/DataGrid/DataGrid'
 import PalletPackCard from '../../Cards/PalletPackCard/PalletPackCard';
 import PrintDialog from '../../PrintDialog/PrintDialog'
+import NewPalletForm from '../../Forms/NewPalletForm/NewPalletForm'
 
 const pallets = require('../../../services/pallets')
 
@@ -62,7 +63,9 @@ export default function PalletsGrid(props) {
                 <LocalShippingIcon color='success' sx={{paddingRight:1}} /> 
                 {params.row.dispatchId}
                 </Box>: 
-                <LocalShippingIcon />
+                <Box sx={{ display: 'flex', justifyContent: 'center', color: '#e0e0e0' }}>
+                <LocalShippingIcon /> 
+                </Box>
 
             }
         },
@@ -139,16 +142,20 @@ export default function PalletsGrid(props) {
 
             <DataGrid title='Pallets' rows={palletsList} columns={columns} height='80vh' setGridApiRef={setGridApiRef} />
 
-            <Dialog open={openEditDialog} maxWidth={'sm'} fullWidth>
+            <Dialog open={openEditDialog} maxWidth={'xs'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}>Editar Pallet {rowData.id}</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
-                    <Grid container>
-                        test
+                    <Grid container spacing={1} direction={'column'}>
+                        <NewPalletForm 
+                        dialog = {true}
+                        closeDialog={() => setOpenEditDialog(false)}
+                        afterSubmit={() => {}}
+                        palletData={rowData}
+                        setPalletData = {setRowData}
+                        edit={true}
+                        />
                     </Grid>
                 </DialogContent>
-                <DialogActions sx={{ padding: 2 }}>
-                    <Button variant='contained' onClick={() => setOpenEditDialog(false)}>Cerrar</Button>
-                </DialogActions>
             </Dialog>
 
             <Dialog open={openPacksDialog} maxWidth={'sm'} fullWidth>

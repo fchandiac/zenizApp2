@@ -22,6 +22,7 @@ export default function Layout(props) {
     const router = useRouter()
     const [openDrawer, setOpenDrawer] = useState()
     const [openAuthDialog, setOpenAuthDialog] = useState(false)
+    const [openChangePassDialog, setOpenChangePassDialog] = useState(false)
     const [anchorElPopOver, setAnchorElPopOver] = useState(null)
 
     const [userAuthData, setUserAuthData] = useState(userAuthDataDefault())
@@ -104,7 +105,7 @@ export default function Layout(props) {
                         <Typography fontSize={10}>{'Perfil: ' + user.Profile.name}</Typography>
                     </Box>
                     <Divider />
-                    <Box flexDirection={'column'} display={'flex'} paddingTop={1}>
+                    <Box  display={'flex'} paddingTop={1}>
                         <Button variant={'outlined'} onClick={() => {
                             setAnchorElPopOver(null)
                             router.push({
@@ -113,8 +114,18 @@ export default function Layout(props) {
                             setPageTitle('')
 
                         }}>Cerrar sesión</Button>
-
                     </Box>
+                    <Box display={'flex'} paddingTop={1}>
+                        <Button variant={'outlined'} size='small' onClick={() => {
+                            setAnchorElPopOver(null)
+                            router.push({
+                                pathname: '/',
+                            })
+                            setPageTitle('')
+
+                        }}>Cambiar Contraseña</Button>
+                    </Box>
+
                 </Paper>
             </Popover>
 
@@ -315,6 +326,45 @@ export default function Layout(props) {
                     <DialogActions sx={{ padding: 1 }}>
                         <Button variant='contained' type='submit'>Autorizar</Button>
                         <Button variant='outlined' onClick={() => { setOpenAuthDialog(false) }}>Cerrar</Button>
+                    </DialogActions>
+                </form>
+            </Dialog>
+
+            <Dialog open={openChangePassDialog} maxWidth={'xs'} fullWidth>
+                <DialogTitle sx={{ padding: 2 }}>Autorización</DialogTitle>
+                <form onSubmit={(e) => { e.preventDefault(); updateLock() }}>
+                    <DialogContent sx={{ padding: 1 }}>
+                        <Grid container spacing={1} direction={'column'}>
+                            <Grid item marginTop={1}>
+                                <TextField
+                                    label="Usuario"
+                                    value={userAuthData.user}
+                                    onChange={(e) => setUserAuthData({ ...userAuthData, user: e.target.value })}
+                                    variant="outlined"
+                                    size={'small'}
+                                    fullWidth
+                                    required
+                                />
+                            </Grid>
+                            <Grid item>
+                                <TextField
+                                    label="Contraseña"
+                                    value={userAuthData.pass}
+                                    onChange={(e) => setUserAuthData({ ...userAuthData, pass: e.target.value })}
+                                    variant="outlined"
+                                    type='password'
+                                    size={'small'}
+                                    fullWidth
+                                    required
+                                />
+                            </Grid>
+                        </Grid>
+
+                        {/* <Button variant={'outlined'} onClick={() => { setOpenAuthDialog(false) }}>Cerrar</Button> */}
+                    </DialogContent>
+                    <DialogActions sx={{ padding: 1 }}>
+                        <Button variant='contained' type='submit'>Autorizar</Button>
+                        <Button variant='outlined' onClick={() => { setOpenChangePassDialog(false) }}>Cerrar</Button>
                     </DialogActions>
                 </form>
             </Dialog>

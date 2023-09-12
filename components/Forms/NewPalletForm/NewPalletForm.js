@@ -1,4 +1,4 @@
-import { Button, Grid, TextField, Autocomplete } from '@mui/material'
+import { Button, Grid, TextField, Autocomplete, InputAdornment } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useAppContext } from '../../../appProvider'
 import { set } from 'date-fns'
@@ -9,7 +9,7 @@ const trays = require('../../../services/trays')
 const pallets = require('../../../services/pallets')
 
 export default function NewPalletForm(props) {
-    const { dialog, closeDialog, afterSubmit, palletData, setPalletData } = props
+    const { dialog, closeDialog, afterSubmit, palletData, setPalletData, edit } = props
     const { openSnack } = useAppContext()
     const [storagesInput, setStoragesInput] = useState('')
     const [storagesOptions, setStoragesOptions] = useState([{ id: 0, key: 0, label: '' }])
@@ -55,8 +55,8 @@ export default function NewPalletForm(props) {
     return (
         <>
             <form onSubmit={(e) => { e.preventDefault(); savePallet() }} >
-                <Grid container direction={'column'}>
-                    <Grid item>
+                <Grid container direction={'column'} paddingTop={dialog? 1: 0}>
+                    <Grid item >
                         <Autocomplete
                             inputValue={storagesInput}
                             onInputChange={(e, newInputValue) => {
@@ -73,7 +73,7 @@ export default function NewPalletForm(props) {
                             renderInput={(params) => <TextField {...params} label='Almacén' size={'small'} required />}
                         />
                     </Grid>
-                    <Grid item>
+                    <Grid item display={edit? 'none': 'inline-block'}>
                     <Autocomplete
                             inputValue={traysInput}
                             onInputChange={(e, newInputValue) => {
@@ -91,17 +91,36 @@ export default function NewPalletForm(props) {
                         />
 
                     </Grid>
-                    <Grid item>
+                    <Grid item display={edit? 'none': 'inline-block'}>
                         <TextField
                             label='Peso'
                             value={palletData.weight}
                             onChange={(e) => { setPalletData({ ...palletData, weight: e.target.value }) }}
                             variant="outlined"
                             size={'small'}
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">kg</InputAdornment>
+                            }}
                             fullWidth
                             required
                         />
                     </Grid>
+                    <Grid item display={edit? 'inline-block': 'none'}>
+                        <TextField
+                            label='Capacidad máxima'
+                            value={palletData.weight}
+                            onChange={(e) => { setPalletData({ ...palletData, weight: e.target.value }) }}
+                            variant="outlined"
+                            size={'small'}
+                            type='number'
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">bandejas</InputAdornment>
+                            }}
+                            fullWidth
+                            required
+                        />
+                    </Grid>
+               
                     <Grid item textAlign={'right'}>
                         <Button variant="contained" type='submit'>Guardar</Button>
                         <Button
