@@ -7,6 +7,7 @@ import { GridActionsCellItem } from '@mui/x-data-grid'
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, Box } from '@mui/material'
 import PrintIcon from '@mui/icons-material/Print'
 import Barcode from 'react-barcode'
+import EditIcon from '@mui/icons-material/Edit'
 
 import DataGrid from '../../Karmextron/DataGrid/DataGrid'
 import PalletPackCard from '../../Cards/PalletPackCard/PalletPackCard';
@@ -23,6 +24,7 @@ export default function PalletsGrid(props) {
     const [openPacksDialog, setOpenPacksDialog] = useState(false)
     const [rowData, setRowData] = useState(rowDataDefault())
     const [openPrintDialog, setOpenPrintDialog] = useState(false)
+    const [openEditDialog, setOpenEditDialog] = useState(false)
 
     useEffect(() => {
         pallets.findAll()
@@ -76,6 +78,24 @@ export default function PalletsGrid(props) {
                     }}
                 />,
                 <GridActionsCellItem
+                    label='edit'
+                    icon={<EditIcon />}
+                    onClick={() => {
+                        setRowData({
+                            rowId: params.id,
+                            id: params.row.id,
+                            storageName: params.row.storageName,
+                            trayName: params.row.trayName,
+                            weight: params.row.weight,
+                            trays: params.row.trays,
+                            max: params.row.max,
+                            packs: params.row.packs
+                        })
+                        setOpenEditDialog(true)
+
+                    }}
+                />,
+                <GridActionsCellItem
                     label='print'
                     icon={<PrintIcon />}
                     onClick={() => {
@@ -90,7 +110,6 @@ export default function PalletsGrid(props) {
                             packs: params.row.packs
                         })
                         setOpenPrintDialog(true)
-
                     }}
                 />,
                 <GridActionsCellItem
@@ -120,10 +139,21 @@ export default function PalletsGrid(props) {
 
             <DataGrid title='Pallets' rows={palletsList} columns={columns} height='80vh' setGridApiRef={setGridApiRef} />
 
+            <Dialog open={openEditDialog} maxWidth={'sm'} fullWidth>
+                <DialogTitle sx={{ padding: 2 }}>Editar Pallet {rowData.id}</DialogTitle>
+                <DialogContent sx={{ padding: 1 }}>
+                    <Grid container>
+                        test
+                    </Grid>
+                </DialogContent>
+                <DialogActions sx={{ padding: 2 }}>
+                    <Button variant='contained' onClick={() => setOpenEditDialog(false)}>Cerrar</Button>
+                </DialogActions>
+            </Dialog>
+
             <Dialog open={openPacksDialog} maxWidth={'sm'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}> Packs en Pallet {rowData.id}</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
-
                     <Grid container>
                         {rowData.packs.map((pack) => (
                             <Grid item key={pack.id} xs={4}>
@@ -131,8 +161,6 @@ export default function PalletsGrid(props) {
                             </Grid>
                         ))}
                     </Grid>
-
-
                 </DialogContent>
                 <DialogActions sx={{ padding: 2 }}>
                     <Button variant='contained' onClick={() => setOpenPacksDialog(false)}>Cerrar</Button>

@@ -264,6 +264,18 @@ export default function Layout(props) {
                             />
                         </ListItemButton>
                     </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton>
+                            <ListItemText primary={'Registros'}
+                                onClick={() => {
+                                    router.push({
+                                        pathname: '/records',
+                                    })
+                                    setPageTitle('Registros')
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
                 </List>
             </Drawer>
 

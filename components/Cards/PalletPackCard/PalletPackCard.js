@@ -10,6 +10,7 @@ import PrintIcon from '@mui/icons-material/Print'
 import PrintDialog from '../../PrintDialog/PrintDialog'
 import Barcode from 'react-barcode'
 
+
 const pallets = require('../../../services/pallets')
 const packs = require('../../../services/packs')
 
