@@ -1,4 +1,6 @@
-const server_url = "http://localhost:3003/"
+
+const config= require('../config.js')
+const server_url = config.serverUrl
 
 
 
@@ -134,4 +136,30 @@ function updateDisptach(id, dispatch_id) {
     })
     return pallet
 }
-export { findAllByTray, updateTrays, findAll, findOneById, create, updateDisptach }
+
+
+
+
+function update(id, max, storage_id) {
+    let data = { id, max, storage_id }
+    // let server_url = ipcRenderer.sendSync('server-url', 'sync')
+    const pallet = new Promise((resolve, reject) => {
+        fetch(server_url + 'pallets/update', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+    return pallet
+}
+
+
+export { findAllByTray, updateTrays, findAll, findOneById, create, updateDisptach, update }

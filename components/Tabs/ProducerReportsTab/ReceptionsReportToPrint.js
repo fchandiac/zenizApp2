@@ -6,7 +6,7 @@ export default function ReceptionsReportToPrint(props) {
     const { reportData } = props
     console.log('reportData', reportData)
 
-   
+
 
     const receptionsTable = ({ data }) => {
         return (
@@ -71,11 +71,24 @@ export default function ReceptionsReportToPrint(props) {
         <>
             <Typography variant={'subtitle2'} fontWeight="bold">{'Recepciones'}</Typography>
             <Divider />
-            <Box flexDirection={'column'} paddingTop={1} display={'flex'}>
-                <Typography variant={'caption'}>{'Productor: ' + reportData.producerName}</Typography>
-                <Typography variant={'caption'}>{'Rut: ' + reportData.producerRut}</Typography>
-                <Typography variant={'caption'}>{'Fecha inicial: ' + reportData.start}</Typography>
-                <Typography variant={'caption'}>{'Fecha final: ' + reportData.end}</Typography>
+            <Box  paddingTop={1}
+            display="flex"
+            justifyContent="space-between"
+             >
+                <Box flexDirection={'column'} paddingTop={1} display={'flex'}>
+                    <Typography variant={'caption'}>{'Productor: ' + reportData.producerName}</Typography>
+                    <Typography variant={'caption'}>{'Rut: ' + reportData.producerRut}</Typography>
+                    <Typography variant={'caption'}>{'Fecha inicial: ' + reportData.start}</Typography>
+                    <Typography variant={'caption'}>{'Fecha final: ' + reportData.end}</Typography>
+                </Box>
+                <Box flexDirection={'column'} paddingTop={1} display={'flex'}>
+                    <Typography variant={'caption'}>{'Bandejas: ' + reportData.traysQuanty + ' unds'}</Typography>
+                    <Typography variant={'caption'}>{'Bandejas: ' + reportData.traysWeight + ' kg'}</Typography>
+                    <Typography variant={'caption'}>{'Bruto: ' + reportData.gross + ' kg'}</Typography>
+                    <Typography variant={'caption'}>{'Impurezas: ' + reportData.impurityWeight + ' kg'}</Typography>
+                    <Typography variant={'caption'}>{'Neto: ' +reportData.net + ' kg'}</Typography>
+                    <Typography variant={'caption'}>{'A pagar: $' + reportData.toPay}</Typography>
+                </Box>
             </Box>
             <Box flexDirection={'column'} paddingBottom={1}>
                 {receptionsTable({ data: reportData.receptions })}

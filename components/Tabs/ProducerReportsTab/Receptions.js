@@ -73,7 +73,14 @@ export default function Receptions(props) {
         start: moment(filterDates.start).format('DD-MM-YYYY'),
         end: moment(filterDates.end).format('DD-MM-YYYY'),
         receptions: receptionsToPrint,
-        balance: receptionsToPrint.reduce((acc, item) => acc + item.toPay, 0)
+        
+        traysQuanty: receptionsToPrint.reduce((acc, item) => acc + item.traysQuanty, 0),
+        traysWeight: receptionsToPrint.reduce((acc, item) => acc + item.traysWeight, 0),
+        impurityWeight: receptionsToPrint.reduce((acc, item) => acc + item.impurityWeight, 0),
+        gross: receptionsToPrint.reduce((acc, item) => acc + item.gross, 0),
+        net: receptionsToPrint.reduce((acc, item) => acc + item.net, 0),
+        toPay: receptionsToPrint.reduce((acc, item) => acc + item.toPay, 0),
+
       })
 
 

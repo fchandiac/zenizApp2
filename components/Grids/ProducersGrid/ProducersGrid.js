@@ -150,8 +150,13 @@ export default function ProducersGrid(props) {
           label='Delete'
           icon={<DeleteIcon />}
           onClick={() => {
-            updateRowData(params)
-            setOpenReportsDialog(true)
+
+            console.log(params.row.accounts[0])
+            if(params.row.accounts[0]){
+              openSnack('El productor tiene cuentas asociadas', 'error')
+            } else {
+         
+            }
 
           }}
         />,

@@ -9,7 +9,7 @@ const trays = require('../../../services/trays')
 const pallets = require('../../../services/pallets')
 
 export default function NewPalletForm(props) {
-    const { dialog, closeDialog, afterSubmit, palletData, setPalletData, edit } = props
+    const { dialog, closeDialog, afterSubmit, palletData, setPalletData, edit, gridApiRef } = props
     const { openSnack } = useAppContext()
     const [storagesInput, setStoragesInput] = useState('')
     const [storagesOptions, setStoragesOptions] = useState([{ id: 0, key: 0, label: '' }])
@@ -37,6 +37,14 @@ export default function NewPalletForm(props) {
     }, [])
 
     const savePallet = async () => {
+        if (edit) {
+            await update()
+        } else {
+            await create()
+        }
+    }
+
+    const create = async () => {
         openSnack('Nuevo pallet guardado', 'success')
         const newPallet = await pallets.create(
             palletData.tray.id,
@@ -45,24 +53,42 @@ export default function NewPalletForm(props) {
         )
 
         console.log('newPallet', newPallet)
-        
-        if(dialog != false){
+
+        if (dialog != false) {
             closeDialog()
         }
         afterSubmit()
-   
+
     }
+
+    const update = async () => {
+        console.log('palletDataUpdate', palletData)
+        try {
+            await pallets.update(palletData.id, palletData.max, palletData.storage.id)
+            openSnack('Pallet ' + palletData.id + ' actualizado', 'success')
+            closeDialog()
+            gridApiRef.current.updateRows([{
+                id: palletData.id,
+                storageName: palletData.storage.label,
+                max: palletData.max,
+              }])
+        } catch (err) {
+            console.log('errOnUpdate', err)
+        }
+    }
+
+
     return (
         <>
             <form onSubmit={(e) => { e.preventDefault(); savePallet() }} >
-                <Grid container direction={'column'} paddingTop={dialog? 1: 0}>
+                <Grid container direction={'column'} paddingTop={dialog ? 1 : 0}>
                     <Grid item >
                         <Autocomplete
                             inputValue={storagesInput}
                             onInputChange={(e, newInputValue) => {
                                 setStoragesInput(newInputValue)
                             }}
-                            
+
                             value={palletData.storage}
                             onChange={(e, newValue) => {
                                 setPalletData({ ...palletData, storage: newValue })
@@ -73,8 +99,8 @@ export default function NewPalletForm(props) {
                             renderInput={(params) => <TextField {...params} label='Almacén' size={'small'} required />}
                         />
                     </Grid>
-                    <Grid item display={edit? 'none': 'inline-block'}>
-                    <Autocomplete
+                    <Grid item display={edit ? 'none' : 'inline-block'}>
+                        <Autocomplete
                             inputValue={traysInput}
                             onInputChange={(e, newInputValue) => {
                                 setTraysInput(newInputValue)
@@ -91,7 +117,7 @@ export default function NewPalletForm(props) {
                         />
 
                     </Grid>
-                    <Grid item display={edit? 'none': 'inline-block'}>
+                    <Grid item display={edit ? 'none' : 'inline-block'}>
                         <TextField
                             label='Peso'
                             value={palletData.weight}
@@ -105,11 +131,11 @@ export default function NewPalletForm(props) {
                             required
                         />
                     </Grid>
-                    <Grid item display={edit? 'inline-block': 'none'}>
+                    <Grid item display={edit ? 'inline-block' : 'none'}>
                         <TextField
                             label='Capacidad máxima'
-                            value={palletData.weight}
-                            onChange={(e) => { setPalletData({ ...palletData, weight: e.target.value }) }}
+                            value={palletData.max}
+                            onChange={(e) => { setPalletData({ ...palletData, max: e.target.value }) }}
                             variant="outlined"
                             size={'small'}
                             type='number'
@@ -120,9 +146,9 @@ export default function NewPalletForm(props) {
                             required
                         />
                     </Grid>
-               
+
                     <Grid item textAlign={'right'}>
-                        <Button variant="contained" type='submit'>Guardar</Button>
+                        <Button variant="contained" type='submit'>{edit ? 'Editar' : 'Guardar'}</Button>
                         <Button
                             sx={{ marginLeft: 1, display: dialog ? 'inline-block' : 'none' }}
                             variant={'outlined'}

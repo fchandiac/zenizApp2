@@ -1,4 +1,6 @@
-const server_url = "http://localhost:3003/"
+
+const config= require('../config.js')
+const server_url = config.serverUrl
 
 
 function create(pallet_id, tray_id, reception_id, quanty, trays_weight, impurity, impurity_weight, gross, net) {

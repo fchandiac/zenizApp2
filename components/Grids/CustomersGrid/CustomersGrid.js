@@ -4,12 +4,16 @@ import PrintIcon from '@mui/icons-material/Print'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import InfoDataGrid from '../../Karmextron/InfoDataGrid/InfoDataGrid'
+import { useAppContext } from '../../../appProvider'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid } from '@mui/material'
+import CustomerAccountGrid from '../CustomerAccountsGrid/CustomerAccountGrid'
 
 const customers = require('../../../services/customers')
 
 
 export default function CustomersGrid(props) {
-    const {update} = props
+    const { user } = useAppContext()
+    const { update } = props
     const [customersList, setCustomersList] = useState([])
     const [gridApiRef, setGridApiRef] = useState(null)
     const [rowData, setRowData] = useState(rowDataDefault())
@@ -36,14 +40,17 @@ export default function CustomersGrid(props) {
             headerClassName: 'data-grid-last-column-header',
             type: 'actions', flex: .5, getActions: (params) => [
                 <GridActionsCellItem
+                    sx={{ display: user.Profile.delete ? 'block' : 'none' }}
                     label='delete'
                     icon={<DeleteIcon />}
-                    onClick={() =>{}}
+                    onClick={() => {
+                        openSnack('El Cliente tiene cuentas asociadas', 'error')
+                    }}
                 />,
                 <GridActionsCellItem
                     label='account'
                     icon={<AccountBalanceIcon />}
-                    onClick={async() => {
+                    onClick={async () => {
                         setRowData({
                             id: params.row.id,
                             name: params.row.name,
@@ -60,26 +67,38 @@ export default function CustomersGrid(props) {
         }
     ]
 
-  return (
-    <>
-        <InfoDataGrid
-            columns={columns}
-            rows={customersList}
-            title={'Clientes'}
-            headerVariant={'h6'}
-            height={'80vh'}
-            setGridApiRef={setGridApiRef}
-            infoField={''}
-            infoTitle={''}
-            money={false}
-        />
+    return (
+        <>
+            <InfoDataGrid
+                columns={columns}
+                rows={customersList}
+                title={'Clientes'}
+                headerVariant={'h6'}
+                height={'80vh'}
+                setGridApiRef={setGridApiRef}
+                infoField={''}
+                infoTitle={''}
+                money={false}
+            />
 
-    </>
-  )
+            <Dialog open={openAccountDialog} maxWidth={'lg'} fullWidth>
+                <DialogTitle sx={{ padding: 2 }}> Cuenta cliente</DialogTitle>
+                <DialogContent sx={{ padding: 1 }}>
+                    <CustomerAccountGrid />
+
+                </DialogContent>
+                <DialogActions sx={{ padding: 2 }}>
+                    <Button variant='outlined' onClick={() => setOpenAccountDialog(false)}>Cerrar</Button>
+                </DialogActions>
+            </Dialog>
+
+
+        </>
+    )
 }
 
-function rowDataDefault(){
-    return({
+function rowDataDefault() {
+    return ({
         id: 0,
         name: '',
         rut: '',

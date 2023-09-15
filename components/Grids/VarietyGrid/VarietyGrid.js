@@ -54,7 +54,7 @@ export default function VarietyGrid(props) {
                 <GridActionsCellItem
                     label='destroy'
                     icon={<DeleteIcon />}
-                    onClick={() => { console.log('delete') }}
+                    onClick={() => { openSnack('Variedad tiene recepciones asociadas', 'error') }}
                 />,
               <GridActionsCellItem
                 label='edit'
@@ -72,11 +72,7 @@ export default function VarietyGrid(props) {
                     setOpenEditDialog(true)
                 }}
               />,
-                // <GridActionsCellItem
-                //     label='report'
-                //     icon={<ArticleIcon />}
-                //     onClick={() => { console.log('report') }}
-                // />
+                
             ]
 
           },

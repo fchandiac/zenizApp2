@@ -12,6 +12,7 @@ import PacksGrid from './PacksGrid'
 import PrintDialog from '../PrintDialog/PrintDialog'
 import ReceptionToPrint from './ReceptionToPrint'
 import ReturnedTrays from './ReturnedTrays'
+
 const utils = require('../../utils')
 
 const producers = require('../../services/producers')
@@ -22,12 +23,14 @@ const types = require('../../services/types')
 const variesties = require('../../services/varieties')
 const trays = require('../../services/trays')
 const traysMovements = require('../../services/traysMovements')
+const records = require('../../services/records')
 
 
 
 
 export default function NewReception() {
     const {
+        user,
         openSnack,
         reception,
         setReception,
@@ -81,6 +84,24 @@ export default function NewReception() {
     const [openPrintDialog, setOpenPrintDialog] = useState(false)
 
     const [lastReceptionId, setLastReceptionId] = useState(0)
+    const [newProducerState, setNewProducerState] = useState(false)
+
+    const [producerData, setProducerData] = useState({
+        id: 0,
+        rut: '',
+        name: '',
+        phone: '',
+        mail: '',
+        address: '',
+    })
+
+    useEffect(() => {
+        if(openPrintDialog == false){
+            console.log('openPrintDialog', openPrintDialog)
+            resetReturnetTrays()
+        }
+    }, [openPrintDialog]
+    )
 
     useEffect(() => {
         producers.findAll()
@@ -118,7 +139,7 @@ export default function NewReception() {
                 }))
                 setTypesOptions(data)
             })
-    }, [])
+    }, [newProducerState])
 
     useEffect(() => { // setPacks
         let clp = parseInt(receptionClp)
@@ -265,12 +286,19 @@ export default function NewReception() {
                         openSnack('Recepción guardada', 'success')
                         setOpenPrintDialog(true)
                         resetReception()
-                        resetReturnetTrays()
+                        // resetReturnetTrays()
                     })
                     .catch(err => {
                         console.error(err)
                         openSnack('Error al guardar recepción', 'error')
                     })
+
+                    await records.create(
+                        'recepciones',
+                        'crea',
+                        'recepción ' + newReception_.id,
+                        user.id
+                    )
 
             } catch (err) {
                 console.error(err)
@@ -573,7 +601,14 @@ export default function NewReception() {
                     <NewProducerForm
                         dialog={true}
                         closeDialog={() => { setOpenNewProducerDialog(false) }}
-                        afterSubmit={() => { }}
+                        afterSubmit={() => {
+                            setNewProducerState(!newProducerState)
+                            console.log('newProducerState', newProducerState)
+
+                         }}
+                         producerData={producerData}
+                            setProducerData={setProducerData}
+
                     />
                 </DialogContent>
             </Dialog>

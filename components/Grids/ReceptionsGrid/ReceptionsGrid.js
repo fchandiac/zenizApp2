@@ -32,7 +32,7 @@ const producerAccounts = require('../../../services/producerAccounts')
 
 export default function ReceptionsGrid(props) {
     const { receptionsList, title } = props
-    const { openSnack } = useAppContext()
+    const { openSnack, user } = useAppContext()
     const [gridApiRef, setGridApiRef] = useState(null)
 
     const [openEditDialog, setOpenEditDialog] = useState(false)
@@ -46,6 +46,8 @@ export default function ReceptionsGrid(props) {
     const [typesOptions, setTypesOptions] = useState([])
 
     const [openPrintDialog, setOpenPrintDialog] = useState(false)
+
+    console.log(user)
 
 
     useEffect(() => {
@@ -142,8 +144,17 @@ export default function ReceptionsGrid(props) {
     const closeReception = async () => {
         const closeReception = await receptions.closeReception(rowData.id)
 
-        const beforeBalance = await producerAccounts.producerAccountBalance(rowData.producerId)
-        let newBalance = beforeBalance + rowData.toPay
+        const lastMovement = await producerAccounts.findLastByProducerId(rowData.producerId)
+
+
+  
+        let newBalance = 0
+        if (lastMovement == null) {
+            newBalance =  rowData.toPay
+        } else {
+            newBalance = lastMovement.balance + rowData.toPay
+        }
+
 
         const newCredit = await producerAccounts.create(
             rowData.producerId,
@@ -172,6 +183,7 @@ export default function ReceptionsGrid(props) {
             id: params.row.id,
             producerName: params.row.producerName,
             producerRut: params.row.producerRut,
+            producerId: params.row.producerId,
             varietyName: params.row.varietyName,
             variety: params.row.variety,
             typeName: params.row.typeName,
@@ -186,7 +198,8 @@ export default function ReceptionsGrid(props) {
             impurityWeight: params.row.impurityWeight,
             gross: params.row.gross,
             net: params.row.net,
-            packs: params.row.packs
+            packs: params.row.packs,
+            toPay: params.row.toPay,
         })
     }
 
@@ -264,12 +277,13 @@ export default function ReceptionsGrid(props) {
             type: 'actions', flex: 1, getActions: (params) => [
                 <GridActionsCellItem
                     size={'small'}
-                    sx={{ display: params.row.settlement ? 'none' : 'inline-flex', }}
+                    sx={{ display: params.row.settlement == true || user.Profile.delete == false ? 'none' : 'inline-flex', }}
                     label='delete'
                     icon={<DeleteIcon sx={{ fontSize: 16 }} />}
                     onClick={() => {
                         setRow(params)
                         openSnack('La recepción ya esta cerrada', 'error')
+                        
                     }}
                 />,
                 <GridActionsCellItem
@@ -281,7 +295,7 @@ export default function ReceptionsGrid(props) {
                     }}
                 />,
                 <GridActionsCellItem
-                    sx={{ display: params.row.open ? 'inline-flex' : 'none' }}
+                    sx={{ display: params.row.open  == true && user.Profile.edit == true ? 'inline-flex' : 'none' }}
                     label='edit'
                     icon={<EditIcon sx={{ fontSize: 16 }} />}
                     onClick={() => {
@@ -298,6 +312,7 @@ export default function ReceptionsGrid(props) {
                     }}
                 />,
                 <GridActionsCellItem
+                    sx={{ display: user.Profile.close_reception ? 'inline-flex' : 'none' }}
                     label='open'
                     icon={params.row.open ? <LockOpenIcon sx={{ fontSize: 16 }} /> : <LockIcon sx={{ fontSize: 16 }} />}
                     onClick={() => {
@@ -380,7 +395,6 @@ export default function ReceptionsGrid(props) {
 
                                     }}
                                     inputProps={{ min: 0 }}
-
 
                                 />
                             </Grid>

@@ -1,6 +1,6 @@
 
-const server_url = "http://localhost:3003/"
-
+const config= require('../config.js')
+const server_url = config.serverUrl
 
 function findAll() {
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')

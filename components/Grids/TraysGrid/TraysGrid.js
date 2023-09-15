@@ -12,12 +12,14 @@ import {
 } from '@mui/material'
 import moment from 'moment'
 import TrayForm from '../../Forms/TrayForm/TrayForm'
+import { useAppContext } from '../../../appProvider';
 
 const trays = require('../../../services/trays')
 
 
 export default function TraysGrid(props) {
     const { update } = props
+    const { openSnack, user } = useAppContext()
     const [gridApiRef, setGridApiRef] = useState(null)
     const [traysList, setTraysList] = useState([])
     const [openEditDialog, setOpenEditDialog] = useState(false)
@@ -69,14 +71,15 @@ export default function TraysGrid(props) {
             headerClassName: 'data-grid-last-column-header',
             type: 'actions', flex: .8, getActions: (params) => [
                 <GridActionsCellItem
-                    sx={{ display: params.row.settlement ? 'none' : 'inline-flex' }}
+                    sx={{ display: user.Profile.delete ?  'inline-block': 'none' }}
                     label='delete'
                     icon={<DeleteIcon />}
                     onClick={() => {
-                        openSnack('La recepción ya esta cerrada', 'error')
+                        openSnack('La Bandeja tiene recepciones asociadas', 'error')
                     }}
                 />,
                 <GridActionsCellItem
+                    sx={{ display: user.Profile.edit ?  'inline-block': 'none' }}
                     label='edit'
                     icon={<EditIcon />}
                     onClick={() => {

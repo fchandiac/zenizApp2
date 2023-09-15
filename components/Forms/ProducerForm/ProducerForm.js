@@ -22,6 +22,7 @@ export default function ProducerForm(props) {
       openSnack('Productor ' + newProducer.name + ' Guardado', 'success')
       setProducerData(producerDataDefault())
       afterSubmit()
+      closeDialog()
     } catch (err) {
       if (err.errors[0].message == 'rut must be unique') {
         openSnack('Rut ya existe', 'error')

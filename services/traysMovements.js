@@ -1,5 +1,6 @@
 
-const server_url = "http://localhost:3003/"
+const config= require('../config.js')
+const server_url = config.serverUrl
 
 function create(tray_id, producer_id, reception_id, quanty, type, balance, description) {
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')

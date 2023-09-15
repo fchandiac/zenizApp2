@@ -1,5 +1,6 @@
 
-const server_url = "http://localhost:3003/"
+const config= require('../config.js')
+const server_url = config.serverUrl
 
 function create(name) {
     let data = { name }

@@ -38,6 +38,7 @@ body {
 .row-tiny {
   font-size: .65rem;
   min-height: fit-content;
+  max-width: 7rem;
   padding: .2rem;
   text-align: right;
 }

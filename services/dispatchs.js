@@ -1,4 +1,6 @@
-const server_url = "http://localhost:3003/"
+
+const config= require('../config.js')
+const server_url = config.serverUrl
 
 
 function create(
@@ -70,4 +72,55 @@ function findAll() {
     return dispatch
 }
 
-export { create, findAll }
+function findAllBetweenDate(start, end) {
+    let data = {
+        start,
+        end
+    }
+    // let server_url = ipcRenderer.sendSync('server-url', 'sync')
+    const dispatch = new Promise((resolve, reject) => {
+        fetch(server_url + 'dispatchs/findAllBetweenDate', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+
+    return dispatch
+}
+
+
+
+function close(id){
+    let data = {
+        id
+    }
+    // let server_url = ipcRenderer.sendSync('server-url', 'sync')
+    const dispatch = new Promise((resolve, reject) => {
+        fetch(server_url + 'dispatchs/updateClose', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+
+    return dispatch
+}
+
+export { create, findAll, findAllBetweenDate, close }

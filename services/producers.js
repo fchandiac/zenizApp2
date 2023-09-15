@@ -1,9 +1,12 @@
 
-const server_url = "http://localhost:3003/"
+const config = require('../config.js')
+const server_url = config.serverUrl
+
+const receptions = require('./receptions')
 
 
-function create(rut, name, phone, mail, address){
-    let data = { rut, name, phone, mail, address}
+function create(rut, name, phone, mail, address) {
+    let data = { rut, name, phone, mail, address }
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
     const producer = new Promise((resolve, reject) => {
         fetch(server_url + 'producers/create', {
@@ -89,5 +92,12 @@ function update(id, rut, name, phone, mail, address) {
     return producer
 }
 
+async function tryDelete(id) {
+    const receptionsList = await receptions.findOneById(id)
+    return receptionsList.length > 0 ? false : true
+}
 
-export { findAll, create, findOneById, update }
+
+
+
+export { findAll, create, findOneById, update, tryDelete }

@@ -42,6 +42,7 @@ function palletDataDefault() {
   return ({
       storage: { id: 0, key: 0, label: '' },
       tray: { id: 0, key: 0, label: '' },
-      weight: ''
+      weight: '',
+      max: 0,
   })
 }

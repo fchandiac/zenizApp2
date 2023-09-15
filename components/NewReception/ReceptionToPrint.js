@@ -144,7 +144,11 @@ export default function ReceptionToPrint(props) {
           }
         </Box>
 
-        <Box display={returnetTrays.lenght > 1 ? 'flex' : 'none'} justifyContent='space-between' flexDirection={'column'}>
+        <Divider sx={{ marginTop: 1, marginBottom: 1, backgroundColor: 'black' }} />
+
+        <Box  
+        sx={{ display: returnetTrays.length > 0 ? 'block' : 'none' }}
+        justifyContent='space-between' flexDirection={'column'}>
           <Typography fontSize={14}  >Bandejas devueltas: </Typography>
           {
             returnetTrays.map((tray, index) => (
@@ -152,8 +156,6 @@ export default function ReceptionToPrint(props) {
             ))
           }
         </Box>
-
-
 
       </Paper>
     </>

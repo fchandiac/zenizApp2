@@ -55,26 +55,15 @@ const initialState = {
         mail: '',
         Profile: {
             id: 0,
-            name: '',
+            name: 'blank',
             delete: false,
             edit: false,
-            reports: false,
-            pallets: false,
-            trays: false,
-            types: false,
-            varieties: false,
-            producers: false,
-            customers: false,
-            users: false,
-            records: false,
-            dispatchs: false,
-            receptions: false,
-            advances: false,
-            customers_accounts: false,
-            producers_accounts: false,
+            settlement: false,
             new_reception: false,
             new_dispatch: false,
-            settlements: false,
+            close_reception: false,
+            close_dispatch: false,
+            advance: false
         }
 
     }
@@ -203,6 +192,9 @@ const reducer = (state, action) => {
             }
         case 'SET_USER':
             return { ...state, user: action.value }
+
+        case 'SET_USER_PROFILE':
+            return { ...state, user: { ...state.user, Profile: action.value } }
         case 'SET_RETURNET_TRAYS':
             return { ...state, returnetTrays: action.value }
         case 'ADD_RETURNET_TRAY':
@@ -454,6 +446,10 @@ const AppProvider = ({ children }) => {
         dispatch({ type: 'RESET_RETURNET_TRAYS' })
     }
 
+    const setUserProfile = (data) => {
+        dispatch({ type: 'SET_USER_PROFILE', value: data })
+    }
+
 
     return (
         <AppContext.Provider value={{
@@ -549,7 +545,8 @@ const AppProvider = ({ children }) => {
             setReturnetTrays,
             addReturnetTrays,
             removeReturnetTray,
-            resetReturnetTrays
+            resetReturnetTrays,
+            setUserProfile
         }}>
             {children}
         </AppContext.Provider>

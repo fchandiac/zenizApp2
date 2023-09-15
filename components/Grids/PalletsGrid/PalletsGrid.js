@@ -37,7 +37,9 @@ export default function PalletsGrid(props) {
                     trayName: pallet.Tray == null ? '': pallet.Tray.name,
                     weight: pallet.weight,
                     trays: pallet.trays,
+                    tray: { id: pallet.tray_id, key: pallet.tray_id, label: pallet.Tray == null ? '': pallet.Tray.name},
                     max: pallet.max,
+                    Storage: { id: pallet.storage_id, key: pallet.storage_id, label: pallet.Storage.name},
                     packs: pallet.Packs,
                     dispatch: pallet.dispatch ? 'Si' : 'No',
                     dispatchId: pallet.dispatch_id == null ? '' : pallet.dispatch_id
@@ -72,15 +74,17 @@ export default function PalletsGrid(props) {
         {
             field: 'actions',
             headerName: '',
-            type: 'actions', flex: .8, getActions: (params) => [
+            type: 'actions', flex: 1.2, getActions: (params) => [
                 <GridActionsCellItem
                     label='delete'
                     icon={<DeleteIcon />}
                     onClick={() => {
+                        openSnack('El Pallet tiene Packs asociadas', 'error')
 
                     }}
                 />,
                 <GridActionsCellItem
+                    sx={{display: params.row.dispatch == 'Si' ? 'none': 'inline-block'}}
                     label='edit'
                     icon={<EditIcon />}
                     onClick={() => {
@@ -91,8 +95,10 @@ export default function PalletsGrid(props) {
                             trayName: params.row.trayName,
                             weight: params.row.weight,
                             trays: params.row.trays,
+                            tray: params.row.tray,
                             max: params.row.max,
-                            packs: params.row.packs
+                            packs: params.row.packs,
+                            storage: params.row.Storage
                         })
                         setOpenEditDialog(true)
 
@@ -137,6 +143,8 @@ export default function PalletsGrid(props) {
         }
     ]
 
+   
+
     return (
         <>
 
@@ -149,10 +157,15 @@ export default function PalletsGrid(props) {
                         <NewPalletForm 
                         dialog = {true}
                         closeDialog={() => setOpenEditDialog(false)}
-                        afterSubmit={() => {}}
+                        afterSubmit={() => {
+                            setOpenEditDialog(false)
+                            // setRowData(rowDataDefault())
+                            
+                        }}
                         palletData={rowData}
                         setPalletData = {setRowData}
                         edit={true}
+                        gridApiRef= {gridApiRef}
                         />
                     </Grid>
                 </DialogContent>

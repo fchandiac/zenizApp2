@@ -1,8 +1,12 @@
-import { Grid, IconButton, Paper, TextField, Typography, Autocomplete, Button, Box } from '@mui/material'
+import {
+  Grid, IconButton, Paper, TextField, Typography, Autocomplete, Button, Box,
+  Stack, Switch, InputAdornment
+} from '@mui/material'
 import React, { useState, useEffect } from 'react'
 import { useAppContext } from '../appProvider'
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import DispatachPalletCard from '../components/Cards/DispatchPalletCard/DispatachPalletCard'
+import { set } from 'date-fns'
 
 
 const pallets = require('../services/pallets')
@@ -72,6 +76,7 @@ export default function newDispatch() {
     })
     setDispatchGross(grossSum)
     setDispatchNet(netSum)
+    setDispatchToPay(netSum * dispatchClp)
 
   }, [dispatchPallets])
 
@@ -165,6 +170,7 @@ export default function newDispatch() {
   })
 
   const saveDispatch = async () => {
+    console.log('NEW_DISPATCH', dispatch_)
     const newDispatch = await dispatchs.create(
       dispatchCustomer.id,
       dispatchGuide,
@@ -181,6 +187,8 @@ export default function newDispatch() {
       true
     )
 
+    
+
     dispatchPallets.forEach(async (pallet) => {
       const updateDispatch = await pallets.updateDisptach(pallet.id, newDispatch.id)
       console.log('UPDATE_DISPATCH', updateDispatch)
@@ -188,6 +196,20 @@ export default function newDispatch() {
 
     resetDispatch()
 
+  }
+
+  const calcPrice = (clp, usd, change) => {
+    let result = 0
+
+    if (usd) {
+      result = usd * change
+    } else {
+      result = clp
+    }
+    console.log('result', result)
+    setDispatchToPay(result)
+    setDispatchUsd(usd)
+    setDispatchChange(change)
   }
 
 
@@ -214,7 +236,7 @@ export default function newDispatch() {
                     />
                   </Grid>
                   <Grid item>
-                    <Box sx={{display: 'flex'}}>
+                    <Box sx={{ display: 'flex' }}>
                       <TextField
                         label={'Pallet id'}
                         type='number'
@@ -277,20 +299,6 @@ export default function newDispatch() {
                       fullWidth
                     />
                   </Grid>
-                  {/* <Grid item>
-                  <TextField
-                    label={'Peso Pallets'}
-                    value={dispatchPalletsWeight}
-                    inputProps={{ readOnly: true }}
-                    size='small'
-                    fullWidth
-                  />
-                  
-                </Grid> */}
-                  <Grid item>
-
-                  </Grid>
-
                   <Grid item>
                     <TextField
                       label={'Neto'}
@@ -299,6 +307,76 @@ export default function newDispatch() {
                       size='small'
                       fullWidth
                     />
+                  </Grid>
+                  <Grid item>
+                    <Stack direction="row" spacing={1} justifyContent={'flex-end'}>
+                      <Typography fontSize={11} sx={{ display: 'flex', alignItems: 'center' }}>CLP</Typography>
+                      <Switch
+                        checked={dispatchShowUsd}
+                        onChange={(e) => {
+                          setDispatchShowUsd(e.target.checked)
+                          e.target.checked ? setDispatchMoney('USD') : setDispatchMoney('CLP')
+                        }}
+                        color={'success'}
+                        size={'small'} />
+                      <Typography fontSize={11} sx={{ display: 'flex', alignItems: 'center' }}>USD</Typography>
+                    </Stack>
+                  </Grid>
+                  <Grid item display={dispatchShowUsd ? 'none' : 'inline-block'}>
+                    <TextField
+                      label='Precio'
+                      value={dispatchClp}
+                      onChange={(e) => { setDispatchClp(e.target.value) }}
+                      variant="outlined"
+                      type='number'
+                      size={'small'}
+                      fullWidth
+                      autoFocus
+                      className='no-spin'
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                        endAdornment: <InputAdornment position="end">CLP</InputAdornment>,
+                      }}
+                      inputProps={{ min: 0 }}
+                    />
+                  </Grid>
+                  <Grid item display={dispatchShowUsd ? 'inline-block' : 'none'}>
+                    <TextField
+                      label='USD'
+                      value={dispatchUsd}
+                      type='number'
+                      onChange={(e) => { calcPrice(dispatchClp, e.target.value, dispatchChange) }}
+                      variant="outlined"
+                      className='no-spin'
+                      size={'small'}
+                      fullWidth
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                        endAdornment: <InputAdornment position="end">USD</InputAdornment>,
+
+                      }}
+                      inputProps={{ min: 0 }}
+
+                    />
+                  </Grid>
+                  <Grid item display={dispatchShowUsd ? 'inline-block' : 'none'}>
+                    <TextField
+                      label='Cambio'
+                      value={dispatchChange}
+                      type='number'
+                      // calcPrice(receptionClp, e.target.value, receptionChange, receptionMoney)
+                      onChange={(e) => { calcPrice(dispatchClp, dispatchUsd, e.target.value) }}
+                      variant="outlined"
+                      size={'small'}
+                      fullWidth
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                        endAdornment: <InputAdornment position="end">CLP</InputAdornment>,
+                      }}
+                      inputProps={{ min: 0 }}
+
+                    />
+
                   </Grid>
 
                   <Grid item>

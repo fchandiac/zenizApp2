@@ -14,11 +14,12 @@ import { useRouter } from 'next/router'
 
 import { useAppContext } from '../../appProvider'
 import Snack from '../Karmextron/Snack/Snack'
+import ChangePassForm from '../Forms/ChangePassForm/ChangePassForm'
 const users = require('../../services/users')
 
 export default function Layout(props) {
     const { children } = props
-    const { pageTitle, setPageTitle, lock, setLock, openSnack, user } = useAppContext()
+    const { pageTitle, setPageTitle, lock, setLock, openSnack, user, setUserProfile } = useAppContext()
     const router = useRouter()
     const [openDrawer, setOpenDrawer] = useState()
     const [openAuthDialog, setOpenAuthDialog] = useState(false)
@@ -37,8 +38,9 @@ export default function Layout(props) {
         } else {
             console.log(findUser)
             if (findUser.pass == userAuthData.pass) {
-                if (findUser.Profile.auth == true) {
+                if (findUser.Profile.id == 1001) {
                     setLock(!lock)
+                    setUserProfile(findUser.Profile)
                     setOpenAuthDialog(false)
                     setUserAuthData(userAuthDataDefault())
                 } else {
@@ -117,11 +119,7 @@ export default function Layout(props) {
                     </Box>
                     <Box display={'flex'} paddingTop={1}>
                         <Button variant={'outlined'} size='small' onClick={() => {
-                            setAnchorElPopOver(null)
-                            router.push({
-                                pathname: '/',
-                            })
-                            setPageTitle('')
+                            setOpenChangePassDialog(true)
 
                         }}>Cambiar Contraseña</Button>
                     </Box>
@@ -143,7 +141,7 @@ export default function Layout(props) {
                 </Box>
                 <Divider />
                 <List>
-                    <ListItem disablePadding>
+                    <ListItem disablePadding sx={{ display: user.Profile.new_reception ? 'inline-block': 'none'}}>
                         <ListItemButton>
                             <ListItemText primary={'Nueva recepción'}
                                 onClick={() => {
@@ -331,42 +329,21 @@ export default function Layout(props) {
             </Dialog>
 
             <Dialog open={openChangePassDialog} maxWidth={'xs'} fullWidth>
-                <DialogTitle sx={{ padding: 2 }}>Autorización</DialogTitle>
-                <form onSubmit={(e) => { e.preventDefault(); updateLock() }}>
+                <DialogTitle sx={{ padding: 2 }}>Cambiar contraseña</DialogTitle>
+        
                     <DialogContent sx={{ padding: 1 }}>
-                        <Grid container spacing={1} direction={'column'}>
-                            <Grid item marginTop={1}>
-                                <TextField
-                                    label="Usuario"
-                                    value={userAuthData.user}
-                                    onChange={(e) => setUserAuthData({ ...userAuthData, user: e.target.value })}
-                                    variant="outlined"
-                                    size={'small'}
-                                    fullWidth
-                                    required
-                                />
-                            </Grid>
-                            <Grid item>
-                                <TextField
-                                    label="Contraseña"
-                                    value={userAuthData.pass}
-                                    onChange={(e) => setUserAuthData({ ...userAuthData, pass: e.target.value })}
-                                    variant="outlined"
-                                    type='password'
-                                    size={'small'}
-                                    fullWidth
-                                    required
-                                />
-                            </Grid>
-                        </Grid>
-
-                        {/* <Button variant={'outlined'} onClick={() => { setOpenAuthDialog(false) }}>Cerrar</Button> */}
+                     <ChangePassForm   
+                        closeDialog={(e) => {setOpenChangePassDialog(false)}}
+                        user= {user.user}
+                        afterSubmit={() => {
+                            console.log('afterSubmit')
+                            setAnchorElPopOver(null)
+                            setOpenChangePassDialog(false)
+                        }}
+                        />
                     </DialogContent>
-                    <DialogActions sx={{ padding: 1 }}>
-                        <Button variant='contained' type='submit'>Autorizar</Button>
-                        <Button variant='outlined' onClick={() => { setOpenChangePassDialog(false) }}>Cerrar</Button>
-                    </DialogActions>
-                </form>
+            
+       
             </Dialog>
             
 
