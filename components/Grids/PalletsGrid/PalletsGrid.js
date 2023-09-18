@@ -18,7 +18,7 @@ const pallets = require('../../../services/pallets')
 
 
 export default function PalletsGrid(props) {
-    const {update} = props
+    const { update } = props
     const [gridApiRef, setGridApiRef] = useState(null)
     const [palletsList, setPalletsList] = useState([])
     const [openInfoDialog, setOpenInfoDialog] = useState(false)
@@ -34,12 +34,12 @@ export default function PalletsGrid(props) {
                 let data = res.map(pallet => ({
                     id: pallet.id,
                     storageName: pallet.Storage.name,
-                    trayName: pallet.Tray == null ? '': pallet.Tray.name,
+                    trayName: pallet.Tray == null ? '' : pallet.Tray.name,
                     weight: pallet.weight,
                     trays: pallet.trays,
-                    tray: { id: pallet.tray_id, key: pallet.tray_id, label: pallet.Tray == null ? '': pallet.Tray.name},
+                    tray: { id: pallet.tray_id, key: pallet.tray_id, label: pallet.Tray == null ? '' : pallet.Tray.name },
                     max: pallet.max,
-                    Storage: { id: pallet.storage_id, key: pallet.storage_id, label: pallet.Storage.name},
+                    Storage: { id: pallet.storage_id, key: pallet.storage_id, label: pallet.Storage.name },
                     packs: pallet.Packs,
                     dispatch: pallet.dispatch ? 'Si' : 'No',
                     dispatchId: pallet.dispatch_id == null ? '' : pallet.dispatch_id
@@ -51,40 +51,66 @@ export default function PalletsGrid(props) {
     }, [update])
 
     const columns = [
-        { field: 'id', headerName: 'Id', flex: .5, type: 'number' },
+        { field: 'id', headerName: 'Id', flex: .5, type: 'number', valueFormatter: (params) => params.value },
         { field: 'storageName', headerName: 'Almacen', flex: 1 },
         { field: 'trayName', headerName: 'Bandeja', flex: 1 },
-        { field: 'weight', headerName: 'Peso', flex: 1 },
+        {
+            field: 'weight', headerName: 'Peso', flex: 1,
+            valueFormatter: (params) =>
+                new Intl.NumberFormat('es-CL', {
+                    style: 'decimal',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(params.value) + ' kg'
+        },
         { field: 'trays', headerName: 'Bandejas', flex: 1 },
         { field: 'max', headerName: 'Max', flex: 1 },
         {
             field: 'dispatch', headerName: 'Despacho', flex: 1,
+
             renderCell: (params) => {
-                return params.row.dispatch === 'Si' ? 
-                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                <LocalShippingIcon color='success' sx={{paddingRight:1}} /> 
-                {params.row.dispatchId}
-                </Box>: 
-                <Box sx={{ display: 'flex', justifyContent: 'center', color: '#e0e0e0' }}>
-                <LocalShippingIcon /> 
-                </Box>
+                return params.row.dispatch === 'Si' ?
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <LocalShippingIcon color='success' sx={{ paddingRight: 1 }} />
+                        {params.row.dispatchId}
+                    </Box> :
+                    <Box sx={{ display: 'flex', justifyContent: 'center', color: '#e0e0e0' }}>
+                        <LocalShippingIcon />
+                    </Box>
 
             }
         },
         {
             field: 'actions',
             headerName: '',
+            headerClassName: 'data-grid-last-column-header',
             type: 'actions', flex: 1.2, getActions: (params) => [
                 <GridActionsCellItem
+                    sx={{display: params.row.dispatch == 'Si' ? 'none' : 'inline-flex'}}
                     label='delete'
                     icon={<DeleteIcon />}
                     onClick={() => {
+                        setRowData({
+                            rowId: params.id,
+                            id: params.row.id,
+                            storageName: params.row.storageName,
+                            trayName: params.row.trayName,
+                            weight: params.row.weight,
+                            trays: params.row.trays,
+                            tray: params.row.tray,
+                            max: params.row.max,
+                            packs: params.row.packs,
+                            storage: params.row.Storage
+                        })
                         openSnack('El Pallet tiene Packs asociadas', 'error')
 
                     }}
                 />,
                 <GridActionsCellItem
-                    sx={{display: params.row.dispatch == 'Si' ? 'none': 'inline-block'}}
+                    // si no tiene permisos
+                    // si fue despachado
+                    // si tiene packs asociadas
+                    sx={{ display: params.row.dispatch == 'Si' ? 'none' : 'inline-flex' }}
                     label='edit'
                     icon={<EditIcon />}
                     onClick={() => {
@@ -143,7 +169,7 @@ export default function PalletsGrid(props) {
         }
     ]
 
-   
+
 
     return (
         <>
@@ -154,18 +180,18 @@ export default function PalletsGrid(props) {
                 <DialogTitle sx={{ padding: 2 }}>Editar Pallet {rowData.id}</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
                     <Grid container spacing={1} direction={'column'}>
-                        <NewPalletForm 
-                        dialog = {true}
-                        closeDialog={() => setOpenEditDialog(false)}
-                        afterSubmit={() => {
-                            setOpenEditDialog(false)
-                            // setRowData(rowDataDefault())
-                            
-                        }}
-                        palletData={rowData}
-                        setPalletData = {setRowData}
-                        edit={true}
-                        gridApiRef= {gridApiRef}
+                        <NewPalletForm
+                            dialog={true}
+                            closeDialog={() => setOpenEditDialog(false)}
+                            afterSubmit={() => {
+                                setOpenEditDialog(false)
+                                // setRowData(rowDataDefault())
+
+                            }}
+                            palletData={rowData}
+                            setPalletData={setRowData}
+                            edit={true}
+                            gridApiRef={gridApiRef}
                         />
                     </Grid>
                 </DialogContent>

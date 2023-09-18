@@ -20,7 +20,7 @@ export default function producers() {
       producers={( <Grid container spacing={1}>
         <Grid item xs={3}>
           <Paper variant={'outlined'}>
-            <Box paddingLeft={2} paddingTop={2}>
+            <Box p={1}>
               Nuevo Productor
             </Box>
             <NewProducerForm afterSubmit={updateGrid_} producerData={producerData} setProducerData={setProducerData}/>

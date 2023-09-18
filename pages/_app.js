@@ -15,7 +15,7 @@ import Layout from '../components/Layout/Layout'
 const theme = createTheme(
   {
     palette: {
-      // primary: { main: '#0091ea', contrastText: '#fff' },
+      primary: { main: '#4B5A7B', contrastText: '#fff' },
       // secondary: { main: '#ef5350', contrastText: '#fff' },
       // error: { main: '#ef5350', contrastText: '#fff' },
       // warning: { main: '#ffca28', contrastText: '#fff' },

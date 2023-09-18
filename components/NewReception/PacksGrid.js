@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { DataGrid, GridToolbarQuickFilter, useGridApiContext } from '@mui/x-data-grid'
 import { useAppContext } from '../../appProvider'
+import { GridActionsCellItem } from '@mui/x-data-grid'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 
 export default function PacksGrid() {
-  const { reception, receptionShowImpurities } = useAppContext()
+  const { reception, receptionShowImpurities, openSnack, removePack } = useAppContext()
   const [list, setList] = useState([])
 
 
@@ -17,15 +19,82 @@ export default function PacksGrid() {
   }, [reception.packs])
 
   const columns = [
-    { field: 'id', headerName: '#', flex: 1 },
-    { field: 'palletId', headerName: 'Pallet', flex: 1 },
-    { field: 'trayName', headerName: 'Bandeja', flex: 1 },
-    { field: 'quanty', headerName: 'Cant. bandejas', flex: 1 },
-    { field: 'trayWeight', headerName: 'Kg unidad', flex: 1 },
-    { field: 'gross', headerName: 'Kg bruto', flex: 1 },
-    { field: 'traysWeight', headerName: 'Kg bandejas', flex: 1 },
-    { field: 'impurityWeight', headerName: 'Kg impurezas', flex: 1, hide: receptionShowImpurities ? false : true },
-    { field: 'net', headerName: 'Kg neto', flex: 1, headerClassName: 'data-grid-last-column-header' },
+    { field: 'id', headerName: '#', flex: 1, valueFormatter: (params) => params.value },
+    { field: 'palletId', headerName: 'Pallet', flex: .8 },
+    { field: 'trayName', headerName: 'Bandeja', flex: 2 },
+    {
+      field: 'quanty', headerName: 'Bandejas', flex: .8,
+      valueFormatter: (params) =>
+        new Intl.NumberFormat('es-CL', {
+          style: 'decimal',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(params.value) + ' unds'
+    },
+    {
+      field: 'trayWeight', headerName: 'Unidad', flex: .8,
+      valueFormatter: (params) =>
+        new Intl.NumberFormat('es-CL', {
+          style: 'decimal',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(params.value) + ' kg'
+    },
+    {
+      field: 'gross', headerName: 'Bruto', flex: .8,
+      valueFormatter: (params) =>
+        new Intl.NumberFormat('es-CL', {
+          style: 'decimal',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(params.value) + ' kg'
+    },
+    {
+      field: 'traysWeight', headerName: 'Bandejas', flex: .8,
+      valueFormatter: (params) =>
+        new Intl.NumberFormat('es-CL', {
+          style: 'decimal',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(params.value) + ' unds'
+    },
+    {
+      field: 'impurityWeight', headerName: 'Impurezas', flex: .8, hide: receptionShowImpurities ? false : true,
+      valueFormatter: (params) =>
+        new Intl.NumberFormat('es-CL', {
+          style: 'decimal',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(params.value) + ' kg'
+    },
+    {
+      field: 'net', headerName: 'Kg neto', flex: .8, headerClassName: 'data-grid-last-column-header',
+      valueFormatter: (params) =>
+        new Intl.NumberFormat('es-CL', {
+          style: 'decimal',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(params.value) + ' kg'
+    },
+    {
+      field: 'actions',
+      headerName: '',
+      headerClassName: 'data-grid-last-column-header',
+      type: 'actions', flex: .5, getActions: (params) => [
+          <GridActionsCellItem
+              label='destroy'
+              icon={<DeleteIcon />}
+              onClick={() => { 
+                console.log()
+                removePack(params.row)
+                openSnack('Pack eliminado', 'success')
+               }}
+          />
+        
+          
+      ]
+
+    }
   ]
 
 

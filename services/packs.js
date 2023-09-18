@@ -73,5 +73,26 @@ function divide(idA, quantyA, quantyB) {
 
 
 
+function destroy(id) {
+    let data = {id}
+    // let server_url = ipcRenderer.sendSync('server-url', 'sync')
+    const pack = new Promise((resolve, reject) => {
+        fetch(server_url + 'packs/destroy', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+    return pack
+}
 
-export { create, updatePallet, divide }
+
+export { create, updatePallet, divide, destroy }

@@ -37,21 +37,21 @@ export default function Movements() {
       const movs = await traysMovements.findAllByTrayBetweenDate(tray.id, filterDates.start, filterDates.end)
       console.log(movs)
 
-        let data = movs.map(mov => ({
-          id: mov.id,
-          trayId: mov.tray_id,
-          trayName: mov.Tray.name,
-          producer: mov.Producer == null ? {}: mov.Producer,
-          producerName: mov.Producer == null ? '': mov.Producer.name,
-          reception: mov.Reception == null ? {}: mov.Reception,
-          receptionId: mov.reception_id == null ? '': mov.reception_id,
-          quanty: mov.quanty,
-          type: mov.type,
-          balance: mov.balance,
-          description: mov.description,
-          createdAt: mov.createdAt
-        }))
-        setMovementsList(data)
+      let data = movs.map(mov => ({
+        id: mov.id,
+        trayId: mov.tray_id,
+        trayName: mov.Tray.name,
+        producer: mov.Producer == null ? {} : mov.Producer,
+        producerName: mov.Producer == null ? '' : mov.Producer.name,
+        reception: mov.Reception == null ? {} : mov.Reception,
+        receptionId: mov.reception_id == null ? '' : mov.reception_id,
+        quanty: mov.quanty,
+        type: mov.type,
+        balance: mov.balance,
+        description: mov.description,
+        createdAt: mov.createdAt
+      }))
+      setMovementsList(data)
     }
     fetchData()
   }, [tray, filterDates])
@@ -67,7 +67,7 @@ export default function Movements() {
     const newMov = await traysMovements.create(movementData.tray.id, null, null, movementData.amount, movementData.type, currentBalance, movementData.description)
     await trays.updateStock(movementData.tray.id, currentBalance)
 
- 
+
 
     setTray({ id: movementData.tray.id, key: movementData.tray.id, label: movementData.tray.label })
     setFilterDates({ start: moment(new Date).format('YYYY-MM-DD'), end: moment(new Date).format('YYYY-MM-DD 23:59') })
@@ -80,97 +80,43 @@ export default function Movements() {
     <>
       <Grid spacing={1} container>
         <Grid item xs={3}>
-          <Grid item>
-            <DesktopDatePicker
-              label="Fecha incial"
-              inputFormat='DD-MM-YYYY'
-              value={filterDates.start}
-              onChange={(e) => {
-                console.log(e)
-                setFilterDates({ ...filterDates, start: e })
-              }}
-              renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
-            />
-          </Grid>
-          <Grid item>
-            <DesktopDatePicker
-              label="Fecha final"
-              inputFormat='DD-MM-YYYY'
-              value={filterDates.end}
-              onChange={(e) => { setFilterDates({ ...filterDates, end: e }) }}
-              renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
-            />
-          </Grid>
-          <Grid item>
-            <Autocomplete
-              inputValue={trayInput}
-              onInputChange={(e, newInputValue) => {
-                setTrayInput(newInputValue)
-              }}
-              value={tray}
-              onChange={(e, newValue) => {
-                setTray(newValue)
-
-              }}
-              getOptionLabel={(option) => option.label}
-              options={traysOptions}
-              renderInput={(params) => <TextField {...params} label='Bandeja' size={'small'} fullWidth />}
-            />
-          </Grid>
-          <Grid item>
-            <Paper variant='outlined'>
-              <Box paddingLeft={2} paddingTop={2}>
-                Nuevo Movimiento
-              </Box>
-              <form onSubmit={(e) => { e.preventDefault(); newMovement() }}>
+          <Grid container spacing={1} direction={'column'}>
+            <Grid item>
+              <Paper variant='outlined'>
+                <Box p={1}>
+                  Filtro fecha / bandeja
+                </Box>
                 <Grid container spacing={1} direction={'column'} p={1}>
                   <Grid item>
-                    <FormControl fullWidth size='small' required sx={{ minWidth: 120 }}>
-                      <InputLabel id="demo-simple-select-label">Tipo Movimiento</InputLabel>
-                      <Select
-                        sx={{ padding: 0, margin: 0 }}
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={movementData.type}
-                        label="Tipo Movimiento"
-                        onChange={(e) => setMovementData({ ...movementData, type: e.target.value })}
-                      >
-                        <MenuItem value={0}>Ingreso</MenuItem>
-                        <MenuItem value={1}>Egreso</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item>
-                    <TextField
-                      fullWidth
-                      size='small'
-                      label='Cantidad'
-                      type='number'
-                      value={movementData.amount}
-                      onChange={(e) => setMovementData({ ...movementData, amount: e.target.value })}
-                      required
+                    <DesktopDatePicker
+                      label="Fecha incial"
+                      inputFormat='DD-MM-YYYY'
+                      value={filterDates.start}
+                      onChange={(e) => {
+                        console.log(e)
+                        setFilterDates({ ...filterDates, start: e })
+                      }}
+                      renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
                     />
                   </Grid>
                   <Grid item>
-                    <TextField
-                      fullWidth
-                      size='small'
-                      label='Nota'
-                      value={movementData.description}
-                      onChange={(e) => setMovementData({ ...movementData, description: e.target.value })}
-                      multiline
-                      rows={4}
+                    <DesktopDatePicker
+                      label="Fecha final"
+                      inputFormat='DD-MM-YYYY'
+                      value={filterDates.end}
+                      onChange={(e) => { setFilterDates({ ...filterDates, end: e }) }}
+                      renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
                     />
                   </Grid>
                   <Grid item>
                     <Autocomplete
-                      inputValue={trayInput2}
+                      inputValue={trayInput}
                       onInputChange={(e, newInputValue) => {
-                        setTrayInput2(newInputValue)
+                        setTrayInput(newInputValue)
                       }}
                       value={tray}
                       onChange={(e, newValue) => {
-                        setMovementData({ ...movementData, tray: newValue })
+                        setTray(newValue)
 
                       }}
                       getOptionLabel={(option) => option.label}
@@ -178,18 +124,86 @@ export default function Movements() {
                       renderInput={(params) => <TextField {...params} label='Bandeja' size={'small'} fullWidth />}
                     />
                   </Grid>
-                  <Grid item textAlign={'right'}>
-                    <Button variant='contained' type='submit'>Guardar</Button>
-                  </Grid>
                 </Grid>
-              </form>
-            </Paper>
+              </Paper>
+
+            </Grid>
 
 
+            <Grid item>
+              <Paper variant='outlined'>
+                <Box p={1}>
+                  Nuevo Movimiento
+                </Box>
+                <form onSubmit={(e) => { e.preventDefault(); newMovement() }}>
+                  <Grid container spacing={1} direction={'column'} p={1}>
+                    <Grid item>
+                      <FormControl fullWidth size='small' required sx={{ minWidth: 120 }}>
+                        <InputLabel id="demo-simple-select-label">Tipo Movimiento</InputLabel>
+                        <Select
+                          sx={{ padding: 0, margin: 0 }}
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={movementData.type}
+                          label="Tipo Movimiento"
+                          onChange={(e) => setMovementData({ ...movementData, type: e.target.value })}
+                        >
+                          <MenuItem value={0}>Ingreso</MenuItem>
+                          <MenuItem value={1}>Egreso</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item>
+                      <TextField
+                        fullWidth
+                        size='small'
+                        label='Cantidad'
+                        type='number'
+                        value={movementData.amount}
+                        onChange={(e) => setMovementData({ ...movementData, amount: e.target.value })}
+                        required
+                      />
+                    </Grid>
+                    <Grid item>
+                      <TextField
+                        fullWidth
+                        size='small'
+                        label='Nota'
+                        value={movementData.description}
+                        onChange={(e) => setMovementData({ ...movementData, description: e.target.value })}
+                        multiline
+                        rows={4}
+                      />
+                    </Grid>
+                    <Grid item>
+                      <Autocomplete
+                        inputValue={trayInput2}
+                        onInputChange={(e, newInputValue) => {
+                          setTrayInput2(newInputValue)
+                        }}
+                        value={tray}
+                        onChange={(e, newValue) => {
+                          setMovementData({ ...movementData, tray: newValue })
+
+                        }}
+                        getOptionLabel={(option) => option.label}
+                        options={traysOptions}
+                        renderInput={(params) => <TextField {...params} label='Bandeja' size={'small'} fullWidth />}
+                      />
+                    </Grid>
+                    <Grid item textAlign={'right'}>
+                      <Button variant='contained' type='submit'>Guardar</Button>
+                    </Grid>
+                  </Grid>
+                </form>
+              </Paper>
+
+
+            </Grid>
           </Grid>
         </Grid>
         <Grid item xs={9}>
-            <TraysMovementsGrid traysMovementsList={movementsList} />
+          <TraysMovementsGrid traysMovementsList={movementsList} />
         </Grid>
       </Grid>
     </>

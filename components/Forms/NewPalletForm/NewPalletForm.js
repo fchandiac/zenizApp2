@@ -1,7 +1,7 @@
 import { Button, Grid, TextField, Autocomplete, InputAdornment } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useAppContext } from '../../../appProvider'
-import { set } from 'date-fns'
+
 
 const utils = require('../../../utils')
 const storages = require('../../../services/storages')
@@ -9,12 +9,13 @@ const trays = require('../../../services/trays')
 const pallets = require('../../../services/pallets')
 
 export default function NewPalletForm(props) {
-    const { dialog, closeDialog, afterSubmit, palletData, setPalletData, edit, gridApiRef } = props
-    const { openSnack } = useAppContext()
+    const { dialog, closeDialog, palletData, palletId, setPalletData, edit, gridApiRef, onPack } = props
+    const { openSnack, addPalletToCurrentPallets } = useAppContext()
     const [storagesInput, setStoragesInput] = useState('')
     const [storagesOptions, setStoragesOptions] = useState([{ id: 0, key: 0, label: '' }])
     const [traysInput, setTraysInput] = useState('')
     const [traysOptions, setTraysOptions] = useState([])
+
 
     useEffect(() => {
         storages.findAll().then(res => {
@@ -52,17 +53,40 @@ export default function NewPalletForm(props) {
             palletData.weight,
         )
 
-        console.log('newPallet', newPallet)
+        console.log('onPack', onPack)
+
+        if (onPack) {
+            // let currentPalletsMatch = Boolean((currentPallets.filter(pallet => pallet.tray_id === packData.tray.id)).length)
+            
+            let newCurrentPallet = {
+                id: newPallet.id,
+                trays: newPallet.trays,
+                max: newPallet.max,
+                virtualTrays: newPallet.trays,
+                tray_id: newPallet.tray_id,
+                virtualCapacity: newPallet.max - newPallet.trays
+            }
+            addPalletToCurrentPallets(newCurrentPallet)
+            console.log('newCurrentPallet', newCurrentPallet)
+        }
+
+
+
+        // console.log('newPallet', newPallet)
+
+        setPalletData(palletDataDefault())
+
 
         if (dialog != false) {
             closeDialog()
         }
-        afterSubmit()
+
 
     }
 
     const update = async () => {
-        console.log('palletDataUpdate', palletData)
+        console.log('palletData', palletData)
+
         try {
             await pallets.update(palletData.id, palletData.max, palletData.storage.id)
             openSnack('Pallet ' + palletData.id + ' actualizado', 'success')
@@ -71,7 +95,7 @@ export default function NewPalletForm(props) {
                 id: palletData.id,
                 storageName: palletData.storage.label,
                 max: palletData.max,
-              }])
+            }])
         } catch (err) {
             console.log('errOnUpdate', err)
         }
@@ -81,8 +105,8 @@ export default function NewPalletForm(props) {
     return (
         <>
             <form onSubmit={(e) => { e.preventDefault(); savePallet() }} >
-                <Grid container direction={'column'} paddingTop={dialog ? 1 : 0}>
-                    <Grid item >
+                <Grid container direction={'column'} paddingTop={dialog ? 1 : 0} spacing={1} p={1}>
+                    <Grid item  display={onPack?  'none' : 'inline-block'}>
                         <Autocomplete
                             inputValue={storagesInput}
                             onInputChange={(e, newInputValue) => {
@@ -123,6 +147,7 @@ export default function NewPalletForm(props) {
                             value={palletData.weight}
                             onChange={(e) => { setPalletData({ ...palletData, weight: e.target.value }) }}
                             variant="outlined"
+                            type='number'
                             size={'small'}
                             InputProps={{
                                 endAdornment: <InputAdornment position="end">kg</InputAdornment>
@@ -137,8 +162,8 @@ export default function NewPalletForm(props) {
                             value={palletData.max}
                             onChange={(e) => { setPalletData({ ...palletData, max: e.target.value }) }}
                             variant="outlined"
-                            size={'small'}
                             type='number'
+                            size={'small'}
                             InputProps={{
                                 endAdornment: <InputAdornment position="end">bandejas</InputAdornment>
                             }}
@@ -163,8 +188,9 @@ export default function NewPalletForm(props) {
 
 function palletDataDefault() {
     return ({
-        storage: { id: 0, key: 0, label: '' },
-        tray: { id: 0, key: 0, label: '' },
-        weight: ''
+      storage: { id: 0, key: 0, label: '' },
+      tray: { id: 0, key: 0, label: '' },
+      weight: '',
+      max: 0,
     })
-}
+  }

@@ -8,7 +8,7 @@ import DoneAllIcon from '@mui/icons-material/DoneAll'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, FormControlLabel,
-    Switch, TextField, InputAdornment, Autocomplete
+    Switch, TextField, InputAdornment, Autocomplete, Divider
 } from '@mui/material'
 import PackCard from '../../Cards/PackCard/PackCard'
 import LockIcon from '@mui/icons-material/Lock'
@@ -19,13 +19,14 @@ import InfoDataGrid from './InfoDataGrid'
 import PrintIcon from '@mui/icons-material/Print'
 import PrintDialog from '../../PrintDialog/PrintDialog'
 import ReceptionToPrint from '../../NewReception/ReceptionToPrint'
-import { set } from 'date-fns'
+
 
 
 const receptions = require('../../../services/receptions')
 const variesties = require('../../../services/varieties')
 const types = require('../../../services/types')
 const producerAccounts = require('../../../services/producerAccounts')
+const packs = require('../../../services/packs')
 
 
 
@@ -46,6 +47,7 @@ export default function ReceptionsGrid(props) {
     const [typesOptions, setTypesOptions] = useState([])
 
     const [openPrintDialog, setOpenPrintDialog] = useState(false)
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
 
     console.log(user)
 
@@ -203,6 +205,17 @@ export default function ReceptionsGrid(props) {
         })
     }
 
+    const destroyReception = async () => {
+        await receptions.destroy(rowData.id)
+        const packs_ = rowData.packs
+        console.log('PACKS', packs)
+        packs_.forEach(async (pack) => {
+            await packs.destroy(pack.id)
+        })
+        gridApiRef.current.updateRows([{ id: rowData.rowId, _action: 'delete' }])
+        setOpenDeleteDialog(false)
+    }
+
     const columns = [
         { field: 'id', headerName: 'Id', flex: .3, type: 'number', headerClassName: 'row-header-tiny', valueFormatter: (params) => params.value },
         { field: 'producerName', headerName: 'Productor', flex: .8, headerClassName: 'row-header-tiny' },
@@ -211,10 +224,12 @@ export default function ReceptionsGrid(props) {
         { field: 'typeName', headerName: 'Tipo', flex: .3, hide: true, headerClassName: 'row-header-tiny' },
         { field: 'guide', headerName: 'Guía', flex: .3, hide: true, headerClassName: 'row-header-tiny', },
         {
-            field: 'clp', headerName: 'CLP', flex: .3, hide: false, headerClassName: 'row-header-tiny',
+            field: 'clp', headerName: 'Precio', flex: .3, hide: false, headerClassName: 'row-header-tiny',
             valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
         },
-        { field: 'usd', headerName: 'USD', flex: .3, hide: true, headerClassName: 'row-header-tiny' },
+        { field: 'usd', headerName: 'Dolar', flex: .35, hide: false, headerClassName: 'row-header-tiny',
+        valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'USD' })
+     },
         { field: 'change', headerName: 'Cambio', flex: .3, hide: true, headerClassName: 'row-header-tiny' },
         { field: 'money', headerName: 'Moneda', flex: .35, hide: false, headerClassName: 'row-header-tiny' },
         {
@@ -282,7 +297,7 @@ export default function ReceptionsGrid(props) {
                     icon={<DeleteIcon sx={{ fontSize: 16 }} />}
                     onClick={() => {
                         setRow(params)
-                        openSnack('La recepción ya esta cerrada', 'error')
+                        setOpenDeleteDialog(true)
                         
                     }}
                 />,
@@ -346,7 +361,7 @@ export default function ReceptionsGrid(props) {
     return (
         <>
             {/* <DataGrid title={title} rows={receptionsList} columns={columns} height='80vh' setGridApiRef={setGridApiRef} /> */}
-            <InfoDataGrid title={title} rows={receptionsList} columns={columns} height='80vh' setGridApiRef={setGridApiRef} />
+            <InfoDataGrid title={title} rows={receptionsList} columns={columns} height='87vh' setGridApiRef={setGridApiRef} />
 
             <Dialog open={openEditDialog} maxWidth={'xs'} fullWidth>
                 <form onSubmit={(e) => { e.preventDefault(); editReception() }}>
@@ -530,6 +545,19 @@ export default function ReceptionsGrid(props) {
                 <DialogActions sx={{ padding: 2 }}>
                     <Button variant='contained' onClick={() => { closeReception() }}>Cerrar recepción</Button>
                     <Button variant='outlined' onClick={() => setLockReceptionDialog(false)}>Cerrar</Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={openDeleteDialog} maxWidth={'xs'} fullWidth>
+                <DialogTitle sx={{ padding: 2 }}> Elimiar recepción {rowData.id}</DialogTitle>
+                <DialogContent sx={{ padding: 2 }}>
+                    <Typography variant={'subtitle2'}>¿Esta seguro que desea eliminar la recepción {rowData.id}, del productor {rowData.producerName}?</Typography>
+                    <Divider sx={{paddingTop: 2}}/>
+                    <Typography  textAlign={'right'} fontSize={10}>La eliminación de esta recepción generara una nota de credito si ya se encuentra cerrada y eliminara los packs del pallet correspondiente</Typography>
+                </DialogContent>
+                <DialogActions sx={{ padding: 2 }}>
+                    <Button variant='contained' onClick={() => { destroyReception()}}>Eliminar</Button>
+                    <Button variant='outlined' onClick={() =>{setOpenDeleteDialog(false)}}>Cerrar</Button>
                 </DialogActions>
             </Dialog>
 

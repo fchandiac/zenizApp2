@@ -1,18 +1,19 @@
 import React from 'react'
-import { Dialog, DialogActions, DialogTitle, DialogContent, Grid, TextField, Button } from '@mui/material'
+import { Dialog, DialogActions, DialogTitle, DialogContent, Grid, TextField, Button, CardMedia } from '@mui/material'
 import { useAppContext } from '../appProvider'
 import { useRouter } from 'next/router'
+import { Box } from '@mui/system'
 
 const users = require('../services/users')
 
 export default function index() {
-  const { setUser, openSnack, setPageTitle} = useAppContext()
+  const { setUser, openSnack, setPageTitle } = useAppContext()
   const router = useRouter()
   const [userData, setUserData] = React.useState({ user: '', pass: '' })
 
 
-  const login = async() => {
-    try{
+  const login = async () => {
+    try {
       const findUser = await users.findOneByUser(userData.user)
       if (findUser === null) {
         openSnack('Usuario no encontrado', 'error')
@@ -28,31 +29,38 @@ export default function index() {
         }
       }
 
-    } catch(err){
+    } catch (err) {
       openSnack('Error de conexión al servidor', 'error')
-      
+
       // if (err.errors[0].message === 'user not found') {])
     }
-    
+
 
 
   }
 
   return (
     <>
-       <Dialog open={true} maxWidth={'xs'} fullWidth
+      <Dialog open={true} maxWidth={'xs'} fullWidth
         BackdropProps={{
-          sx: { backgroundColor: 'rgba(0, 0, 0, 0.1)' },
+          sx: { backgroundColor: '#AAB4C9' },
         }}
       // PaperProps={{
       //   sx: { boxShadow: '0px 20px 300px rgba(0, 0, 0, 0.6)' },
       // }}
       >
-        <DialogTitle sx={{ p: 2 }}>
-          Acceso
-        </DialogTitle>
+
         <form onSubmit={(e) => { e.preventDefault(); login() }}>
           <DialogContent sx={{ p: 2 }}>
+            <Box display="flex" justifyContent="center" alignItems="center" >
+              <CardMedia
+                 component="img" // Indica que estás mostrando una imagen
+                 alt=""
+                 sx={{maxWidth:'10vw', paddingBottom:2}}
+        
+                 image="http://localhost:3001/images/logo.png" // Ruta de la imagen
+              />
+            </Box>
             <Grid container spacing={1} direction={'column'}>
               <Grid item marginTop={1}>
                 <TextField

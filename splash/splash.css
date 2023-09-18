@@ -1,5 +1,5 @@
 body {
-    background-color: #1976d2;
+    background-color: #4B5A7B;
     margin: 0 !important;
 }
 .flex {
@@ -14,14 +14,31 @@ body {
 }
 
 .splash-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.text-info {
+    margin-top: 20px;
+}
+
+
+.splash-container {
     display: grid;
     grid-template-columns: 60% 40%;
+    height: 100vh;
+    text-align: left;
 }
 
 .img{
-    width: 100%;
-    object-fit:contain;
-    top: 0;
+  
+   max-height: 100vh;
+}
+
+.img2{
+    height: 20vh;
 }
 
 .text-info{
@@ -29,7 +46,7 @@ body {
     padding-right: 1rem;
     font-size: 0.9rem;
     text-align: right;
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
 }
 
 .text-info p {
@@ -37,7 +54,7 @@ body {
 }
 
 .circle {
-    background-color: #1976d2;
+    background-color: #4B5A7B;
     border-radius: 5px;
     width: 280px;
     height: 10px;

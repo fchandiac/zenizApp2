@@ -34,6 +34,9 @@ export default function Pallets() {
           <Grid container spacing={1} direction={'column'}>
             <Grid item>
               <Paper variant='outlined'>
+                <Box p={1}>
+                  Nuevo Pallet
+                </Box>
                 <NewPalletForm
                   dialog={false}
                   closeDialog={() => { }}

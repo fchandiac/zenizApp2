@@ -34,7 +34,7 @@ export default function ProducerForm(props) {
   return (
     <>
       <form onSubmit={(e) => { e.preventDefault(); saveProducer() }} >
-        <Grid container direction={'column'} p={1}>
+        <Grid container direction={'column'} p={1} spacing={1}>
           <Grid item>
             <TextField
               label='Nombre'

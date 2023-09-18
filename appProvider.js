@@ -109,10 +109,19 @@ const reducer = (state, action) => {
             }
         case 'ADD_PACK':
             return { ...state, reception: { ...state.reception, packs: [...state.reception.packs, action.value] } }
+        case 'REMOVE_PACK':
+            const packs_ = state.reception.packs.filter((pack, index) => {
+                return index !== (action.value.id - 1)
+              })
+
+            
+            return { ...state, reception: { ...state.reception, packs: packs_ } }
         case 'SET_LOCK':
             return { ...state, lock: action.value }
         case 'SET_CURRENT_PALLETS':
             return { ...state, currentPallets: action.value }
+        case 'ADD_PALLET_TO_CURRENT_PALLETS':
+            return { ...state, currentPallets: [...state.currentPallets, action.value] }
         case 'RESET_RECEPTION':
             return {
                 ...state,
@@ -228,8 +237,8 @@ const reducer = (state, action) => {
                 },
             }
 
-            case 'REMOVE_ALL_DISPATCH_PALLET':
-                return { ...state, dispatch_: { ...state.dispatch_, pallets: [] } }
+        case 'REMOVE_ALL_DISPATCH_PALLET':
+            return { ...state, dispatch_: { ...state.dispatch_, pallets: [] } }
 
         default:
     }
@@ -441,13 +450,21 @@ const AppProvider = ({ children }) => {
     const removeReturnetTray = (data) => {
         dispatch({ type: 'REMOVE_RETURNET_TRAY', value: data })
     }
-    
+
     const resetReturnetTrays = () => {
         dispatch({ type: 'RESET_RETURNET_TRAYS' })
     }
 
     const setUserProfile = (data) => {
         dispatch({ type: 'SET_USER_PROFILE', value: data })
+    }
+
+    const addPalletToCurrentPallets = (data) => {
+        dispatch({ type: 'ADD_PALLET_TO_CURRENT_PALLETS', value: data })
+    }
+
+    const removePack = (packId) => {
+        dispatch({ type: 'REMOVE_PACK', value: packId })
     }
 
 
@@ -546,7 +563,9 @@ const AppProvider = ({ children }) => {
             addReturnetTrays,
             removeReturnetTray,
             resetReturnetTrays,
-            setUserProfile
+            setUserProfile,
+            addPalletToCurrentPallets,
+            removePack
         }}>
             {children}
         </AppContext.Provider>

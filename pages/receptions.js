@@ -54,8 +54,9 @@ export default function otherPage() {
 
   return (
     <>
-      <Grid container spacing={1}>
+      <Grid container spacing={1} >
         <Grid item xs={1.5}>
+          <Grid container spacing={1} direction='column'>
           <Grid item fontSize={12}>
             <DesktopDatePicker
               className='small-date-picker'
@@ -82,6 +83,7 @@ export default function otherPage() {
               onChange={(e) => { setFilterDates({ ...filterDates, end: e }) }}
               renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
             />
+          </Grid>
           </Grid>
         </Grid>
         <Grid item xs={10.5}>

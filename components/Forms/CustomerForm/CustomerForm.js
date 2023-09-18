@@ -3,6 +3,7 @@ import { useAppContext } from '../../../appProvider'
 import { Grid, TextField, Button } from '@mui/material'
 
 const customers = require('../../../services/customers')
+const utils = require('../../../utils')
 
 export default function CustomerForm(props) {
     const { dialog, edit, closeDialog, afterSubmit, customerData, setCustomerData, gridApiRef } = props
@@ -36,7 +37,7 @@ export default function CustomerForm(props) {
     return (
         <>
         <form onSubmit={(e) => { e.preventDefault(); saveCustomer() }} >
-          <Grid container direction={'column'} p={1}>
+          <Grid container direction={'column'} spacing={1}  p={1}>
             <Grid item>
               <TextField
                 label='Nombre'
@@ -53,7 +54,7 @@ export default function CustomerForm(props) {
               <TextField
                 label='Rut'
                 value={customerData.rut}
-                onChange={(e) => { setCustomerData({ ...customerData, rut: e.target.value }) }}
+                onChange={(e) => { setCustomerData({ ...customerData, rut: utils.formatRut(e.target.value) }) }}
                 variant="outlined"
                 size={'small'}
                 fullWidth
@@ -64,10 +65,9 @@ export default function CustomerForm(props) {
                 <TextField
                     label='Teléfono'
                     value={customerData.phone}
-                    onChange={(e) => { setCustomerData({ ...customerData, weight: e.target.value }) }}
+                    onChange={(e) => { setCustomerData({ ...customerData, phone: e.target.value }) }}
                     variant="outlined"
                     size={'small'}
-                    type='number'
                     fullWidth
           
                 />
@@ -76,10 +76,9 @@ export default function CustomerForm(props) {
                 <TextField
                     label='Mail'
                     value={customerData.mail}
-                    onChange={(e) => { setCustomerData({ ...customerData, weight: e.target.value }) }}
+                    onChange={(e) => { setCustomerData({ ...customerData, mail: e.target.value }) }}
                     variant="outlined"
                     size={'small'}
-                    type='number'
                     fullWidth
              
                 />
@@ -88,10 +87,9 @@ export default function CustomerForm(props) {
                 <TextField
                     label='Dirección'
                     value={customerData.address}
-                    onChange={(e) => { setCustomerData({ ...customerData, weight: e.target.value }) }}
+                    onChange={(e) => { setCustomerData({ ...customerData, address: e.target.value }) }}
                     variant="outlined"
                     size={'small'}
-                    type='number'
                     fullWidth
            
                 />

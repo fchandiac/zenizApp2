@@ -1,6 +1,6 @@
 import {
     Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Grid,
-    IconButton, Switch, TextField, InputAdornment, Paper, Typography
+    IconButton, Switch, TextField, InputAdornment, Paper, Typography, Box
 } from '@mui/material'
 import React, { useState, useEffect } from 'react'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
@@ -65,7 +65,8 @@ export default function NewReception() {
         setReceptionGross,
         setReceptionNet,
         setReceptionImpurityWeight,
-        resetReturnetTrays
+        resetReturnetTrays,
+        currentPallets, setCurrentPallets, setReceptionMoney
     } = useAppContext()
 
 
@@ -96,12 +97,30 @@ export default function NewReception() {
     })
 
     useEffect(() => {
+        const fectData = async () => {
+            let pallets_ = await pallets.findAll()
+            let data = pallets_.filter(item => item.dispatch == false)
+            
+            data = pallets_.map(item => ({
+                id: item.id,
+                trays: item.trays,
+                max: item.max,
+                virtualTrays: item.trays,
+                tray_id: item.tray_id,
+                virtualCapacity: item.max - item.trays
+            }))
+            // let newCurrentPallets = [...currentPallets, ...data]
+            setCurrentPallets(data)
+        } 
+        fectData()
+    }, [])
+
+    useEffect(() => {
         if(openPrintDialog == false){
             console.log('openPrintDialog', openPrintDialog)
             resetReturnetTrays()
         }
-    }, [openPrintDialog]
-    )
+    }, [openPrintDialog])
 
     useEffect(() => {
         producers.findAll()
@@ -199,18 +218,24 @@ export default function NewReception() {
         setReceptionChange(change)
         setReceptionToPay(result * reception.net)
 
+        // if (usd > 1 && result == 0) {
+        //     console.log('ReceptionMoney', receptionMoney)
+        //     // console.log('usd', usd)
+        //     // setReceptionMoney('USD')
+        // }
+
     }
 
-    const previewReception = () => {
-        console.log('Reception', reception)
-    }
+
 
     const saveReception = async () => {
-
-
         if (reception.packs.length == 0) {
             openSnack('No hay packs cargados a la rcepción', 'error')
         } else {
+            let money = 'CLP'
+            if (receptionUsd > 0 && receptionClp == 0) {
+                money = 'USD'
+            }
             try {
                 const newReception_ = await receptions.create(
                     reception.producer.id,
@@ -220,7 +245,7 @@ export default function NewReception() {
                     reception.clp,
                     reception.usd,
                     reception.change,
-                    reception.money,
+                    money,
                     reception.traysQuanty,
                     reception.traysWeight,
                     reception.gross,
@@ -229,34 +254,6 @@ export default function NewReception() {
                     reception.toPay,
                 )
 
-                // reception.packs.forEach(async (pack) => {
-                //     console.log('packReception')
-                //     const newPack = await packs.create(
-                //         pack.pallet.id,
-                //         pack.tray.id,
-                //         newReception_.id, //reception id
-                //         pack.quanty,
-                //         pack.traysWeight,
-                //         pack.impurity,
-                //         pack.impurityWeight,
-                //         pack.gross,
-                //         pack.net,
-                //     )
-                //     const tray_ = await trays.findOneById(pack.tray.id)
-                //     let currentBalance = tray_.stock + parseInt(pack.quanty)
-                //     await trays.updateStock(tray_.id, currentBalance)
-
-                //     await traysMovements.create(
-                //         tray_.id,
-                //         reception.producer.id,
-                //         newReception_.id,
-                //         pack.quanty,
-                //         3,
-                //         currentBalance,
-                //         'Recibidas recepción ' + newReception_.id + ' pack ' + newPack.id
-                //     )
-
-                // })
 
                 setLastReceptionId(newReception_.id)
 
@@ -270,6 +267,7 @@ export default function NewReception() {
                             console.log('returned')
                             const tray_ = await trays.findOneById(tray.tray.id)
                             let currentBalance = tray_.stock - parseInt(tray.quanty)
+
                             await trays.updateStock(tray_.id, currentBalance)
 
                             await traysMovements.create(
@@ -281,7 +279,7 @@ export default function NewReception() {
                                 currentBalance,
                                 'Devueltas en recepción ' + newReception_.id
                             )
-                            // console.log('newMov', newMov)
+                             console.log('newMov', newMov)
                         })
                         openSnack('Recepción guardada', 'success')
                         setOpenPrintDialog(true)
@@ -414,7 +412,7 @@ export default function NewReception() {
                         />
                     </Grid>
                     <Grid item xs={12} >
-                        <Grid container sx={{ display: receptionShowPrices ? 'inline-block' : 'none' }}>
+                        <Grid container spacing={1} sx={{ display: receptionShowPrices ? 'inline-block' : 'none' }}>
                             <Grid item>
                                 <FormControlLabel
                                     control={<Switch checked={receptionShowUsd} onChange={() => {
@@ -474,7 +472,6 @@ export default function NewReception() {
                             </Grid>
                         </Grid>
                     </Grid>
-
                     <Grid item xs={12}>
                         <IconButton onClick={() => { setOpenAddPackDialog(true) }}>
                             <AddCircleIcon fontSize='large' />
@@ -483,10 +480,6 @@ export default function NewReception() {
                     </Grid>
                     <Grid item textAlign={'right'} xs={12}>
                         <PacksGrid />
-                    </Grid>
-
-                    <Grid item xs={8} padding={1}>
-                        <ReturnedTrays />
                     </Grid>
                     <Grid item xs={4}>
                         <Paper variant='outlined'>
@@ -583,6 +576,15 @@ export default function NewReception() {
                             </Grid>
                         </Paper>
                     </Grid>
+                    <Grid item xs={4} >
+                    </Grid>
+
+                    <Grid item xs={4}>
+                        <Box height={'100%'}>
+                        <ReturnedTrays />
+                        </Box>
+                    </Grid>
+                    
                 </Grid>
 
             </form>
@@ -662,7 +664,7 @@ const traysOptionsData = [
 
 
 async function processPacks(reception, newReception_) {
-    const promises = reception.packs.map(async (pack) => {
+    const promises = reception.packs.forEach(async (pack) => {
         console.log('packReception')
         const newPack = await packs.create(
             pack.pallet.id,

@@ -8,7 +8,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, FormControlLabel,
-    Switch, TextField, InputAdornment, Autocomplete, Paper
+    Switch, TextField, InputAdornment, Autocomplete, Paper, Box, IconButton, Tooltip
 } from '@mui/material'
 import moment from 'moment'
 
@@ -25,7 +25,17 @@ export default function TraysMovementsGrid(props) {
         { field: 'id', headerName: 'Id', flex: 1, type: 'number', valueFormatter: (params) => params.value },
         { field: 'trayName', headerName: 'Bandeja', flex: 1 },
         { field: 'producerName', headerName: 'Productor', flex: 1 },
-        { field: 'receptionId', headerName: 'Recepción', flex: 1 },
+        {
+            field: 'receptionId', headerName: 'Recepción', flex: 1,
+            renderCell: (params) => {
+                return params.value === '' ?
+                    <Box sx={{ display: 'flex', justifyContent: 'center', color: '#757575' }}>
+                        <DeleteIcon />
+                    </Box> :
+                    params.value
+
+            }
+        },
         { field: 'quanty', headerName: 'Cantidad', flex: 1, type: 'number' },
         {
             field: 'type', headerName: 'Tipo', flex: 1,
@@ -35,7 +45,8 @@ export default function TraysMovementsGrid(props) {
         { field: 'description', headerName: 'Descripción', flex: 2 },
         {
             field: 'createdAt', headerName: 'Fecha', flex: 1, type: 'dateTime',
-            valueFormatter: (params) => moment(params.value).format('DD-MM-YYYY HH:mm')
+            valueFormatter: (params) => moment(params.value).format('DD-MM-YYYY HH:mm'),
+            headerClassName: 'data-grid-last-column-header'
         },
     ]
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {
     AppBar, Container, Drawer, IconButton, Box, Divider, List, ListItem, ListItemButton, ListItemText,
-    Typography, Dialog, DialogTitle, DialogContent, Button, Paper, Popover, Grid, TextField, DialogActions
+    Typography, Dialog, DialogTitle, DialogContent, Button, Paper, Popover, Grid, TextField, DialogActions, CardMedia
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import AccountCircle from '@mui/icons-material/AccountCircle'
@@ -19,7 +19,7 @@ const users = require('../../services/users')
 
 export default function Layout(props) {
     const { children } = props
-    const { pageTitle, setPageTitle, lock, setLock, openSnack, user, setUserProfile } = useAppContext()
+    const { pageTitle, setPageTitle, openSnack, user, setUserProfile } = useAppContext()
     const router = useRouter()
     const [openDrawer, setOpenDrawer] = useState()
     const [openAuthDialog, setOpenAuthDialog] = useState(false)
@@ -31,6 +31,7 @@ export default function Layout(props) {
     const openUserInfo = Boolean(anchorElPopOver)
     const id = openUserInfo ? 'simple-popover' : undefined
 
+
     const updateLock = async () => {
         const findUser = await users.findOneByUser(userAuthData.user)
         if (findUser == null) {
@@ -39,7 +40,6 @@ export default function Layout(props) {
             console.log(findUser)
             if (findUser.pass == userAuthData.pass) {
                 if (findUser.Profile.id == 1001) {
-                    setLock(!lock)
                     setUserProfile(findUser.Profile)
                     setOpenAuthDialog(false)
                     setUserAuthData(userAuthDataDefault())
@@ -50,6 +50,13 @@ export default function Layout(props) {
                 openSnack('Contraseña incorrecta', 'error')
             }
         }
+    }
+
+    const lock = async () => {
+        const findUser = await users.findOneByUser(user.user)
+        setUserProfile(findUser.Profile)
+
+
     }
 
     return (
@@ -81,10 +88,18 @@ export default function Layout(props) {
                         >
                             <AccountCircle />
                         </IconButton>
-                        <IconButton onClick={() => { lock ? setOpenAuthDialog(true) : setLock(!lock) }} color={'inherit'} size="large" sx={{ mr: 1 }}>
-                            <LockOpenIcon sx={{ display: lock ? 'none' : 'inline-block' }} />
-                            <LockIcon sx={{ display: lock ? 'inline-block' : 'none' }} />
+                        <IconButton 
+                        sx={{ mr: 1 }}
+                        onClick={() => { user.Profile.id != 1001 ? setOpenAuthDialog(true) : lock() }} color={'inherit'} size="large" >
+                            <LockOpenIcon sx={{ display: user.Profile.id == 1001 ? 'inline-block' : 'none' }} />
+                            <LockIcon sx={{ display: user.Profile.id == 1001 ? 'none' : 'inline-block' }} />
                         </IconButton>
+                        <CardMedia
+                            component="img" // Indica que estás mostrando una imagen
+                            alt=""
+                            sx={{ width: '2.7vw'}}
+                            image="http://localhost:3001/images/symbol.png" // Ruta de la imagen
+                        />
                     </Box>
 
                 </Container>
@@ -107,7 +122,7 @@ export default function Layout(props) {
                         <Typography fontSize={10}>{'Perfil: ' + user.Profile.name}</Typography>
                     </Box>
                     <Divider />
-                    <Box  display={'flex'} paddingTop={1}>
+                    <Box display={'flex'} paddingTop={1}>
                         <Button variant={'outlined'} onClick={() => {
                             setAnchorElPopOver(null)
                             router.push({
@@ -141,7 +156,7 @@ export default function Layout(props) {
                 </Box>
                 <Divider />
                 <List>
-                    <ListItem disablePadding sx={{ display: user.Profile.new_reception ? 'inline-block': 'none'}}>
+                    <ListItem disablePadding sx={{ display: user.Profile.new_reception ? 'inline-block' : 'none' }}>
                         <ListItemButton>
                             <ListItemText primary={'Nueva recepción'}
                                 onClick={() => {
@@ -302,6 +317,7 @@ export default function Layout(props) {
                                     variant="outlined"
                                     size={'small'}
                                     fullWidth
+                                    autoFocus
                                     required
                                 />
                             </Grid>
@@ -330,22 +346,22 @@ export default function Layout(props) {
 
             <Dialog open={openChangePassDialog} maxWidth={'xs'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}>Cambiar contraseña</DialogTitle>
-        
-                    <DialogContent sx={{ padding: 1 }}>
-                     <ChangePassForm   
-                        closeDialog={(e) => {setOpenChangePassDialog(false)}}
-                        user= {user.user}
+
+                <DialogContent sx={{ padding: 1 }}>
+                    <ChangePassForm
+                        closeDialog={(e) => { setOpenChangePassDialog(false) }}
+                        user={user.user}
                         afterSubmit={() => {
                             console.log('afterSubmit')
                             setAnchorElPopOver(null)
                             setOpenChangePassDialog(false)
                         }}
-                        />
-                    </DialogContent>
-            
-       
+                    />
+                </DialogContent>
+
+
             </Dialog>
-            
+
 
             <Snack />
 
