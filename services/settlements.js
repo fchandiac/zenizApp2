@@ -45,4 +45,25 @@ function findAllBetweenDates(start, end) {
     return settlements
 }
 
-export { create, findAllBetweenDates }
+
+
+
+function findOneById(id){
+    const settlement = new Promise((resolve, reject) => {
+        fetch(server_url + 'settlements/findOneById', {
+            method: 'POST',
+            body: JSON.stringify({id}),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+    return settlement
+}
+export { create, findAllBetweenDates, findOneById }

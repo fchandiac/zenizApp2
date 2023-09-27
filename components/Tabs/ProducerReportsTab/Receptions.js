@@ -100,6 +100,7 @@ export default function Receptions(props) {
     <>
       <Grid container spacing={1}>
         <Grid item xs={2}>
+          <Grid container direction='column' spacing={1}>
           <Grid item>
             <DesktopDatePicker
               label="Fecha incial"
@@ -129,6 +130,7 @@ export default function Receptions(props) {
             </IconButton>
 
           </Grid>
+          </Grid>
         </Grid>
         <Grid item xs={10}>
           <ReceptionsGrid receptionsList={receptionsList} title={title} />
@@ -139,7 +141,7 @@ export default function Receptions(props) {
         open={openPrintDialog}
         setOpen={setOpenPrintDialog}
         title={'Reporte de recepciones'}
-        maxWidth={'lg'}
+        dialogWidth={'lg'}
       >
         <ReceptionsReportToPrint reportData={reportData} />
       </PrintDialog>

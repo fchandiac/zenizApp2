@@ -5,10 +5,11 @@ import { useAppContext } from '../../../appProvider'
 
 
 const varieties = require('../../../services/varieties')
+const records = require('../../../services/records')
 
 export default function VarietyForm(props) {
   const { dialog, edit, closeDialog, afterSubmit, varietyData, setVarietyData, gridApiRef } = props
-  const { openSnack } = useAppContext()
+  const { openSnack, user } = useAppContext()
 
 
   const saveVariety = async () => {
@@ -57,6 +58,12 @@ export default function VarietyForm(props) {
         usd: varietyData.usd,
         money: varietyData.money,
       }])
+      await records.create(
+        'Variedades',
+        'Edición',
+        'Variedad ' + varietyData.name +  'Moneda: ' + varietyData.money + ' - CLP: ' + varietyData.clp + ' - USD: ' + varietyData.usd,
+        user.id
+      )
       setVarietyData(varietyDataDefault())
       dialog ? closeDialog() : null
     } catch (err) {
@@ -71,7 +78,7 @@ export default function VarietyForm(props) {
   return (
     <>
       <form onSubmit={(e) => { e.preventDefault(); saveVariety() }} >
-        <Grid container direction={'column'} p={1}>
+        <Grid container direction={'column'} p={1} spacing={1}>
           <Grid item>
             <TextField
               label='Nombre'
@@ -81,7 +88,7 @@ export default function VarietyForm(props) {
               size={'small'}
               fullWidth
               required
-              autoFocus= {dialog ? true : false}
+              autoFocus={dialog ? true : false}
             />
           </Grid>
           <Grid item >
@@ -90,9 +97,9 @@ export default function VarietyForm(props) {
               <Switch
                 checked={varietyData.moneySwitch}
                 onChange={(e) => {
-                  setVarietyData({ 
-                    ...varietyData, 
-                    moneySwitch: e.target.checked, 
+                  setVarietyData({
+                    ...varietyData,
+                    moneySwitch: e.target.checked,
                     clp: e.target.checked ? 0 : varietyData.clp,
                     usd: e.target.checked ? varietyData.usd : 0,
                     money: e.target.checked ? 'USD' : 'CLP'
@@ -108,7 +115,7 @@ export default function VarietyForm(props) {
               label='CLP'
               value={varietyData.clp}
               onChange={(e) => {
-                setVarietyData({ ...varietyData, usd: 0, clp: e.target.value  })
+                setVarietyData({ ...varietyData, usd: 0, clp: e.target.value })
               }}
               variant="outlined"
               type='number'
@@ -126,7 +133,7 @@ export default function VarietyForm(props) {
               label='USD'
               value={varietyData.usd}
               onChange={(e) => {
-                setVarietyData({ ...varietyData, clp: 0, usd: e.target.value  })
+                setVarietyData({ ...varietyData, clp: 0, usd: e.target.value })
               }}
               variant="outlined"
               type='number'

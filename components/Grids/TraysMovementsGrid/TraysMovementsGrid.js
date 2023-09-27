@@ -6,11 +6,14 @@ import InfoIcon from '@mui/icons-material/Info'
 import ViewQuiltIcon from '@mui/icons-material/ViewQuilt'
 import EditIcon from '@mui/icons-material/Edit'
 import { GridActionsCellItem } from '@mui/x-data-grid'
+import PrintIcon from '@mui/icons-material/Print'
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, FormControlLabel,
     Switch, TextField, InputAdornment, Autocomplete, Paper, Box, IconButton, Tooltip
 } from '@mui/material'
 import moment from 'moment'
+import PrintDialog from '../../PrintDialog/PrintDialog';
+import TrayMovementToPrint from './TrayMovementToPrint';
 
 
 const traysMovements = require('../../../services/traysMovements')
@@ -19,6 +22,7 @@ export default function TraysMovementsGrid(props) {
     const { traysMovementsList } = props
     const [gridApiRef, setGridApiRef] = useState(null)
     const [rowData, setRowData] = useState(rowDataDefault())
+    const [openPrintDialog, setOpenPrintDialog] = useState(false)
 
 
     const columns = [
@@ -46,7 +50,33 @@ export default function TraysMovementsGrid(props) {
         {
             field: 'createdAt', headerName: 'Fecha', flex: 1, type: 'dateTime',
             valueFormatter: (params) => moment(params.value).format('DD-MM-YYYY HH:mm'),
-            headerClassName: 'data-grid-last-column-header'
+        }, {
+            field: 'actions',
+            headerName: '',
+            headerClassName: 'data-grid-last-column-header',
+            type: 'actions', flex: .5, getActions: (params) => [
+                <GridActionsCellItem
+                    label='print'
+                    icon={<PrintIcon />}
+                    onClick={() => { 
+                        setRowData({
+                            id: params.row.id,
+                            trayId: params.row.trayId,
+                            trayName: params.row.trayName,
+                            producer: params.row.producer,
+                            producerName: params.row.producerName,
+                            reception: params.row.reception,
+                            quanty: params.row.quanty,
+                            type: params.row.type,
+                            balance: params.row.balance,
+                            description: params.row.description,
+                            createdAt: params.row.createdAt
+                        })
+                        setOpenPrintDialog(true)
+                     }}
+                />
+            ]
+
         },
     ]
 
@@ -97,7 +127,16 @@ export default function TraysMovementsGrid(props) {
                 money={false}
                 getRowClassName={getRowClassName}
             />
+            <PrintDialog
+                open={openPrintDialog}
+                setOpen={setOpenPrintDialog}
+                title={'Recibo moviento de bandejas'}
+                dilalogWidth={'sx'}
+            >
+                <TrayMovementToPrint movementId={rowData.id} />
+            </PrintDialog>
         </>
+
 
     )
 }

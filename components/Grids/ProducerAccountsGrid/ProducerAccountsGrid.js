@@ -6,7 +6,7 @@ import InfoIcon from '@mui/icons-material/Info'
 import ViewQuiltIcon from '@mui/icons-material/ViewQuilt'
 import EditIcon from '@mui/icons-material/Edit'
 import { GridActionsCellItem } from '@mui/x-data-grid'
-import moment from 'moment';
+import moment from 'moment'
 
 const producerAccounts = require('../../../services/producerAccounts')
 
@@ -40,6 +40,7 @@ export default function ProducerAccountsGrid(props) {
             case 0: return 'Recepción'
             case 1: return 'Anticipo'
             case 2: return 'Liquidación'
+            case 3: return 'Nota de débito'
         }
     }
 

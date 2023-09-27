@@ -5,10 +5,14 @@ import LockIcon from '@mui/icons-material/Lock'
 import DoneAllIcon from '@mui/icons-material/DoneAll'
 
 const receptions = require('../../services/receptions')
+const traysMovements = require('../../services/traysMovements')
+
 
 export default function ReceptionToPrint(props) {
-  const { receptionId, returnetTrays } = props
+  const { receptionId} = props
   const [receptionData, setReceptionData] = useState(receptionDataDefault())
+  const [returnedTraysData, setReturnedTraysData] = useState([])
+  const [totalReturneds, setTotalReturneds] = useState(0) 
 
   useEffect(() => {
     if (receptionId == 0) {
@@ -16,16 +20,30 @@ export default function ReceptionToPrint(props) {
     } else {
       const fetchData = async () => {
         const rec = await receptions.findOneById(receptionId)
-        console.log(rec)
+        const trays = await traysMovements.findAllByReception(receptionId)
+        let filterTrays =  trays.filter(tray => tray.type == 2)
+
+        let sumReturneds = filterTrays.reduce((a, b) => a + b.quanty, 0)
+
+        setReturnedTraysData(filterTrays)
+        setTotalReturneds(sumReturneds)
         setReceptionData(rec)
+
       }
       fetchData()
     }
   }, [receptionId])
 
+  const showToPay = (receptionData) => {
+    if ( receptionData.clp > 1)
+      return true
+    else
+      return false
+  }
+
   return (
     <>
-      <Paper variant='outlined' style={{ padding: '10px', borderColor: 'black' }}>
+      <Paper variant='outlined' style={{ padding: '5px', borderColor: 'black', width:'55mm' }}>
         <Box>
           <Typography variant='h6' align='center'>ZENIZ</Typography>
         </Box>
@@ -45,14 +63,20 @@ export default function ReceptionToPrint(props) {
           <Typography fontSize={10}>Variedad: {receptionData.Variety.name}</Typography>
           <Typography fontSize={10}>Tipo: {receptionData.Type.name}</Typography>
           <Typography
-            sx={{ display: receptionData.money == 'CLP' ? 'block' : 'none' }}
+            sx={{  display: receptionData.money == 'CLP' ? 'block' : 'none'  }}
             fontSize={10}
-          >Precio: {receptionData.clp.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</Typography>
+          >Precio por kg: {receptionData.clp.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</Typography>
           <Typography
             sx={{ display: receptionData.money == 'USD' ? 'block' : 'none' }}
             fontSize={10}
           >
             Precio en dolar: {receptionData.usd.toLocaleString('es-CL', { style: 'currency', currency: 'USD' })}
+          </Typography>
+          <Typography
+            sx={{ display: showToPay == true ? 'block' : 'none' }}
+            fontSize={10}
+          >
+            A pagar: {receptionData.to_pay.toLocaleString('es-CL', { style: 'currency', currency: 'USD' })}
           </Typography>
         </Box>
 
@@ -122,9 +146,9 @@ export default function ReceptionToPrint(props) {
                 {
                   new Intl.NumberFormat('es-CL', {
                     style: 'decimal',
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  }).format(pack.trays_weight) + ' kg bruto'
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(pack.gross) + ' kg bruto'
                 }
                 </Typography>
 
@@ -132,8 +156,8 @@ export default function ReceptionToPrint(props) {
                 {
                   new Intl.NumberFormat('es-CL', {
                     style: 'decimal',
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   }).format(pack.net) + ' kg neto'
                 }
                 </Typography>
@@ -144,15 +168,15 @@ export default function ReceptionToPrint(props) {
           }
         </Box>
 
-        <Divider sx={{ marginTop: 1, marginBottom: 1, backgroundColor: 'black' }} />
+        <Divider sx={{ marginTop: 1, marginBottom: 1, backgroundColor: 'black' , display: returnedTraysData.length > 0 ? 'block' : 'none' }} />
 
         <Box  
-        sx={{ display: returnetTrays.length > 0 ? 'block' : 'none' }}
+        sx={{ display: returnedTraysData.length > 0 ? 'block' : 'none' }}
         justifyContent='space-between' flexDirection={'column'}>
-          <Typography fontSize={14}  >Bandejas devueltas: </Typography>
+          <Typography fontSize={14}  >Bandejas devueltas: {totalReturneds}</Typography>
           {
-            returnetTrays.map((tray, index) => (
-              <Typography key={index} fontSize={12}>{tray.tray.label}: {tray.quanty}</Typography>
+            returnedTraysData.map((tray, index) => (
+              <Typography key={index} fontSize={10}>{tray.Tray.name}: {tray.quanty}</Typography>
             ))
           }
         </Box>

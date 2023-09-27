@@ -19,7 +19,7 @@ export default function Settlements() {
     useEffect(() => {
         const fetchData = async () => {
             const advancesByDates = await advances_.findAllBetweenDates(filterDates.start, filterDates.end)
-            let formattedAdvances =  advancesByDates.map(advance => ({
+            let formattedAdvances = advancesByDates.map(advance => ({
                 id: advance.id,
                 producerName: advance.Producer.name,
                 producerRut: advance.Producer.rut,
@@ -31,7 +31,7 @@ export default function Settlements() {
             console.log(advancesByDates)
             setAdvancesList(formattedAdvances)
         }
-            
+
         fetchData()
         if (moment(filterDates.start).format('DD-MM-YYYY') == moment(filterDates.end).format('DD-MM-YYYY')) {
             setTitle('Liquidaciones ' + moment(filterDates.start).format('DD-MM-YYYY'))
@@ -46,33 +46,35 @@ export default function Settlements() {
         <>
             <Grid container spacing={1}>
                 <Grid item xs={2}>
-                    <Grid item>
-                        <DesktopDatePicker
-                            label="Fecha incial"
-                            inputFormat='DD-MM-YYYY'
-                            value={filterDates.start}
-                            onChange={(e) => {
-                                console.log(e)
-                                setFilterDates({ ...filterDates, start: e })
-                            }}
-                            renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
-                        />
-                    </Grid>
-                    <Grid item>
-                        <DesktopDatePicker
-                            label="Fecha final"
-                            inputFormat='DD-MM-YYYY'
-                            value={filterDates.end}
-                            onChange={(e) => { setFilterDates({ ...filterDates, end: e }) }}
-                            renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
-                        />
+                    <Grid container direction='column' spacing={1}>
+                        <Grid item>
+                            <DesktopDatePicker
+                                label="Fecha incial"
+                                inputFormat='DD-MM-YYYY'
+                                value={filterDates.start}
+                                onChange={(e) => {
+                                    console.log(e)
+                                    setFilterDates({ ...filterDates, start: e })
+                                }}
+                                renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
+                            />
+                        </Grid>
+                        <Grid item>
+                            <DesktopDatePicker
+                                label="Fecha final"
+                                inputFormat='DD-MM-YYYY'
+                                value={filterDates.end}
+                                onChange={(e) => { setFilterDates({ ...filterDates, end: e }) }}
+                                renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
+                            />
+                        </Grid>
                     </Grid>
                 </Grid>
                 <Grid item xs={10}>
-                  <AdvancesGrid 
-                  advancesList={advancesList}
-                  
-                  />
+                    <AdvancesGrid
+                        advancesList={advancesList}
+
+                    />
                 </Grid>
             </Grid>
         </>

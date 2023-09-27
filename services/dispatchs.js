@@ -1,5 +1,5 @@
 
-const config= require('../config.js')
+const config = require('../config.js')
 const server_url = config.serverUrl
 
 
@@ -10,13 +10,13 @@ function create(
     usd,
     change,
     money,
-    trays_quanty,
-    trays_weight,
+    pallets_quanty,
+    pallets_weight,
     impurity_weight,
     gross,
     net,
     to_pay,
-    open,
+    open
 ) {
     let data = {
         customer_id,
@@ -25,13 +25,14 @@ function create(
         usd,
         change,
         money,
-        trays_quanty,
-        trays_weight,
+        pallets_quanty,
+        pallets_weight,
         impurity_weight,
         gross,
         net,
         to_pay,
         open,
+
     }
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
     const dispatch = new Promise((resolve, reject) => {
@@ -97,9 +98,7 @@ function findAllBetweenDate(start, end) {
     return dispatch
 }
 
-
-
-function close(id){
+function close(id) {
     let data = {
         id
     }
@@ -123,4 +122,67 @@ function close(id){
     return dispatch
 }
 
-export { create, findAll, findAllBetweenDate, close }
+
+
+function findOneById(id) {
+    let data = {
+        id
+    }
+    // let server_url = ipcRenderer.sendSync('server-url', 'sync')
+    const dispatch = new Promise((resolve, reject) => {
+        fetch(server_url + 'dispatchs/findOneById', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+
+    return dispatch
+}
+
+function update(
+    id,
+    clp,
+    usd,
+    change,
+    money,
+    impurity_weight,
+    to_pay
+) {
+    let data = {
+        id,
+        clp,
+        usd,
+        change,
+        money,
+        impurity_weight,
+        to_pay
+    }
+    // let server_url = ipcRenderer.sendSync('server-url', 'sync')
+    const dispatch = new Promise((resolve, reject) => {
+        fetch(server_url + 'dispatchs/update', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+
+    return dispatch
+}
+export { create, findAll, findAllBetweenDate, close, findOneById, update }

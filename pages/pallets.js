@@ -1,17 +1,9 @@
-// import React from 'react'
-// import PalletsTab from '../components/Tabs/PalletsTab/PalletsTab'
-
-// export default function pallets() {
-//   return (
-//    <PalletsTab />
-//   )
-// }
 
 import { Grid, Paper, Box } from '@mui/material'
 import React, { useState, useEffect } from 'react'
 import PalletsGrid from '../components/Grids/PalletsGrid'
-import NewPalletForm from '../components/Forms/NewPalletForm/NewPalletForm'
 import StoragesTable from '../components/Tables/StoragesTable/StoragesTable'
+import PalletForm from '../components/Forms/PalletForm'
 
 const storages = require('../services/storages')
 
@@ -35,9 +27,10 @@ export default function Pallets() {
             <Grid item>
               <Paper variant='outlined'>
                 <Box p={1}>
-                  Nuevo Pallet
+                  Nuevo pallet
                 </Box>
-                <NewPalletForm
+
+                <PalletForm
                   dialog={false}
                   closeDialog={() => { }}
                   palletData={palletData}
@@ -45,6 +38,7 @@ export default function Pallets() {
                   afterSubmit={() => {
                     setPalletData(palletDataDefault())
                     updateGrid_()
+                    console.log('afterSubmit')
                   }}
                 />
               </Paper>
@@ -53,13 +47,9 @@ export default function Pallets() {
               <Paper variant='outlined' >
                 <Grid container spacing={1} direction={'column'}>
                   <Grid item>
-
-                <StoragesTable />
+                    <StoragesTable />
                   </Grid>
                 </Grid>
-
-
-
               </Paper>
             </Grid>
           </Grid>

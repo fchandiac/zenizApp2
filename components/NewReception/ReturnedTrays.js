@@ -63,35 +63,38 @@ export default function ReturnedTrays() {
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell sx={{margin:0, padding:0, paddingLeft:1}}>Bandeja</TableCell>
-                        <TableCell sx={{margin:0, padding:0, paddingLeft:1}}>Cantidad</TableCell>
-                        <TableCell sx={{margin:0, padding:0, paddingLeft:1}}></TableCell>
+                        <TableCell sx={{ margin: 0, padding: 0, paddingLeft: 1 }}>Bandeja</TableCell>
+                        <TableCell sx={{ margin: 0, padding: 0, paddingLeft: 1 }}>Cantidad</TableCell>
+                        <TableCell sx={{ margin: 0, padding: 0, paddingLeft: 1 }}></TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {movements.map((row) => (
+                    {movements.map((row, index) => (
                         <TableRow
-                            key={row.id}
+                            key={index}
                             sx={{ '&:last-child td, &:last-child th': { border: 'none' } }}
                         >
-                            <TableCell sx={{margin:0, padding:0, paddingLeft:1, fontSize:'.75rem'}} >{row.tray.label}</TableCell>
-                            <TableCell sx={{margin:0, padding:0, paddingLeft:1, fontSize:'.75rem'}} >{row.quanty}</TableCell>
-                            <TableCell sx={{margin:0, padding:0, paddingLeft:1, fontSize:'.75rem'}} >
-                                <IconButton sx={{padding:0,  fontSize:'1.2rem'}  }>
-                                    <DeleteIcon onClick={() => { removeReturnedTray(row.id) }}
-                                     fontSize='inherit'
-                                     />
+                            <TableCell sx={{ margin: 0, padding: 0, paddingLeft: 1, fontSize: '.75rem' }} >{row.tray.label}</TableCell>
+                            <TableCell sx={{ margin: 0, padding: 0, paddingLeft: 1, fontSize: '.75rem' }} >{row.quanty}</TableCell>
+                            <TableCell sx={{ margin: 0, padding: 0, paddingLeft: 1, fontSize: '.75rem' }} >
+                                <IconButton
+                                    sx={{ padding: 0, fontSize: '1.2rem' }}
+                                    onClick={() => { removeReturnedTray(row.id) }}
+                                >
+                                    <DeleteIcon
+                                        fontSize='inherit'
+                                    />
                                 </IconButton>
-                            
+
                             </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
-                <TableFooter sx={{borderTop: '1px solid rgba(0, 0, 0, 0.12)', height:'100%'}}>
-                   <Box sx={{display:'flex', alignItems: 'center', paddingTop:1, paddingLeft: 1, width:'100%'}}>
-                     <Typography >Total:</Typography>
-                        <Typography sx={{paddingLeft:1}} >{movements.reduce((a, b) => a + parseInt(b.quanty), 0)}</Typography>
-                     </Box>
+                <TableFooter sx={{ borderTop: '1px solid rgba(0, 0, 0, 0.12)', height: '100%' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', paddingTop: 1, paddingLeft: 1, width: '100%' }}>
+                        <Typography >Total:</Typography>
+                        <Typography sx={{ paddingLeft: 1 }} >{movements.reduce((a, b) => a + parseInt(b.quanty), 0)}</Typography>
+                    </Box>
                 </TableFooter>
             </Table>
         </TableContainer>
@@ -107,7 +110,7 @@ export default function ReturnedTrays() {
                             padding: 1,
                             display: 'flex',
                             alignItems: 'center',
-                     
+
                             width: '100%'
                         }}>
                             <IconButton
@@ -128,42 +131,44 @@ export default function ReturnedTrays() {
 
             <Dialog open={openReturnedTraysDialog} maxWidth={'xs'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}>Devolver bandejas</DialogTitle>
-                <DialogContent sx={{ padding: 1 }}>
-                    <Grid container spacing={1} direction={'column'}>
-                        <Grid item marginTop={1}>
-                            <Autocomplete
-                                inputValue={traysInput}
-                                onInputChange={(e, newInputValue) => {
-                                    setTraysInput(newInputValue)
-                                }}
-                                isOptionEqualToValue={(option, value) => null || option.id === value.id}
-                                value={returnedTrayData.tray}
-                                onChange={(e, newValue) => {
-                                    setReturnedTrayData({ ...returnedTrayData, tray: newValue })
-                                }}
-                                options={traysOptions}
-                                renderInput={(params) => <TextField {...params} label='Bandeja' size={'small'} fullWidth required />}
-                            />
-                        </Grid>
-                        <Grid item >
-                            <TextField
-                                fullWidth
-                                label='Cantidad'
-                                variant='outlined'
-                                size='small'
-                                type='number'
-                                value={returnedTrayData.quanty}
-                                onChange={(e) => { setReturnedTrayData({ ...returnedTrayData, quanty: e.target.value }) }}
-                                required
-                            />
-                        </Grid>
+                <form onSubmit={(e) => { e.preventDefault(); addReturnedTray() }}>
+                    <DialogContent sx={{ padding: 1 }}>
+                        <Grid container spacing={1} direction={'column'}>
+                            <Grid item marginTop={1}>
+                                <Autocomplete
+                                    inputValue={traysInput}
+                                    onInputChange={(e, newInputValue) => {
+                                        setTraysInput(newInputValue)
+                                    }}
+                                    isOptionEqualToValue={(option, value) => null || option.id === value.id}
+                                    value={returnedTrayData.tray}
+                                    onChange={(e, newValue) => {
+                                        setReturnedTrayData({ ...returnedTrayData, tray: newValue })
+                                    }}
+                                    options={traysOptions}
+                                    renderInput={(params) => <TextField {...params} label='Bandeja' size={'small'} fullWidth required />}
+                                />
+                            </Grid>
+                            <Grid item >
+                                <TextField
+                                    fullWidth
+                                    label='Cantidad'
+                                    variant='outlined'
+                                    size='small'
+                                    type='number'
+                                    value={returnedTrayData.quanty}
+                                    onChange={(e) => { setReturnedTrayData({ ...returnedTrayData, quanty: e.target.value }) }}
+                                    required
+                                />
+                            </Grid>
 
-                    </Grid>
-                </DialogContent>
-                <DialogActions sx={{ padding: 2 }}>
-                    <Button variant='contained' onClick={() => { addReturnedTray() }}>Agregar</Button>
-                    <Button variant='outlined' onClick={() => { setOpenReturnedTraysDialog(false) }}>Cerrar</Button>
-                </DialogActions>
+                        </Grid>
+                    </DialogContent>
+                    <DialogActions sx={{ padding: 2 }}>
+                        <Button variant='contained' type='submit'>Agregar</Button>
+                        <Button variant='outlined' onClick={() => { setOpenReturnedTraysDialog(false) }}>Cerrar</Button>
+                    </DialogActions>
+                </form>
             </Dialog>
         </>
     )

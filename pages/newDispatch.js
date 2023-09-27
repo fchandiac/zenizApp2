@@ -12,6 +12,7 @@ import { set } from 'date-fns'
 const pallets = require('../services/pallets')
 const customers = require('../services/customers')
 const dispatchs = require('../services/dispatchs')
+const customerAccounts = require('../services/customerAccounts')
 
 export default function newDispatch() {
   const {
@@ -33,6 +34,7 @@ export default function newDispatch() {
     dispatchPalletsQuanty,
     dispatchPalletsWeight,
     dispatchPallets,
+    removeDisptachPallet,
 
     setDispatchCustomer,
     setDispatchGuide,
@@ -49,6 +51,7 @@ export default function newDispatch() {
     setDispatchPalletsQuanty,
     setDispatchPalletsWeight,
     resetDispatch
+
 
   } = useAppContext()
   const [palletInput, setPalletInput] = useState('')
@@ -84,19 +87,23 @@ export default function newDispatch() {
 
   const addPallet = async () => {
     const pallet = await pallets.findOneById(palletInput)
-    if (pallet.dispatch) {
-      openSnack('Pallet ya despachado', 'error')
+
+    if (pallet !== null) {
+      if (pallet.dispatch) {
+        openSnack('Pallet ya despachado', 'error')
+      } else {
+        addDispatchPallet(formatPallet(pallet))
+        setPalletInput('')
+        setDispatchWeight('')
+      }
     } else {
-      console.log('FORMAT_PALLET', formatPallet(pallet))
-
-      addDispatchPallet(formatPallet(pallet))
-      setPalletInput('')
-      setDispatchWeight('')
-
+      openSnack('Pallet no encontrado', 'error')
     }
 
 
   }
+
+
 
   const producerList = (pallet) => { // PALLET
     const uniqueProducers = new Set()
@@ -155,10 +162,20 @@ export default function newDispatch() {
     return traysWeight
   }
 
+  const calculteDecrease = (pallet) => {
+    let dispatchNetSum = calculateDisptachNetSum(pallet)
+    let beforeNetSum = claculateBeforeNetSum(pallet)
+
+    let decrease = beforeNetSum - dispatchNetSum
+    let decreasePercent = (decrease / beforeNetSum) * 100
+    return { weight: decrease, percent: decreasePercent }
+  }
+
+
   const formatPallet = (pallet) => ({ // PALLET
     id: pallet.id,
     weight: pallet.weight,
-    dispatchWeight: parseInt(dispatchWeight),
+    dispatchWeight: parseFloat(dispatchWeight),
     dipatchNetSum: calculateDisptachNetSum(pallet),
     producerList: producerList(pallet),
     varietyList: varietyList(pallet),
@@ -167,7 +184,10 @@ export default function newDispatch() {
     traysWeight: calculateTraysWeight(pallet),
     trayName: pallet.Tray.name,
     packs: pallet.Packs,
+    decrease: calculteDecrease(pallet).weight,
+    decreasePercent: calculteDecrease(pallet).percent
   })
+
 
   const saveDispatch = async () => {
     console.log('NEW_DISPATCH', dispatch_)
@@ -187,12 +207,24 @@ export default function newDispatch() {
       true
     )
 
-    
+    let packs = []
+
 
     dispatchPallets.forEach(async (pallet) => {
-      const updateDispatch = await pallets.updateDisptach(pallet.id, newDispatch.id)
+      packs.push(pallet.packs)
+
+      const updateDispatch = await pallets.updateDisptach(
+        pallet.id,
+        newDispatch.id,
+        pallet.beforeGrossSum,
+        pallet.decrease
+      )
       console.log('UPDATE_DISPATCH', updateDispatch)
     })
+
+
+
+
 
     resetDispatch()
 
@@ -214,7 +246,7 @@ export default function newDispatch() {
 
 
   return (
-    <Grid container>
+    <Grid container spacing={1}>
       <Grid item xs={3}>
         <Grid container direction={'column'} spacing={1}>
           <Grid item>
@@ -223,7 +255,7 @@ export default function newDispatch() {
                 Agregar pallet
               </Typography>
               <form onSubmit={(e) => { e.preventDefault(); addPallet() }}>
-                <Grid container direction={'column'} p={1}>
+                <Grid container direction={'column'} p={1} spacing={1}>
                   <Grid item>
                     <TextField
                       label={'Peso Pallet Despacho'}
@@ -233,6 +265,10 @@ export default function newDispatch() {
                       size='small'
                       required
                       fullWidth
+                      InputProps={{
+                        endAdornment: <InputAdornment position="end">kg</InputAdornment>,
+                      }}
+                      inputProps={{step: 0.1}}
                     />
                   </Grid>
                   <Grid item>
@@ -262,7 +298,7 @@ export default function newDispatch() {
                 Datos despacho
               </Typography>
               <form onSubmit={(e) => { e.preventDefault(); saveDispatch() }}>
-                <Grid container direction={'column'} p={1}>
+                <Grid container direction={'column'} p={1} spacing={1}>
                   <Grid item>
 
                     <Autocomplete
@@ -392,14 +428,14 @@ export default function newDispatch() {
           </Grid>
         </Grid>
       </Grid>
-      <Grid item xs={9}>
+      <Grid item xs={9} display={dispatchPalletsQuanty > 0 ? 'block' : ' none'}>
         <Paper variant={'outlined'}>
           <Typography p={1}>
             Pallets
           </Typography>
 
-          <Grid container spacing={1} p={1}>
-            {dispatch_.pallets.map((pallet) => (
+          <Grid container spacing={1} p={1} >
+            {dispatchPallets.map((pallet) => (
               <Grid item xs={4} key={pallet.id}>
                 <DispatachPalletCard pallet={pallet} />
               </Grid>

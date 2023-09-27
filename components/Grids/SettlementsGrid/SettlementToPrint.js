@@ -1,12 +1,34 @@
-import { Grid, Typography, Box, Divider,Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material'
+import { Grid, Typography, Box, Divider, Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material'
 import moment from 'moment'
 import React from 'react'
 
 export default function SettlementToPrint(props) {
     const { settlement } = props
     console.log('settlementToPrint', settlement)
+    const calculateTotals = (data) => {
+        const totals = {
+            traysQuanty: 0,
+            traysWeight: 0,
+            gross: 0,
+            impurityWeight: 0,
+            net: 0,
+            toPay: 0,
+        };
+
+        data.forEach((item) => {
+            totals.traysQuanty += item.trays_quanty;
+            totals.traysWeight += item.trays_weight;
+            totals.gross += item.gross;
+            totals.impurityWeight += item.impurity_weight;
+            totals.net += item.net;
+            totals.toPay += item.to_pay;
+        });
+
+        return totals;
+    };
 
     const table = ({ data }) => {
+        const totals = calculateTotals(data)
         return (
             <TableContainer component={Paper} variant={'outlined'}>
                 <Table>
@@ -14,7 +36,7 @@ export default function SettlementToPrint(props) {
                         <TableRow>
                             <TableCell className='row-header-tiny'>id</TableCell>
                             <TableCell className='row-header-tiny'>Variedad</TableCell>
-                            <TableCell className='row-header-tiny'># Bandejas</TableCell>
+                            <TableCell className='row-header-tiny'>Bandejas</TableCell>
                             <TableCell className='row-header-tiny'>Bandejas</TableCell>
                             <TableCell className='row-header-tiny'>Bruto</TableCell>
                             <TableCell className='row-header-tiny'>Impurezas</TableCell>
@@ -27,7 +49,14 @@ export default function SettlementToPrint(props) {
                             <TableRow key={item.id}>
                                 <TableCell className='row-tiny'>{item.id}</TableCell>
                                 <TableCell className='row-tiny'>{item.Variety.name}</TableCell>
-                                <TableCell className='row-tiny'>{item.trays_quanty}</TableCell>
+                                <TableCell className='row-tiny'>{
+
+                                    new Intl.NumberFormat('es-CL', {
+                                        style: 'decimal',
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0,
+                                    }).format(item.trays_quanty) + ' unds'
+                                }</TableCell>
                                 <TableCell className='row-tiny'>{
                                     new Intl.NumberFormat('es-CL', {
                                         style: 'decimal',
@@ -59,13 +88,28 @@ export default function SettlementToPrint(props) {
                                 <TableCell className='row-tiny'>{item.to_pay.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</TableCell>
                             </TableRow>
                         ))}
+
+                        <TableRow>
+                            <TableCell sx={{backgroundColor: '#eeeeee'}} className='row-tiny'>Totales</TableCell>
+                            <TableCell sx={{backgroundColor: '#eeeeee'}} className='row-tiny'></TableCell>
+                            <TableCell sx={{backgroundColor: '#eeeeee'}} className='row-tiny'>{totals.traysQuanty} unds</TableCell>
+                            <TableCell sx={{backgroundColor: '#eeeeee'}} className='row-tiny'>{totals.traysWeight.toFixed(2)} kg</TableCell>
+                            <TableCell sx={{backgroundColor: '#eeeeee'}} className='row-tiny'>{totals.gross.toFixed(2)} kg</TableCell>
+                            <TableCell sx={{backgroundColor: '#eeeeee'}} className='row-tiny'>{totals.impurityWeight.toFixed(2)} kg</TableCell>
+                            <TableCell sx={{backgroundColor: '#eeeeee'}} className='row-tiny'>{totals.net.toFixed(2)} kg</TableCell>
+                            <TableCell sx={{backgroundColor: '#eeeeee'}} className='row-tiny'>
+                                {totals.toPay.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}
+                            </TableCell>
+                        </TableRow>
                     </TableBody>
+
                 </Table>
             </TableContainer>
         )
     }
     return (
         <>
+
             <Typography variant={'subtitle2'} fontWeight="bold">{'Liquidación ' + settlement.id}</Typography>
             <Divider />
             <Box flexDirection={'column'} paddingTop={1} display={'flex'}>

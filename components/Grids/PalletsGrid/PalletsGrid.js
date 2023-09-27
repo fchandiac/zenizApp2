@@ -4,7 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import InfoIcon from '@mui/icons-material/Info'
 import ViewQuiltIcon from '@mui/icons-material/ViewQuilt'
 import { GridActionsCellItem } from '@mui/x-data-grid'
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, Box } from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, Box, Paper } from '@mui/material'
 import PrintIcon from '@mui/icons-material/Print'
 import Barcode from 'react-barcode'
 import EditIcon from '@mui/icons-material/Edit'
@@ -12,13 +12,15 @@ import EditIcon from '@mui/icons-material/Edit'
 import DataGrid from '../../Karmextron/DataGrid/DataGrid'
 import PalletPackCard from '../../Cards/PalletPackCard/PalletPackCard';
 import PrintDialog from '../../PrintDialog/PrintDialog'
-import NewPalletForm from '../../Forms/NewPalletForm/NewPalletForm'
+import PalletForm from '../../Forms/PalletForm/PalletForm'
+import { useAppContext } from '../../../appProvider'
 
 const pallets = require('../../../services/pallets')
 
 
 export default function PalletsGrid(props) {
     const { update } = props
+    const {user, openSnack} = useAppContext()
     const [gridApiRef, setGridApiRef] = useState(null)
     const [palletsList, setPalletsList] = useState([])
     const [openInfoDialog, setOpenInfoDialog] = useState(false)
@@ -26,6 +28,7 @@ export default function PalletsGrid(props) {
     const [rowData, setRowData] = useState(rowDataDefault())
     const [openPrintDialog, setOpenPrintDialog] = useState(false)
     const [openEditDialog, setOpenEditDialog] = useState(false)
+
 
     useEffect(() => {
         pallets.findAll()
@@ -41,7 +44,7 @@ export default function PalletsGrid(props) {
                     max: pallet.max,
                     Storage: { id: pallet.storage_id, key: pallet.storage_id, label: pallet.Storage.name },
                     packs: pallet.Packs,
-                    dispatch: pallet.dispatch ? 'Si' : 'No',
+                    dispatch: pallet.dispatch,
                     dispatchId: pallet.dispatch_id == null ? '' : pallet.dispatch_id
                 }))
                 setPalletsList(data)
@@ -49,6 +52,16 @@ export default function PalletsGrid(props) {
             .catch(err => { console.log(err) })
 
     }, [update])
+
+
+    const showDelete = (dispatch, packs) => {
+
+        if (dispatch || packs.length > 0 || user.Profile.delete == false) {
+            return false
+        }
+
+        return true
+    }
 
     const columns = [
         { field: 'id', headerName: 'Id', flex: .5, type: 'number', valueFormatter: (params) => params.value },
@@ -69,7 +82,7 @@ export default function PalletsGrid(props) {
             field: 'dispatch', headerName: 'Despacho', flex: 1,
 
             renderCell: (params) => {
-                return params.row.dispatch === 'Si' ?
+                return params.row.dispatch === true ?
                     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                         <LocalShippingIcon color='success' sx={{ paddingRight: 1 }} />
                         {params.row.dispatchId}
@@ -86,7 +99,7 @@ export default function PalletsGrid(props) {
             headerClassName: 'data-grid-last-column-header',
             type: 'actions', flex: 1.2, getActions: (params) => [
                 <GridActionsCellItem
-                    sx={{display: params.row.dispatch == 'Si' ? 'none' : 'inline-flex'}}
+                    sx={{ display: showDelete(params.row.dispatch, params.row.packs) ? 'inline-flex' : 'none' }}
                     label='delete'
                     icon={<DeleteIcon />}
                     onClick={() => {
@@ -110,7 +123,7 @@ export default function PalletsGrid(props) {
                     // si no tiene permisos
                     // si fue despachado
                     // si tiene packs asociadas
-                    sx={{ display: params.row.dispatch == 'Si' ? 'none' : 'inline-flex' }}
+                    sx={{ display: params.row.dispatch ? 'none' : 'inline-flex' }}
                     label='edit'
                     icon={<EditIcon />}
                     onClick={() => {
@@ -148,6 +161,7 @@ export default function PalletsGrid(props) {
                     }}
                 />,
                 <GridActionsCellItem
+                    sx={{ display: params.row.packs.length > 0 ? 'inline-flex' : 'none' }}
                     label='packs'
                     icon={<ViewQuiltIcon />}
                     onClick={() => {
@@ -179,13 +193,13 @@ export default function PalletsGrid(props) {
             <Dialog open={openEditDialog} maxWidth={'xs'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}>Editar Pallet {rowData.id}</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
-                    <Grid container spacing={1} direction={'column'}>
-                        <NewPalletForm
+                    <Grid container spacing={1} direction={'column'} paddingTop={1}>
+                        <PalletForm
                             dialog={true}
                             closeDialog={() => setOpenEditDialog(false)}
                             afterSubmit={() => {
-                                setOpenEditDialog(false)
-                                // setRowData(rowDataDefault())
+
+                                setRowData(rowDataDefault())
 
                             }}
                             palletData={rowData}
@@ -200,7 +214,7 @@ export default function PalletsGrid(props) {
             <Dialog open={openPacksDialog} maxWidth={'sm'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}> Packs en Pallet {rowData.id}</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
-                    <Grid container>
+                    <Grid container spacing={1}>
                         {rowData.packs.map((pack) => (
                             <Grid item key={pack.id} xs={4}>
                                 <PalletPackCard pack={pack} />
@@ -217,13 +231,15 @@ export default function PalletsGrid(props) {
                 open={openPrintDialog}
                 setOpen={setOpenPrintDialog}
                 title='Imprimir etiqueta'
-                maxWidth={'xs'}
+                dialogWidth={'xs'}
             >
-                <Typography variant={'subtitle1'} fontWeight="bold" align='center'>{'ZENIZ'}</Typography>
-                <Typography variant={'subtitle2'} fontWeight="bold" align='center'>{'Pallet ' + rowData.id}</Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <Barcode value={rowData.id.toString()} />
-                </Box>
+                <Paper variant='outlined' sx={{ padding: 1, borderColor: 'black', width:'90mm' }}>
+                    <Typography variant={'subtitle1'} fontWeight="bold" align='center'>{'ZENIZ'}</Typography>
+                    <Typography variant={'subtitle2'} fontWeight="bold" align='center'>{'Pallet ' + rowData.id}</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Barcode value={rowData.id.toString()} />
+                    </Box>
+                </Paper>
             </PrintDialog>
         </>
     )

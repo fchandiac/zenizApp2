@@ -8,7 +8,7 @@ import DoneAllIcon from '@mui/icons-material/DoneAll'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, FormControlLabel,
-    Switch, TextField, InputAdornment, Autocomplete, Divider
+    Switch, TextField, InputAdornment, Autocomplete, Divider, Box
 } from '@mui/material'
 import PackCard from '../../Cards/PackCard/PackCard'
 import LockIcon from '@mui/icons-material/Lock'
@@ -27,6 +27,7 @@ const variesties = require('../../../services/varieties')
 const types = require('../../../services/types')
 const producerAccounts = require('../../../services/producerAccounts')
 const packs = require('../../../services/packs')
+const records = require('../../../services/records')
 
 
 
@@ -48,8 +49,6 @@ export default function ReceptionsGrid(props) {
 
     const [openPrintDialog, setOpenPrintDialog] = useState(false)
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
-
-    console.log(user)
 
 
     useEffect(() => {
@@ -82,29 +81,32 @@ export default function ReceptionsGrid(props) {
         } else {
             result = clp
         }
-        console.log('result', result)
         setRowData({ ...rowData, clp: result, usd: usd, change: change })
     }
 
     const editReception = () => {
-        let clp = rowData.clp
-        let usd = rowData.usd
-        let change = rowData.change
+        let clp = parseInt(rowData.clp)
+        let usd = parseFloat(rowData.usd)
+        let change = parseInt(rowData.change)
         let money = rowData.money
         let showUsd = rowData.showUsd
         let variety = rowData.variety
         let type = rowData.type
         let toPay = rowData.toPay
         let impurityWeight = rowData.impurityWeight
-        let net = rowData.net
+        let net = rowData.net 
 
+        console.log('clp', clp)
 
         if (showUsd) {
             money = 'USD'
-            if (clp > 0) {
-                money = 'CLP'
-            }
+        } else {
+            money = 'CLP'
         }
+
+       
+
+
         net = net - impurityWeight
         toPay = net * clp
 
@@ -149,10 +151,10 @@ export default function ReceptionsGrid(props) {
         const lastMovement = await producerAccounts.findLastByProducerId(rowData.producerId)
 
 
-  
+
         let newBalance = 0
         if (lastMovement == null) {
-            newBalance =  rowData.toPay
+            newBalance = rowData.toPay
         } else {
             newBalance = lastMovement.balance + rowData.toPay
         }
@@ -202,18 +204,54 @@ export default function ReceptionsGrid(props) {
             net: params.row.net,
             packs: params.row.packs,
             toPay: params.row.toPay,
+            open: params.row.open,
         })
     }
 
     const destroyReception = async () => {
-        await receptions.destroy(rowData.id)
-        const packs_ = rowData.packs
-        console.log('PACKS', packs)
-        packs_.forEach(async (pack) => {
-            await packs.destroy(pack.id)
-        })
-        gridApiRef.current.updateRows([{ id: rowData.rowId, _action: 'delete' }])
-        setOpenDeleteDialog(false)
+        if (rowData.open == true) {
+            await receptions.destroy(rowData.id)
+            const packs_ = rowData.packs
+            packs_.forEach(async (pack) => {
+                await packs.destroy(pack.id)
+            })
+            await records.create(
+                'Recepciones',
+                'Eliminación',
+                'Recepción ' + rowData.id,
+                user.id,
+            )
+
+            gridApiRef.current.updateRows([{ id: rowData.rowId, _action: 'delete' }])
+            setOpenDeleteDialog(false)
+        } else {
+            await receptions.destroy(rowData.id)
+            const packs_ = rowData.packs
+            packs_.forEach(async (pack) => {
+                await packs.destroy(pack.id)
+            })
+
+            const lastMovement = await producerAccounts.findLastByProducerId(rowData.producerId)
+            producerAccounts.create(
+                rowData.producerId,
+                0,
+                rowData.toPay,
+                lastMovement.balance - rowData.toPay,
+                rowData.id,
+                3,
+                'Eliminación de recepción' + rowData.id
+            )
+            await records.create(
+                'Recepciones',
+                'Eliminación',
+                'Recepción ' + rowData.id,
+                user.id,
+            )
+            gridApiRef.current.updateRows([{ id: rowData.rowId, _action: 'delete' }])
+            setOpenDeleteDialog(false)
+            
+
+        }
     }
 
     const columns = [
@@ -227,9 +265,10 @@ export default function ReceptionsGrid(props) {
             field: 'clp', headerName: 'Precio', flex: .3, hide: false, headerClassName: 'row-header-tiny',
             valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
         },
-        { field: 'usd', headerName: 'Dolar', flex: .35, hide: false, headerClassName: 'row-header-tiny',
-        valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'USD' })
-     },
+        {
+            field: 'usd', headerName: 'Dolar', flex: .35, hide: false, headerClassName: 'row-header-tiny',
+            valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'USD' })
+        },
         { field: 'change', headerName: 'Cambio', flex: .3, hide: true, headerClassName: 'row-header-tiny' },
         { field: 'money', headerName: 'Moneda', flex: .35, hide: false, headerClassName: 'row-header-tiny' },
         {
@@ -297,8 +336,9 @@ export default function ReceptionsGrid(props) {
                     icon={<DeleteIcon sx={{ fontSize: 16 }} />}
                     onClick={() => {
                         setRow(params)
+                        console.log('ROW', params.row)
                         setOpenDeleteDialog(true)
-                        
+
                     }}
                 />,
                 <GridActionsCellItem
@@ -310,7 +350,7 @@ export default function ReceptionsGrid(props) {
                     }}
                 />,
                 <GridActionsCellItem
-                    sx={{ display: params.row.open  == true && user.Profile.edit == true ? 'inline-flex' : 'none' }}
+                    sx={{ display: params.row.open == true && user.Profile.edit == true ? 'inline-flex' : 'none' }}
                     label='edit'
                     icon={<EditIcon sx={{ fontSize: 16 }} />}
                     onClick={() => {
@@ -409,7 +449,7 @@ export default function ReceptionsGrid(props) {
                                         endAdornment: <InputAdornment position="end">USD</InputAdornment>,
 
                                     }}
-                                    inputProps={{ min: 0 }}
+                                    inputProps={{ min: 0,   step: 0.01 }}
 
                                 />
                             </Grid>
@@ -428,7 +468,6 @@ export default function ReceptionsGrid(props) {
                                         endAdornment: <InputAdornment position="end">CLP</InputAdornment>,
                                     }}
                                     inputProps={{ min: 0 }}
-
                                 />
                             </Grid>
                             <Grid item >
@@ -488,8 +527,9 @@ export default function ReceptionsGrid(props) {
                                     inputProps={{
                                         min: 0,
                                         max: 100,
+                                        step: 0.01
+                                    
                                     }}
-
                                 />
                             </Grid>
                             <Grid item>
@@ -552,22 +592,27 @@ export default function ReceptionsGrid(props) {
                 <DialogTitle sx={{ padding: 2 }}> Elimiar recepción {rowData.id}</DialogTitle>
                 <DialogContent sx={{ padding: 2 }}>
                     <Typography variant={'subtitle2'}>¿Esta seguro que desea eliminar la recepción {rowData.id}, del productor {rowData.producerName}?</Typography>
-                    <Divider sx={{paddingTop: 2}}/>
-                    <Typography  textAlign={'right'} fontSize={10}>La eliminación de esta recepción generara una nota de credito si ya se encuentra cerrada y eliminara los packs del pallet correspondiente</Typography>
+                    <Divider sx={{ paddingTop: 2 }} />
+                    <Box textAlign={'right'} sx={{ paddingTop: 2, paddingLeft:20 }} alignItems={'flex-end'}>
+                        <Typography
+                           
+                            fontSize={10}
+                        >La eliminación de esta recepción generara una nota de credito (si ya se encuentra cerrada) y eliminara los packs del pallet correspondiente</Typography>
+                    </Box>
                 </DialogContent>
                 <DialogActions sx={{ padding: 2 }}>
-                    <Button variant='contained' onClick={() => { destroyReception()}}>Eliminar</Button>
-                    <Button variant='outlined' onClick={() =>{setOpenDeleteDialog(false)}}>Cerrar</Button>
+                    <Button variant='contained' onClick={() => { destroyReception() }}>Eliminar</Button>
+                    <Button variant='outlined' onClick={() => { setOpenDeleteDialog(false) }}>Cerrar</Button>
                 </DialogActions>
             </Dialog>
 
             <PrintDialog
                 open={openPrintDialog}
                 setOpen={setOpenPrintDialog}
-                title={'Recepcción ' + rowData.id}
-                maxWidth={'xs'}
+                title={'Recibo recepcción ' + rowData.id}
+                dialogWidth={'xs'}
             >
-                <ReceptionToPrint receptionId={rowData.id} returnetTrays={[]} />
+                <ReceptionToPrint receptionId={rowData.id} />
             </PrintDialog>
 
 

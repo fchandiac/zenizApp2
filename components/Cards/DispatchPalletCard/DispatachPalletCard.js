@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Card, Box, Typography, IconButton, Grid, Popover, Paper, Divider } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
@@ -49,7 +49,7 @@ export default function DispatachPalletCard(props) {
                 id={id}
                 open={openMoreInfo}
                 anchorEl={anchorElPopOver}
-                onClose={() => { setAnchorElPopOver(null)}}
+                onClose={() => { setAnchorElPopOver(null) }}
                 anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left',
@@ -72,12 +72,57 @@ export default function DispatachPalletCard(props) {
                     </Box>
                     <Divider />
                     <Box flexDirection={'column'} display={'flex'} paddingTop={1}>
-                        <Typography  fontSize={10}>{'Bandeja ' + pallet.trayName}</Typography>
-                        <Typography fontSize={10}>{pallet.beforeGrossSum.toLocaleString('es-CL') + ' Kg bruto'}</Typography>
-                        <Typography fontSize={10}>{pallet.dispatchWeight.toLocaleString('es-CL') + ' Kg bruto (despacho)'}</Typography>
-                        <Typography  fontSize={10}>{pallet.traysWeight.toLocaleString('es-CL') + ' Kg bandejas'}</Typography>
-                        <Typography  fontSize={10}>{pallet.beforeNetSum.toLocaleString('es-CL') + ' Kg neto'}</Typography>
-                        <Typography  fontSize={10}>{pallet.dipatchNetSum .toLocaleString('es-CL')+ ' Kg neto (despacho)'}</Typography>
+                        <Typography fontSize={10}>{'Bandeja ' + pallet.trayName}</Typography>
+                        <Typography fontSize={10}>{
+
+                            new Intl.NumberFormat('es-CL', {
+                                style: 'decimal',
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            }).format(pallet.traysWeight) + ' kg bandejas'
+                        }</Typography>
+                        <Typography fontSize={10}>{
+                            new Intl.NumberFormat('es-CL', {
+                                style: 'decimal',
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            }).format(pallet.beforeGrossSum) + ' kg pallet'
+                        }</Typography>
+                        <Typography fontSize={10}>{
+                            new Intl.NumberFormat('es-CL', {
+                                style: 'decimal',
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            }).format(pallet.dispatchWeight) + ' kg bruto (despacho)'
+                        }</Typography>
+                        <Typography fontSize={10}>{
+                            new Intl.NumberFormat('es-CL', {
+                                style: 'decimal',
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            }).format(pallet.beforeNetSum) + ' kg neto'
+                        }</Typography>
+                        <Typography fontSize={10}>{
+                            new Intl.NumberFormat('es-CL', {
+                                style: 'decimal',
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            }).format(pallet.dipatchNetSum) + ' kg neto (despacho)'
+                        }</Typography>
+                        <Typography fontSize={10}>{
+                            new Intl.NumberFormat('es-CL', {
+                                style: 'decimal',
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            }).format(pallet.decrease) + ' kg merma'
+                        }</Typography>
+                        <Typography fontSize={10}>{
+                            new Intl.NumberFormat('es-CL', {
+                                style: 'decimal',
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            }).format(pallet.decreasePercent) + ' % merma'
+                        }</Typography>
                     </Box>
                 </Paper>
             </Popover>

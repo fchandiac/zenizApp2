@@ -28,6 +28,7 @@ const initialState = {
         showImpurities: false,
         showUsd: false,
     },
+    currenDisptachPallets: [],
     returnetTrays: [],
     currentPallets: [{ id: 0, tray_id: 0, trays: 0, max: 0, virtualTrays: 0, virtualCapacity: 0 }], // ReceptionProccess
     dispatch_: {
@@ -46,6 +47,8 @@ const initialState = {
         showPrices: false,
         showImpurities: false,
         showUsd: false,
+        decrease: 0,
+        decreasePercent: 0,
     },
     user: {
         id: 0,
@@ -163,7 +166,16 @@ const reducer = (state, action) => {
         case 'SET_RECEPTION_NET':
             return { ...state, reception: { ...state.reception, net: action.value } }
         case 'ADD_DISPATCH_PALLET':
-            return { ...state, dispatch_: { ...state.dispatch_, pallets: [...state.dispatch_.pallets, action.value] } }
+            // add pallet to dispatch and set palletsQuanty and palletsWeight
+            return {
+                ...state,
+                dispatch_: {
+                    ...state.dispatch_,
+                    pallets: [...state.dispatch_.pallets, action.value],
+                    palletsQuanty: state.dispatch_.palletsQuanty + 1,
+                    palletsWeight: state.dispatch_.palletsWeight + action.value.weight
+                }
+            }
         case 'REMOVE_DISPATCH_PALLET':
             return { ...state, dispatch_: { ...state.dispatch_, pallets: state.dispatch_.pallets.filter(pallet => pallet.id !== action.value) } }
         case 'SET_DISPATCH_CUSTOMER':
@@ -194,6 +206,14 @@ const reducer = (state, action) => {
             return { ...state, dispatch_: { ...state.dispatch_, palletsQuanty: action.value } }
         case 'SET_DISPATCH_PALLETS_WEIGHT':
             return { ...state, dispatch_: { ...state.dispatch_, palletsWeight: action.value } }
+
+        case 'SET_DISPATCH_DECREASE':
+            return { ...state, dispatch_: { ...state.dispatch_, decrease: action.value } }
+        case 'SET_DISPATCH_DECREASE_PERCENT':
+            return { ...state, dispatch_: { ...state.dispatch_, decreasePercent: action.value } }
+        case 'REPLACE_DISPATCH_PALLET':
+            return { ...state, dispatch_: { ...state.dispatch_, pallets: state.dispatch_.pallets.map(pallet => pallet.id === action.value.id ? action.value : pallet) } }
+
         case 'RESET_DISPATCH':
             return {
                 ...state,
@@ -467,6 +487,17 @@ const AppProvider = ({ children }) => {
         dispatch({ type: 'REMOVE_PACK', value: packId })
     }
 
+    const setDispatchDecrease = (data) => {
+        dispatch({ type: 'SET_DISPATCH_DECREASE', value: data })
+    }
+
+    const setDispatchDecreasePercent = (data) => {
+        dispatch({ type: 'SET_DISPATCH_DECREASE_PERCENT', value: data })
+    }
+
+    const replaceDispatchPallet= (pallet) => {
+        dispatch({ type: 'REPLACE_DISPATCH_PALLET', value: pallet })
+    }
 
     return (
         <AppContext.Provider value={{
@@ -557,6 +588,9 @@ const AppProvider = ({ children }) => {
             removeAllDispatchPallet,
             removeDisptachPallet,
             updateDispatchPallet,
+            setDispatchDecrease,
+            setDispatchDecreasePercent,
+            replaceDispatchPallet,
             setUser,
 
             setReturnetTrays,

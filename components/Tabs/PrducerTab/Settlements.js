@@ -45,6 +45,7 @@ export default function Settlements() {
         <>
             <Grid container spacing={1}>
                 <Grid item xs={2}>
+                    <Grid container spacing={1} direction={'column'}>
                     <Grid item>
                         <DesktopDatePicker
                             label="Fecha incial"
@@ -66,7 +67,9 @@ export default function Settlements() {
                             renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
                         />
                     </Grid>
+                    </Grid>
                 </Grid>
+
                 <Grid item xs={10}>
                    <SettlementsGrid title={title} settlementsList={settlementsList} />
                 </Grid>

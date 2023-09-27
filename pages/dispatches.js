@@ -15,6 +15,7 @@ export default function dispatches() {
   useEffect(() => {
     const fetchData = async () => {
       const dispatchesList = await dispatchs.findAllBetweenDate(filterDates.start, filterDates.end)
+      console.log(dispatchesList)
       let data = dispatchesList.map(dispatch => ({
         id: dispatch.id,
         customerName: dispatch.Customer.name,
@@ -26,9 +27,9 @@ export default function dispatches() {
         usd: dispatch.usd,
         change: dispatch.change,
         money: dispatch.money,
-        trays_quanty: dispatch.trays_quanty,
-        trays_weight: dispatch.trays_weight,
-        impurity_weight: dispatch.impurity_weight,
+        palletsQuanty: dispatch.pallets_quanty,
+        palletsWeight: dispatch.pallets_weight,
+        impurityWeight: dispatch.impurity_weight,
         gross: dispatch.gross,
         net: dispatch.net,
         toPay: dispatch.to_pay,
@@ -45,7 +46,9 @@ export default function dispatches() {
     <>
   
       <Grid container spacing={1}>
+      
         <Grid item xs={1.5}>
+          <Grid container direction="column" spacing={1}>
           <Grid item fontSize={12}>
             <DesktopDatePicker
               className='small-date-picker'
@@ -72,6 +75,7 @@ export default function dispatches() {
               onChange={(e) => { setFilterDates({ ...filterDates, end: e }) }}
               renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
             />
+          </Grid>
           </Grid>
         </Grid>
         <Grid item xs={10.5}>

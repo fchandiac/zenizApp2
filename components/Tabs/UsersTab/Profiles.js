@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import ProfileForm from '../../Forms/ProfileForm/ProfileForm'
 import { Grid, Paper, Box } from '@mui/material'
 import ProfileCard from '../../Cards/ProfileCard/ProfileCard'
@@ -27,11 +27,16 @@ export default function Profiles() {
     <>
       <Grid container spacing={1} >
         <Grid item xs={3}>
-          <ProfileForm  afterSubmit={() => {update_()}}/>
+          <Paper variant='outlined'>
+            <Box p={1}>
+              Nuevo perfil
+            </Box>
+            <ProfileForm afterSubmit={() => { update_() }} />
+          </Paper>
         </Grid>
         <Grid item xs={9}>
           <Paper variant='outlined'>
-            <Box sx={{padding:1}}>
+            <Box sx={{ padding: 1 }}>
               <Grid container spacing={1}>
                 {profilesList.map((profile, index) => {
                   return (

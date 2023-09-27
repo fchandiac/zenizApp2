@@ -3,12 +3,19 @@ import DataGrid from '../../Karmextron/DataGrid/DataGrid'
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
+import PrintIcon from '@mui/icons-material/Print'
 import { GridActionsCellItem } from '@mui/x-data-grid'
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid } from '@mui/material'
+import {
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, FormControlLabel,
+  Switch, TextField, InputAdornment
+} from '@mui/material'
 import InfoDataGrid from './InfoDataGrid'
-import VarietyForm from '../../Forms/VarietyForm/VarietyForm'
 import LockIcon from '@mui/icons-material/Lock'
 import LockOpenIcon from '@mui/icons-material/LockOpen'
+import { useAppContext } from '../../../appProvider'
+import PrintDialog from '../../PrintDialog/PrintDialog'
+import DistpatchToPrint from './DistpatchToPrint'
+
 
 
 const dispatchs = require('../../../services/dispatchs')
@@ -16,32 +23,73 @@ const customerAccounts = require('../../../services/customerAccounts')
 
 export default function DispatchsGrid(props) {
   const { dispatchsList } = props
+  const { openSnack, user } = useAppContext()
   const [gridApiRef, setGridApiRef] = useState(null)
   const [openEditDialog, setOpenEditDialog] = useState(false)
   const [rowData, setRowData] = useState(rowDataDefault())
+  const [showUsd, setShowUsd] = useState(false)
+  const [openPrintDialog, setOpenPrintDialog] = useState(false)
 
 
   const closeDispatch = async (id, customerId, toPay) => {
-    await dispatchs.close(id)
+    if (toPay === 0) {
+      openSnack('El precio en pesos no esta asignado ', 'error')
+      return
+    } else {
+      await dispatchs.close(id)
 
-    const lastMovement = await customerAccounts.findLastByCustomerId(customerId)
-    console.log(lastMovement)
+      const lastMovement = await customerAccounts.findLastByCustomerId(customerId)
+      console.log(lastMovement)
 
-    let newBalance = 0
-        if (lastMovement == null) {
-            newBalance =  toPay
-        } else {
-            newBalance = lastMovement.balance + toPay
-        }
+      let newBalance = 0
+      if (lastMovement == null) {
+        newBalance = toPay
+      } else {
+        newBalance = lastMovement.balance + toPay
+      }
 
-    await customerAccounts.create(customerId, toPay, 0, newBalance, id, 0, 'Cierre de despacho')
+      await customerAccounts.create(customerId, toPay, 0, newBalance, id, 0, 'Cierre de despacho')
+      gridApiRef.current.updateRows([{
+        id: rowData.rowId,
+        open: false
+      }])
+    }
+  }
+
+  const calcPrice = (clp, usd, change) => {
+    let result = 0
+    let toPay = 0
+
+    console.log('clp, usd, change', clp, usd, change)
+
+    if (usd > 1) {
+      result = usd * change
+    } else {
+      result = clp
+    }
+
+    if (result > 0) {
+      toPay = result * rowData.net
+    }
+
+    setRowData({ ...rowData, clp: result, usd: usd, change: change, toPay: toPay })
+  }
 
 
+  const updateDispatch = async () => {
+
+    console.log('rowData', rowData)
+    await dispatchs.update(rowData.id, rowData.clp, rowData.usd, rowData.change, rowData.money, rowData.impurityWeight, rowData.toPay)
     gridApiRef.current.updateRows([{
-      id: id,
-      open: false
-
+      id: rowData.rowId,
+      clp: rowData.clp,
+      usd: rowData.usd,
+      change: rowData.change,
+      money: rowData.money,
+      impurityWeight: 0,
+      toPay: rowData.toPay,
     }])
+    setOpenEditDialog(false)
   }
 
 
@@ -60,14 +108,48 @@ export default function DispatchsGrid(props) {
       field: 'clp', headerName: 'CLP', flex: 1, headerClassName: 'row-header-tiny',
       valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
     },
-    { field: 'usd', headerName: 'USD', flex: 1, headerClassName: 'row-header-tiny' },
+    {
+      field: 'usd', headerName: 'USD', flex: 1, headerClassName: 'row-header-tiny',
+      valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+    },
     { field: 'change', headerName: 'Cambio', flex: 1, headerClassName: 'row-header-tiny' },
     { field: 'money', headerName: 'Moneda', flex: 1, headerClassName: 'row-header-tiny' },
-    { field: 'trays_quanty', headerName: 'Bandejas', flex: 1, headerClassName: 'row-header-tiny' },
-    { field: 'trays_weight', headerName: 'Peso Bandejas', flex: 1, headerClassName: 'row-header-tiny' },
-    { field: 'impurity_weight', headerName: 'Impurezas', flex: 1, headerClassName: 'row-header-tiny' },
-    { field: 'gross', headerName: 'Bruto', flex: 1, headerClassName: 'row-header-tiny' },
-    { field: 'net', headerName: 'Neto', flex: 1, headerClassName: 'row-header-tiny' },
+    {
+      field: 'palletsQuanty', headerName: 'Pallets', flex: 1, headerClassName: 'row-header-tiny',
+      valueFormatter: (params) =>
+        new Intl.NumberFormat('es-CL', {
+          style: 'decimal',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(params.value) + ' unds'
+    },
+    {
+      field: 'impurityWeight', headerName: 'Impurezas', flex: 1, headerClassName: 'row-header-tiny',
+      valueFormatter: (params) =>
+        new Intl.NumberFormat('es-CL', {
+          style: 'decimal',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(params.value) + ' kg'
+    },
+    {
+      field: 'gross', headerName: 'Bruto', flex: 1, headerClassName: 'row-header-tiny',
+      valueFormatter: (params) =>
+        new Intl.NumberFormat('es-CL', {
+          style: 'decimal',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(params.value) + ' kg'
+    },
+    {
+      field: 'net', headerName: 'Neto', flex: 1, headerClassName: 'row-header-tiny',
+      valueFormatter: (params) =>
+        new Intl.NumberFormat('es-CL', {
+          style: 'decimal',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(params.value) + ' kg'
+    },
     { field: 'toPay', headerName: 'A Pagar', flex: 1, headerClassName: 'row-header-tiny' },
     {
       field: 'actions',
@@ -75,41 +157,64 @@ export default function DispatchsGrid(props) {
       headerClassName: 'data-grid-last-column-header',
       type: 'actions', flex: 2, getActions: (params) => [
         <GridActionsCellItem
-          label='destroy'
-          icon={<DeleteIcon />}
-          onClick={() => { openSnack('El despacho tiene pallets asociadas', 'error') }}
-        />,
-        <GridActionsCellItem
           label='edit'
           icon={<EditIcon />}
           onClick={() => {
-            // setRowData({
-            //     rowId: params.id,
-            //     id: params.row.id,
-            //     name: params.row.name,
-            //     clp: params.row.clp,
-            //     usd: params.row.usd,
-            //     money: params.row.money,
-            //     moneySwitch: params.row.money === 'CLP' ? false : true
-            // })
+            setRowData({
+              rowId: params.id,
+              id: params.row.id,
+              name: params.row.name,
+              clp: params.row.clp,
+              usd: params.row.usd,
+              change: params.row.change,
+              money: params.row.money,
+              toPay: params.row.toPay,
+              net: params.row.net,
+
+            })
             setOpenEditDialog(true)
           }}
         />,
         <GridActionsCellItem
-          // sx={{ display: user.Profile.close_reception ? 'inline-flex' : 'none' }}
+          label='print'
+          icon={<PrintIcon />}
+          onClick={() => {
+            setRowData({
+              rowId: params.id,
+              id: params.row.id,
+              name: params.row.name,
+              clp: params.row.clp,
+              usd: params.row.usd,
+              change: params.row.change,
+              money: params.row.money,
+
+            })
+            setOpenPrintDialog(true)
+          }}
+        />,
+        <GridActionsCellItem
           label='open'
           icon={params.row.open ? <LockOpenIcon sx={{ fontSize: 16 }} /> : <LockIcon sx={{ fontSize: 16 }} />}
           onClick={() => {
-              closeDispatch(params.id, params.row.customerId, params.row.toPay)
+            if (params.row.open === false) {
+              openSnack('El despacho ya esta cerrado', 'error')
+            } else {
+              if (params.row.toPay < 0) {
+                openSnack('El precio en pesos no esta asignado ', 'error')
+              } else {
+                closeDispatch(params.id, params.row.customerId, params.row.toPay)
+                
+              }
+            }
+
+
           }}
-
-
         />,
 
       ]
 
     },
-    // { field: 'open', headerName: 'Abierto', flex: 1, headerClassName: 'row-header-tiny' },
+
   ]
 
   return (
@@ -118,19 +223,95 @@ export default function DispatchsGrid(props) {
 
       <InfoDataGrid title={'Despachos'} rows={dispatchsList} columns={columns} height='80vh' setGridApiRef={setGridApiRef} />
       <Dialog open={openEditDialog} maxWidth={'xs'} fullWidth>
-        <DialogTitle sx={{ padding: 2 }}>Editar Despacho {rowData.id}</DialogTitle>
-        <DialogContent sx={{ padding: 1 }}>
-          <VarietyForm
-            afterSubmit={() => { console.log('afterSubmit') }}
-            dialog={true}
-            edit={true}
-            closeDialog={(e) => { setOpenEditDialog(false) }}
-            varietyData={rowData}
-            setVarietyData={setRowData}
-            gridApiRef={gridApiRef}
-          />
-        </DialogContent>
+        <form onSubmit={(e) => { e.preventDefault(); updateDispatch() }}>
+          <DialogTitle sx={{ padding: 2 }}>Editar Despacho {rowData.id}</DialogTitle>
+          <DialogContent sx={{ padding: 1 }}>
+            <Grid container spacing={1} direction={'column'}>
+              <Grid item>
+                <FormControlLabel
+                  control={<Switch checked={rowData.showUsd} onChange={() => {
+                    setRowData({ ...rowData, showUsd: !rowData.showUsd })
+                  }} />}
+                  label='Precio en dolares'
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  label='Precio'
+                  value={rowData.clp}
+                  onChange={(e) => { calcPrice(e.target.value, rowData.usd, rowData.change) }}
+                  variant="outlined"
+                  type='number'
+                  size={'small'}
+                  fullWidth
+                  autoFocus
+                  className='no-spin'
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    endAdornment: <InputAdornment position="end">CLP</InputAdornment>,
+                  }}
+                  inputProps={{ min: 0 }}
+                />
+              </Grid>
+              <Grid item sx={{ display: rowData.showUsd ? 'inline-block' : 'none' }}>
+                <TextField
+                  label='USD'
+                  value={rowData.usd}
+                  type='number'
+                  onChange={(e) => { calcPrice(rowData.clp, e.target.value, rowData.change) }}
+                  variant="outlined"
+                  className='no-spin'
+                  size={'small'}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    endAdornment: <InputAdornment position="end">USD</InputAdornment>,
+
+                  }}
+                  inputProps={{ min: 0, step: 0.01 }}
+
+                />
+              </Grid>
+              <Grid item sx={{ display: rowData.showUsd ? 'inline-block' : 'none' }}>
+                <TextField
+                  label='Cambio'
+                  value={rowData.change}
+                  type='number'
+                  // calcPrice(receptionClp, e.target.value, receptionChange, receptionMoney)
+                  onChange={(e) => { calcPrice(rowData.clp, rowData.usd, e.target.value) }}
+                  variant="outlined"
+                  size={'small'}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    endAdornment: <InputAdornment position="end">CLP</InputAdornment>,
+                  }}
+                  inputProps={{ min: 0 }}
+                />
+              </Grid>
+
+              <Grid item></Grid>
+            </Grid>
+
+          </DialogContent>
+          <DialogActions >
+            <Button variant={'contained'} type='submit'>editar</Button>
+            <Button variant={'outlined'} onClick={() => { setOpenEditDialog(false) }}>Cerrar</Button>
+
+          </DialogActions>
+        </form>
       </Dialog>
+
+
+      <PrintDialog
+        open={openPrintDialog}
+        setOpen={setOpenPrintDialog}
+        title={'Recibo despacho ' + rowData.id}
+        dialogWidth={'xl'}
+      >
+        <DistpatchToPrint dispatchId={rowData.id} />
+      </PrintDialog>
+
 
 
     </>

@@ -3,14 +3,16 @@ import React, { useEffect, useState } from 'react'
 import { useAppContext } from '../../../appProvider'
 
 
+
 const utils = require('../../../utils')
 const storages = require('../../../services/storages')
 const trays = require('../../../services/trays')
 const pallets = require('../../../services/pallets')
+const records = require('../../../services/records')
 
-export default function NewPalletForm(props) {
-    const { dialog, closeDialog, palletData, palletId, setPalletData, edit, gridApiRef, onPack } = props
-    const { openSnack, addPalletToCurrentPallets } = useAppContext()
+export default function PalletForm(props) {
+    const { dialog, closeDialog, palletData, afterSubmit, setPalletData, edit, gridApiRef } = props
+    const { openSnack, addPalletToCurrentPallets, user } = useAppContext()
     const [storagesInput, setStoragesInput] = useState('')
     const [storagesOptions, setStoragesOptions] = useState([{ id: 0, key: 0, label: '' }])
     const [traysInput, setTraysInput] = useState('')
@@ -46,40 +48,27 @@ export default function NewPalletForm(props) {
     }
 
     const create = async () => {
-        openSnack('Nuevo pallet guardado', 'success')
-        const newPallet = await pallets.create(
+
+        await pallets.create(
             palletData.tray.id,
             palletData.storage.id,
             palletData.weight,
         )
 
-        console.log('onPack', onPack)
-
-        if (onPack) {
-            // let currentPalletsMatch = Boolean((currentPallets.filter(pallet => pallet.tray_id === packData.tray.id)).length)
-            
-            let newCurrentPallet = {
-                id: newPallet.id,
-                trays: newPallet.trays,
-                max: newPallet.max,
-                virtualTrays: newPallet.trays,
-                tray_id: newPallet.tray_id,
-                virtualCapacity: newPallet.max - newPallet.trays
-            }
-            addPalletToCurrentPallets(newCurrentPallet)
-            console.log('newCurrentPallet', newCurrentPallet)
-        }
-
-
-
-        // console.log('newPallet', newPallet)
-
-        setPalletData(palletDataDefault())
-
-
+        openSnack('Nuevo pallet guardado', 'success')
+        afterSubmit()
         if (dialog != false) {
             closeDialog()
         }
+
+        await records.create(
+            'Pallets',
+            'Creación',
+            'Pallet ' + palletData.id,
+            user.id,
+        )
+
+        
 
 
     }
@@ -106,7 +95,7 @@ export default function NewPalletForm(props) {
         <>
             <form onSubmit={(e) => { e.preventDefault(); savePallet() }} >
                 <Grid container direction={'column'} paddingTop={dialog ? 1 : 0} spacing={1} p={1}>
-                    <Grid item  display={onPack?  'none' : 'inline-block'}>
+                    <Grid item>
                         <Autocomplete
                             inputValue={storagesInput}
                             onInputChange={(e, newInputValue) => {
@@ -188,9 +177,9 @@ export default function NewPalletForm(props) {
 
 function palletDataDefault() {
     return ({
-      storage: { id: 0, key: 0, label: '' },
-      tray: { id: 0, key: 0, label: '' },
-      weight: '',
-      max: 0,
+        storage: { id: 0, key: 0, label: '' },
+        tray: { id: 0, key: 0, label: '' },
+        weight: '',
+        max: 0,
     })
-  }
+}

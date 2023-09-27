@@ -31,6 +31,7 @@ export default function index() {
 
     } catch (err) {
       openSnack('Error de conexión al servidor', 'error')
+      console.log(err)
 
       // if (err.errors[0].message === 'user not found') {])
     }

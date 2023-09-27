@@ -178,6 +178,53 @@ function findAllByProducerByTray(tray_id, producer_id) {
 
 
 
+function findAllByReception(reception_id) {
+    const tray = new Promise((resolve, reject) => {
+        fetch(server_url + 'traysMovements/findAllByReception', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reception_id })
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+
+        }).catch(err => { reject(err) })
+    })
+
+    return tray
+}
+
+
+
+function findOneById(id) {
+    const tray = new Promise((resolve, reject) => {
+        fetch(server_url + 'traysMovements/findOneById', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+
+        }).catch(err => { reject(err) })
+    })
+
+    return tray
+  
+}
+
+
+
 export {
     create,
     findAll,
@@ -186,6 +233,8 @@ export {
     findFirstByTrayBetweenDate,
     findOneLastByTray,
     findAllByTrayByProducerBetweenDate,
-    findAllByProducerByTray
+    findAllByProducerByTray,
+    findAllByReception,
+    findOneById
 
 }

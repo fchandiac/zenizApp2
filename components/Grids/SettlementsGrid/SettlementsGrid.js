@@ -9,7 +9,7 @@ import PrintIcon from '@mui/icons-material/Print'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, FormControlLabel,
-    Switch, TextField, InputAdornment, Autocomplete,
+    Switch, TextField, InputAdornment, Autocomplete, Box,
 } from '@mui/material'
 import { useAppContext } from '../../../appProvider'
 import moment from 'moment'
@@ -52,7 +52,7 @@ export default function SettlementsGrid(props) {
                             description: params.row.description,
                             createdAt: params.row.createdAt,
                             receptions: params.row.receptions
-                           
+
                         })
                         setOpenPrintDialog(true)
                     }}
@@ -62,23 +62,26 @@ export default function SettlementsGrid(props) {
 
     ]
 
-   
+
 
     return (
         <>
             <DataGrid title={title} rows={settlementsList} columns={columns} height='80vh' setGridApiRef={setGridApiRef} />
-            <PrintDialog 
-            open={openPrintDialog} 
-            setOpen={setOpenPrintDialog} 
-            title='Comprobante Liquidación' 
-            maxWidth={'lg'}
+            <PrintDialog
+                open={openPrintDialog}
+                setOpen={setOpenPrintDialog}
+                title='Comprobante Liquidación'
+                dialogWidth={'lg'}
+
             >
-                <SettlementToPrint settlement={rowData} />
+        
+                    <SettlementToPrint settlement={rowData} />
+ 
             </PrintDialog>
         </>
     )
 }
-function rowDataDefault(){
+function rowDataDefault() {
     return {
         id: 0,
         producerName: '',

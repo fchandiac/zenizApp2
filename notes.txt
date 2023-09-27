@@ -1,4 +1,9 @@
-PENDIENTE: IF CLP > 0,00 MONEY = 'CLP' ELSE MONEY = 'USD'
+PENDIENTE: 
+- on divide and move pack: 
+                update pallets informarion. 
+
+            
+- 
 
 
 <CardMedia

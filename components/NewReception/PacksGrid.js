@@ -54,9 +54,9 @@ export default function PacksGrid() {
       valueFormatter: (params) =>
         new Intl.NumberFormat('es-CL', {
           style: 'decimal',
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
-        }).format(params.value) + ' unds'
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(params.value) + ' kg'
     },
     {
       field: 'impurityWeight', headerName: 'Impurezas', flex: .8, hide: receptionShowImpurities ? false : true,

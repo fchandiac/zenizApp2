@@ -1,4 +1,5 @@
 import { TableContainer, Table, TableHead, TableRow, TableBody, TableCell, Typography, Divider, Box, Paper } from '@mui/material'
+import moment from 'moment/moment'
 import React from 'react'
 
 export default function TraysReportToPrint(props) {
@@ -44,7 +45,7 @@ export default function TraysReportToPrint(props) {
                                 <TableCell className='row-tiny'>{item.description}</TableCell>
                                 <TableCell className='row-tiny'>{item.quanty}</TableCell>
                                 <TableCell className='row-tiny'>{item.balance}</TableCell>
-                                <TableCell className='row-tiny'>{item.createdAt}</TableCell>
+                                <TableCell className='row-tiny'>{moment(item.createdAt).format('DD-MM-YYYY HH:mm')}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

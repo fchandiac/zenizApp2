@@ -10,7 +10,8 @@ function create(
     new_dispatch,
     close_reception,
     close_dispatch,
-    advance
+    advance,
+    users
 ) {
     let data = {
         name,
@@ -21,7 +22,8 @@ function create(
         new_dispatch,
         close_reception,
         close_dispatch,
-        advance
+        advance,
+        users
     }
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
     const profile_ = new Promise((resolve, reject) => {

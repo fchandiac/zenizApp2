@@ -116,8 +116,8 @@ function findOneById(id) {
 
 
 
-function updateDisptach(id, dispatch_id) {
-    let data = { id, dispatch_id}
+function updateDisptach(id, dispatch_id, dispatch_weight, decrease_weight) {
+    let data = { id, dispatch_id, dispatch_weight, decrease_weight}
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
     const pallet = new Promise((resolve, reject) => {
         fetch(server_url + 'pallets/updateDispatch', {

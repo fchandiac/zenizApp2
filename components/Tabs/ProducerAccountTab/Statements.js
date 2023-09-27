@@ -23,6 +23,7 @@ export default function Statements(props) {
     const [producer, setProducer] = useState({})
     const [movements, setMovements] = useState([])
     const [openPrintDialog, setOpenPrintDialog] = useState(false)
+    const [totalGross, setTotalGross] = useState(0)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -46,13 +47,16 @@ export default function Statements(props) {
                 }
             })
 
+            console.log(formatData)
+            let gross = formatData.reduce((a, b) => a + b.reception.gros, 0)
+            setTotalGross(totalGross)
+
             setMovements(formatData)
             setProducer(await producers.findOneById(producerId))
             const startBalance_ = await producerAccounts.findFirstByProducerIdBetweenDate(producerId, filterDates.start, filterDates.end)
             setStartBalance(startBalance_ == null ? '' : startBalance_.balance)
             const endBalance_ = await producerAccounts.findLastByProducerIdBetweenDates(producerId, filterDates.start, filterDates.end)
             setEndBalance(endBalance_ == null ? '' : endBalance_.balance)
-
 
         }
         fetchData()
@@ -96,10 +100,10 @@ export default function Statements(props) {
                     {movements.map((row) => (
                         <TableRow
                             key={row.id}
-                            // sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        // sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                         >
                             <TableCell align="right" sx={{ fontSize: 10 }}
-                            className='row-tiny'
+                                className='row-tiny'
                             >
                                 {moment(row.createdAt).format('DD-MM-YYYY HH:mm')}
                             </TableCell>
@@ -118,7 +122,9 @@ export default function Statements(props) {
                             <TableCell className='row-tiny' align="right">{refereceType(row.referenceType)}</TableCell>
                             <TableCell className='row-tiny' align="right">{row.referenceId}</TableCell>
                             <TableCell className='row-tiny' align="right">{row.reception.trays_quanty}</TableCell>
-                            <TableCell className='row-tiny' align="right">{row.reception.clp}</TableCell>
+                            <TableCell className='row-tiny' align="right">{
+                            row.reception.clp
+                            }</TableCell>
                             <TableCell className='row-tiny' align="right">{row.reception.net}</TableCell>
                             <TableCell className='row-tiny' align="right">
                                 {
@@ -140,34 +146,36 @@ export default function Statements(props) {
         <>
             <Grid container spacing={1}>
                 <Grid item xs={2}>
-                    <Grid item>
-                        <DesktopDatePicker
-                            label="Fecha incial"
-                            inputFormat='DD-MM-YYYY'
-                            value={filterDates.start}
-                            onChange={(e) => {
-                                console.log(e)
-                                setFilterDates({ ...filterDates, start: e })
-                            }}
-                            renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
-                        />
-                    </Grid>
-                    <Grid item>
-                        <DesktopDatePicker
-                            label="Fecha final"
-                            inputFormat='DD-MM-YYYY'
-                            value={filterDates.end}
-                            onChange={(e) => { setFilterDates({ ...filterDates, end: e }) }}
-                            renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
-                        />
-                    </Grid>
-                    <Grid item textAlign={'right'}>
-                        <IconButton
-                            onClick={() => { setOpenPrintDialog(true) }}
-                        >
-                            <PrintIcon />
-                        </IconButton>
+                    <Grid container spacing={1} direction={'column'}>
+                        <Grid item>
+                            <DesktopDatePicker
+                                label="Fecha incial"
+                                inputFormat='DD-MM-YYYY'
+                                value={filterDates.start}
+                                onChange={(e) => {
+                                    console.log(e)
+                                    setFilterDates({ ...filterDates, start: e })
+                                }}
+                                renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
+                            />
+                        </Grid>
+                        <Grid item>
+                            <DesktopDatePicker
+                                label="Fecha final"
+                                inputFormat='DD-MM-YYYY'
+                                value={filterDates.end}
+                                onChange={(e) => { setFilterDates({ ...filterDates, end: e }) }}
+                                renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
+                            />
+                        </Grid>
+                        <Grid item textAlign={'right'}>
+                            <IconButton
+                                onClick={() => { setOpenPrintDialog(true) }}
+                            >
+                                <PrintIcon />
+                            </IconButton>
 
+                        </Grid>
                     </Grid>
                 </Grid>
                 <Grid item xs={10}>
@@ -186,8 +194,8 @@ export default function Statements(props) {
                             paddingTop: 1,
                             paddingBottom: 1
                         }}>
-                            <Typography variant='caption' align='left'>Saldo inicial: {startBalance}</Typography>
-                            <Typography variant='caption' align='left'>Saldo Final: {endBalance}</Typography>
+                            <Typography variant='caption' align='left'>Saldo inicial: {startBalance.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</Typography>
+                            <Typography variant='caption' align='left'>Saldo Final: {endBalance.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</Typography>
                         </Box>
                         <Divider />
                         <Box sx={{
@@ -206,9 +214,9 @@ export default function Statements(props) {
                 open={openPrintDialog}
                 setOpen={setOpenPrintDialog}
                 title={'Cartola'}
-                maxWidth={'lg'}
+                dialogWidth={'lg'}
             >
-                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }} variant='outlined'>
+                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', }} variant='outlined'>
 
                     <Typography variant='h6' align='left'>Cartola</Typography>
                     <Typography variant='subtitle1' align='left'>{subTitle}</Typography>
@@ -223,8 +231,8 @@ export default function Statements(props) {
                         paddingTop: 1,
                         paddingBottom: 1
                     }}>
-                        <Typography variant='caption' align='left'>Saldo inicial: {startBalance}</Typography>
-                        <Typography variant='caption' align='left'>Saldo Final: {endBalance}</Typography>
+                        <Typography variant='caption' align='left'>Saldo inicial: {startBalance.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</Typography>
+                        <Typography variant='caption' align='left'>Saldo Final: {endBalance.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</Typography>
                     </Box>
                     <Divider />
                     <Box sx={{

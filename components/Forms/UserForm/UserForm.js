@@ -1,11 +1,13 @@
 import { Button, Grid, TextField, Typography, Autocomplete } from '@mui/material'
 import React, { useState, useEffect } from 'react'
+import { useAppContext } from '../../../appProvider'
 
 const users = require('../../../services/users')
 const profiles = require('../../../services/profiles')
 
 export default function UserForm(props) {
   const { afterSubmit } = props
+  const { openSnack, user } = useAppContext()
   const [userData, setUserData] = useState(userDataDefault())
   const [profileInput, setProfileInput] = useState('')
   const [profilesOptions, setProfilesOptions] = useState([])
@@ -25,22 +27,33 @@ export default function UserForm(props) {
   }, [])
 
   const saveUser = async () => {
-    const newUser = await users.create(
-      userData.user,
-      '1234',
-      userData.name,
-      '',
-      userData.profile.id
-    )
-    setUserData(userDataDefault())
-    afterSubmit()
+    try {
+      const newUser = await users.create(
+        userData.user,
+        '1234',
+        userData.name,
+        '',
+        userData.profile.id
+      )
+
+      setUserData(userDataDefault())
+      afterSubmit()
+
+    } catch (err) {
+      console.log('errOnCreate', err)
+      if (err.errors[0].message === 'user must be unique') {
+        openSnack('El usuario ya existe', 'error')
+      }
+    }
+
 
   }
 
   return (
     <>
-      <Grid container spacing={1} direction={'column'} padding={1}>
-        <form onSubmit={(e) => { e.preventDefault(); saveUser() }}>
+      <form onSubmit={(e) => { e.preventDefault(); saveUser() }}>
+        <Grid container spacing={1} direction={'column'} padding={1}>
+
           <Grid item>
             <TextField
               label={'Usuario'}
@@ -87,8 +100,9 @@ export default function UserForm(props) {
           <Grid item textAlign={'right'}>
             <Button variant='contained' type='submit'>Guardar</Button>
           </Grid>
-        </form>
-      </Grid >
+
+        </Grid >
+      </form>
     </>
   )
 }

@@ -6,6 +6,8 @@ import AppDataGrid from '../../Karmextron/DataGrid/DataGrid'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import InfoDataGrid from '../../Karmextron/InfoDataGrid/InfoDataGrid'
+import PrintDialog from '../../PrintDialog/PrintDialog'
+import SettlementToPrint from '../SettlementsGrid/SettlementToPrint' 
 
 
 const receptions = require('../../../services/receptions')
@@ -19,6 +21,8 @@ export default function SettlementDialog(props) {
     const [receptionsList, setReceptionsList] = useState([])
     const [gridTitle, setGridTitle] = useState('Recepciones')
     const [balance, setBalance] = useState(0)
+    const [openPrintDialog, setOpenPrintDialog] = useState(false)
+    const [settlementData, setSettlementData] = useState({})
 
 
     useEffect(() => {
@@ -87,11 +91,27 @@ export default function SettlementDialog(props) {
             2,
             settlementDescription()
         )
+
+        const findNewSettlement = await settlements.findOneById(newSettlement.id)
+        
+        let formatSettlement = () => ({
+            id: findNewSettlement.id,
+            producerId: findNewSettlement.ProducerId,
+            producerName: findNewSettlement.Producer.name,
+            amount: findNewSettlement.amount,
+            description: findNewSettlement.description,
+            receptions: findNewSettlement.Receptions,
+            createdAt: findNewSettlement.createdAt,
+        })
+        setSettlementData(formatSettlement)
+
         receptionsList.map(async (reception) => {
             await receptions.updateSettlement(reception.id, newSettlement.id)
         })
+        
         setAccountsGridState(!accountsGridState)
         setOpen(false)
+        setOpenPrintDialog(true)
     }
 
 
@@ -230,6 +250,16 @@ export default function SettlementDialog(props) {
                     <Button variant='outlined' onClick={() => setOpen(false)}>Cerrar</Button>
                 </DialogActions>
             </Dialog>
+
+            <PrintDialog
+                open={openPrintDialog}
+                setOpen={setOpenPrintDialog}
+                title={'Liquidación'}
+                dialogWidth={'lg'}
+            >
+                <SettlementToPrint settlement={settlementData} />
+            </PrintDialog>
+                
         </>
     )
 }

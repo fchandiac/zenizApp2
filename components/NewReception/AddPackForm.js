@@ -3,17 +3,19 @@ import React, { useState, useEffect } from 'react'
 import { useAppContext } from '../../appProvider'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import EditIcon from '@mui/icons-material/Edit'
-import NewPalletForm from '../Forms/NewPalletForm/NewPalletForm'
+
 
 
 const pallets = require('../../services/pallets')
 const trays = require('../../services/trays')
+const storages = require('../../services/storages')
+const records = require('../../services/records')
 
 
 
 export default function AddPackForm(props) {
     const { showImpurities, closeDialog } = props
-    const { lock, currentPallets, setCurrentPallets, addPack, addPalletToCurrentPallets, user, openSnack } = useAppContext()
+    const { currentPallets, setCurrentPallets, addPack, user, openSnack, addPalletToCurrentPallets } = useAppContext()
     const [packTraysInput, setPackTraysInput] = useState('')
     const [packTraysOptions, setPackTraysOptions] = useState([{ id: 0, label: '', key: 0 }])
     const [packData, setPackData] = useState(packDataDefault())
@@ -21,8 +23,12 @@ export default function AddPackForm(props) {
     const [palletsInput, setPalletsInput] = useState('')
     const [palletsOptions, setPalletsOptions] = useState([{ id: 0, label: '', key: 0 }])
 
+    const [storagesInput, setStoragesInput] = useState('')
+    const [storagesOptions, setStoragesOptions] = useState([{ id: 0, key: 0, label: '' }])
+
     const [openNewPalletDialog, setOpenNewPalletDialog] = useState(false)
     const [openEditPalletDialog, setOpenEditPalletDialog] = useState(false)
+
     const [palletData, setPalletData] = useState(palletDataDefault())
 
 
@@ -35,6 +41,15 @@ export default function AddPackForm(props) {
                 weight: item.weight
             }))
             setPackTraysOptions(data)
+        })
+
+        storages.findAll().then(res => {
+            let data = res.map(item => ({
+                id: item.id,
+                key: item.id,
+                label: item.name
+            }))
+            setStoragesOptions(data)
         })
     }, [])
 
@@ -50,8 +65,10 @@ export default function AddPackForm(props) {
 
 
     const formatPalletsOptions = (tray_id, pallets) => {
+        console.log('pallets', pallets)
         let data = pallets.filter(pallet => pallet.tray_id === tray_id)
-        data = data.filter(item => item.max - item.virtualTrays > 0)
+   
+        data = data.filter(item => item.dispatch == false)
 
         data = data.map(item => ({
             id: item.id,
@@ -60,7 +77,8 @@ export default function AddPackForm(props) {
             trays: item.trays,
             max: item.max,
             virtualTrays: item.virtualTrays,
-            virtualCapacity: item.virtualCapacity
+            virtualCapacity: item.virtualCapacity,
+
         }))
         setPalletsOptions(data)
     }
@@ -95,15 +113,22 @@ export default function AddPackForm(props) {
         return packData
     }
 
-    const submit = () => {
+    const submit = async () => {
         // evitar sobrecarga de Palletss  
-        updateVirtualPallet(packData.pallet.id, packData.quanty)
-        addPack(formatPack(packData))
-        setPackData(packDataDefault())
-        closeDialog()
+        const pallet = pallets.findOneById(packData.pallet.id)
+        if (pallet.max - pallet.virtualTrays < packData.quanty) {
+            openSnack('La cantidad de bandejas supera la capacidad del pallet', 'error')
+            return
+        } else {
+            updateVirtualPallet(packData.pallet.id, packData.quanty)
+            addPack(formatPack(packData))
+            setPackData(packDataDefault())
+            closeDialog()
+        }
+
     }
 
-    const editMax = async() => {
+    const editMax = async () => {
         await pallets.updateMax(palletData.id, palletData.max)
         openSnack('Capacidad máxima actualizada', 'success')
 
@@ -111,8 +136,31 @@ export default function AddPackForm(props) {
         editCurrentPallet.max = palletData.max
         editCurrentPallet.virtualCapacity = palletData.max - editCurrentPallet.virtualTrays
         setCurrentPallets(currentPallets.map(pallet => pallet.id === palletData.id ? editCurrentPallet : pallet))
-
+        await records.create('Pallets', 'Edición', 'Capacidad máxima actualizada a ' + palletData.max, user.id)
         setOpenEditPalletDialog(false)
+
+    }
+
+    const createPallet = async () => {
+        const newPallet = await pallets.create(
+            packData.tray.id,
+            palletData.storage.id,
+            palletData.weight,
+        )
+
+        let newCurrentPallet = {
+            id: newPallet.id,
+            trays: newPallet.trays,
+            max: newPallet.max,
+            virtualTrays: newPallet.trays,
+            tray_id: newPallet.tray_id,
+            virtualCapacity: newPallet.max - newPallet.trays
+        }
+
+        addPalletToCurrentPallets(newCurrentPallet)
+        openSnack('Nuevo pallet guardado', 'success')
+        setPalletData(palletDataDefault())
+        setOpenNewPalletDialog(false)
     }
 
     return (
@@ -183,7 +231,14 @@ export default function AddPackForm(props) {
                     <Grid item sx={{ display: 'flex' }}>
                         <IconButton
                             sx={{ flex: '0 0 auto', marginRight: 1, display: user.Profile.id == 1001 ? 'flex' : 'none' }}
-                            onClick={() => { setOpenNewPalletDialog(true) }}>
+                            onClick={() => {
+                                console.log(packData.tray)
+                                if (packData.tray.id == 0) {
+                                    openSnack('Seleccione una bandeja', 'error')
+                                    return
+                                }
+                                setOpenNewPalletDialog(true)
+                            }}>
                             <AddCircleIcon fontSize='inherit' />
                         </IconButton>
                         <IconButton
@@ -237,16 +292,51 @@ export default function AddPackForm(props) {
             </form>
 
             <Dialog open={openNewPalletDialog} maxWidth={'xs'} fullWidth>
-                <DialogTitle sx={{ padding: 2 }}>Nuevo pallet</DialogTitle>
+                <DialogTitle sx={{ p: 0, paddingLeft: 1, paddingTop: 1 }}>Nuevo pallet</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
-                    <NewPalletForm
-                        dialog={true}
-                        onPack={true}
-                        edit={false}
-                        palletData={palletData}
-                        setPalletData={setPalletData}
-                        closeDialog={() => { setOpenNewPalletDialog(false) }}
-                    />
+                    <form onSubmit={(e) => { e.preventDefault(); createPallet() }} >
+                        <DialogContent sx={{ padding: 0 }}>
+                            <Grid container direction={'column'} spacing={1} paddingTop={1}>
+                                <Grid item >
+                                    <Autocomplete
+                                        inputValue={storagesInput}
+                                        onInputChange={(e, newInputValue) => {
+                                            setStoragesInput(newInputValue)
+                                        }}
+
+                                        value={palletData.storage}
+                                        onChange={(e, newValue) => {
+                                            setPalletData({ ...palletData, storage: newValue })
+                                        }}
+                                        getOptionLabel={(option) => option.label}
+                                        disablePortal
+                                        options={storagesOptions}
+                                        renderInput={(params) => <TextField {...params} label='Almacén' size={'small'} required />}
+                                    />
+                                </Grid>
+                                <Grid item >
+                                    <TextField
+                                        label='Peso'
+                                        value={palletData.weight}
+                                        onChange={(e) => { setPalletData({ ...palletData, weight: e.target.value }) }}
+                                        variant="outlined"
+                                        type='number'
+                                        size={'small'}
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">kg</InputAdornment>
+                                        }}
+                                        fullWidth
+                                        required
+                                    />
+                                </Grid>
+                                <Grid item textAlign={'right'}>
+                                    <Button variant="contained" type='submit' >guardar</Button>
+                                    <Button sx={{ marginLeft: 1 }} variant={'outlined'} onClick={() => { setOpenNewPalletDialog(false) }}>Cerrar</Button>
+                                </Grid>
+                            </Grid>
+                        </DialogContent>
+                    </form>
+
                 </DialogContent>
             </Dialog>
 
@@ -274,7 +364,7 @@ export default function AddPackForm(props) {
                             </Grid>
                             <Grid item textAlign={'right'}>
                                 <Button variant="contained"
-                                type='submit'
+                                    type='submit'
                                 >editar</Button>
                                 <Button
                                     sx={{ marginLeft: 1 }}

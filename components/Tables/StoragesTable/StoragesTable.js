@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
-import { IconButton, TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, DialogActions,
-Dialog, DialogTitle, DialogContent, Button
+import {
+    IconButton, TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, DialogActions,
+    Dialog, DialogTitle, DialogContent, Button, Box
 } from '@mui/material'
 import StorageForm from '../../Forms/StorageForm/StorageForm'
 
@@ -14,9 +15,9 @@ export default function StoragesTable() {
     const [storagesList, setStoragesList] = useState([])
     const [openEditDialog, setOpenEditDialog] = useState(false)
     const [openCreateDialog, setOpenCreateDialog] = useState(false)
-    const [storageData, setStorageData] = useState({id:0, name: ''})
+    const [storageData, setStorageData] = useState({ id: 0, name: '' })
     const [update, setUpdate] = useState(false)
-  
+
 
 
     useEffect(() => {
@@ -37,54 +38,49 @@ export default function StoragesTable() {
 
     return (
         <>
-            <TableContainer m component={Paper} variant='outlined'
-                sx={{
-                    padding: 0, maxHeight: '30vh', overflowY: 'auto',
-                    width: 'auto',
-                    margin: 1,
-                    marginRight: 0
-
-                }} >
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>
-                                <IconButton
-                                    onClick={() => {
-                                        setOpenCreateDialog(true)
-                                    } }
-                                ><AddCircleIcon sx={{ fontSize: 18 }} />
-                                </IconButton>
-                                Almacenes
-                                </TableCell>
-                            <TableCell align="right">{' '}</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {storagesList.map((storage) => (
-                            <TableRow key={storage.id}
-                                sx={{ '&:last-child td, &:last-child th': { border: 'none' } }}
-                            >
-                                <TableCell align={'left'} component="th" scope="row"
-                                    sx={{ fontSize: 12 }}
-                                >
-                                    {storage.name}
-                                </TableCell>
-                                <TableCell className='row-tiny'>
+            <Box p={1}>
+                <TableContainer component={Paper} variant='outlined'>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>
                                     <IconButton
                                         onClick={() => {
-                                            setStorageData({id: storage.id, name: storage.name})
-                                            setOpenEditDialog(true)
-                                         }}
-
-                                    ><EditIcon sx={{ fontSize: 18 }} />
+                                            setOpenCreateDialog(true)
+                                        }}
+                                    ><AddCircleIcon sx={{ fontSize: 18 }} />
                                     </IconButton>
+                                    Almacenes
                                 </TableCell>
+                                <TableCell align="right">{' '}</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                            {storagesList.map((storage) => (
+                                <TableRow key={storage.id}
+                                  
+                                >
+                                    <TableCell align={'left'} component="th" scope="row"
+                                        sx={{ fontSize: 12 }}
+                                    >
+                                        {storage.name}
+                                    </TableCell>
+                                    <TableCell className='row-tiny'>
+                                        <IconButton
+                                            onClick={() => {
+                                                setStorageData({ id: storage.id, name: storage.name })
+                                                setOpenEditDialog(true)
+                                            }}
+
+                                        ><EditIcon sx={{ fontSize: 18 }} />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Box>
             <Dialog open={openCreateDialog} maxWidth={'xs'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}>Nuevo almacén</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
@@ -107,7 +103,7 @@ export default function StoragesTable() {
                         edit={true}
                         storageData={storageData}
                         setStorageData={setStorageData}
-                        afterSubmit={() => {update_()}}
+                        afterSubmit={() => { update_() }}
                         closeDialog={() => { setOpenEditDialog(false) }}
                     />
                 </DialogContent>

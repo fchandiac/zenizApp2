@@ -15,6 +15,7 @@ import { useRouter } from 'next/router'
 import { useAppContext } from '../../appProvider'
 import Snack from '../Karmextron/Snack/Snack'
 import ChangePassForm from '../Forms/ChangePassForm/ChangePassForm'
+
 const users = require('../../services/users')
 
 export default function Layout(props) {
@@ -54,7 +55,23 @@ export default function Layout(props) {
 
     const lock = async () => {
         const findUser = await users.findOneByUser(user.user)
-        setUserProfile(findUser.Profile)
+        if (findUser == null) {
+            setUserProfile({
+                id: 0,
+                name: 'blank',
+                delete: false,
+                edit: false,
+                settlement: false,
+                new_reception: false,
+                new_dispatch: false,
+                close_reception: false,
+                close_dispatch: false,
+                advance: false
+            })
+        } else {
+            setUserProfile(findUser.Profile)
+        }
+        
 
 
     }
@@ -88,16 +105,16 @@ export default function Layout(props) {
                         >
                             <AccountCircle />
                         </IconButton>
-                        <IconButton 
-                        sx={{ mr: 1 }}
-                        onClick={() => { user.Profile.id != 1001 ? setOpenAuthDialog(true) : lock() }} color={'inherit'} size="large" >
+                        <IconButton
+                            sx={{ mr: 1 }}
+                            onClick={() => { user.Profile.id != 1001 ? setOpenAuthDialog(true) : lock() }} color={'inherit'} size="large" >
                             <LockOpenIcon sx={{ display: user.Profile.id == 1001 ? 'inline-block' : 'none' }} />
                             <LockIcon sx={{ display: user.Profile.id == 1001 ? 'none' : 'inline-block' }} />
                         </IconButton>
                         <CardMedia
                             component="img" // Indica que estás mostrando una imagen
                             alt=""
-                            sx={{ width: '2.7vw'}}
+                            sx={{ width: '2.7vw' }}
                             image="http://localhost:3001/images/symbol.png" // Ruta de la imagen
                         />
                     </Box>
@@ -156,7 +173,9 @@ export default function Layout(props) {
                 </Box>
                 <Divider />
                 <List>
-                    <ListItem disablePadding sx={{ display: user.Profile.new_reception ? 'inline-block' : 'none' }}>
+                    <ListItem 
+                    sx={{display: user.Profile.new_reception ? 'block' : 'none'}}
+                    disablePadding>
                         <ListItemButton>
                             <ListItemText primary={'Nueva recepción'}
                                 onClick={() => {
@@ -192,7 +211,9 @@ export default function Layout(props) {
                             />
                         </ListItemButton>
                     </ListItem>
-                    <ListItem disablePadding>
+                    <ListItem 
+                    sx={{display: user.Profile.new_dispatch ? 'block' : 'none'}}
+                    disablePadding>
                         <ListItemButton>
                             <ListItemText primary={'Nuevo despacho'}
                                 onClick={() => {

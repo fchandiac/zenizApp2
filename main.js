@@ -2,12 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path');
 const url = require('url');
 const port = 3001
-var serialNumber = require('serial-number')
 
-
-serialNumber(function (err, value) {
-	console.log('SERIAL NUMBER: ' + value)
-})
 
 
 //// --------> CONFIG JSON APP <-------/////////
@@ -144,33 +139,6 @@ function ejecuteNext(win, splash) {
 			}, 2000)
 		})
 }
-
-
-/////// --------> IPC COMMUNICATION <-------/////////
-
-
-
-ipcMain.on('read-config', (e, arg) => {
-	e.returnValue = config
-})
-
-
-ipcMain.on('write-config', (e, arg) => {
-	config.db_name = config.db_name
-	config.db_user = config.db_user
-	config.db_host = config.db_host
-	config.db_password = config.db_password
-	config.port_app = config.port_app
-	config.app_pass = arg
-	config.server_url = config.server_url
-
-
-	data = JSON.stringify(config)
-	fs.writeFileSync(filePathConfig, data)
-})
-
-
-
 
 
 
