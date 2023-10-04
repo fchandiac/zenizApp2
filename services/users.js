@@ -1,11 +1,17 @@
+// import electron from 'electron'
+// const ipcRenderer = electron.ipcRenderer || false
+
 
 const config= require('../config.js')
 const server_url = config.serverUrl
 
 
+
+
 function findOneByUser(user) {
     let data = { user }
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
+   // console.log(server_url)
     const user_ = new Promise((resolve, reject) => {
         fetch(server_url + 'users/findOneByUser', {
             method: 'POST',

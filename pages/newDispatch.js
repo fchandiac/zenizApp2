@@ -7,6 +7,8 @@ import { useAppContext } from '../appProvider'
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import DispatachPalletCard from '../components/Cards/DispatchPalletCard/DispatachPalletCard'
 import { set } from 'date-fns'
+import PrintDialog from '../components/PrintDialog/PrintDialog'
+import DistpatchToPrint from '../components/Grids/DispatchsGrid/DistpatchToPrint'
 
 
 const pallets = require('../services/pallets')
@@ -59,6 +61,8 @@ export default function newDispatch() {
 
   const [customerInput, setCustomerInput] = useState('')
   const [customerOptions, setCustomerOptions] = useState([])
+  const [openPrintDialog, setOpenPrintDialog] = useState(false)
+  const [newDisptatchId, setNewDispatchId] = useState(0)
 
   useEffect(() => {
     const setOptionsCustomer = async () => {
@@ -222,6 +226,11 @@ export default function newDispatch() {
       console.log('UPDATE_DISPATCH', updateDispatch)
     })
 
+    setNewDispatchId(newDispatch.id)
+    setOpenPrintDialog(true)
+
+
+
 
 
 
@@ -246,6 +255,7 @@ export default function newDispatch() {
 
 
   return (
+    <>
     <Grid container spacing={1}>
       <Grid item xs={3}>
         <Grid container direction={'column'} spacing={1}>
@@ -391,7 +401,7 @@ export default function newDispatch() {
                         endAdornment: <InputAdornment position="end">USD</InputAdornment>,
 
                       }}
-                      inputProps={{ min: 0 }}
+                      inputProps={{ min: 0, step: 0.01 }}
 
                     />
                   </Grid>
@@ -445,6 +455,16 @@ export default function newDispatch() {
         </Paper>
       </Grid>
     </Grid>
+    <PrintDialog
+    open={openPrintDialog}
+    setOpen={setOpenPrintDialog}
+    title={'Recibo despacho ' + newDisptatchId}
+    dialogWidth={'xl'}
+    >
+      <DistpatchToPrint dispatchId={newDisptatchId} />
+
+    </PrintDialog>
+    </>
   )
 }
 

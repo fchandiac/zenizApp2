@@ -143,3 +143,8 @@ function ejecuteNext(win, splash) {
 
 
 
+// ipcMain.on('server-url', (e, arg) => {
+// 	let rawDataConfig = fs.readFileSync(filePathConfig)
+// 	let config = JSON.parse(rawDataConfig)
+// 	e.returnValue = config.api.url
+// })

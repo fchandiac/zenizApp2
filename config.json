@@ -1,1 +1,5 @@
-{"db_name":"sami_5","db_user":"root","db_host":"localhost","db_password":"Fenasantma","port_app":3001,"app_pass":"1234","server_url":"http://localhost:3001/"}
+{
+    "api": {
+        "url": "http://localhost:3002/"
+    }
+}

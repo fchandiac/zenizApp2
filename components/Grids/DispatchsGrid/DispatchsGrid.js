@@ -15,6 +15,7 @@ import LockOpenIcon from '@mui/icons-material/LockOpen'
 import { useAppContext } from '../../../appProvider'
 import PrintDialog from '../../PrintDialog/PrintDialog'
 import DistpatchToPrint from './DistpatchToPrint'
+import { set } from 'date-fns'
 
 
 
@@ -79,15 +80,17 @@ export default function DispatchsGrid(props) {
   const updateDispatch = async () => {
 
     console.log('rowData', rowData)
-    await dispatchs.update(rowData.id, rowData.clp, rowData.usd, rowData.change, rowData.money, rowData.impurityWeight, rowData.toPay)
+    await dispatchs.update(rowData.id, rowData.clp, rowData.usd, rowData.change, rowData.money, rowData.impurityWeight, rowData.toPay, rowData.net, rowData.gross)
     gridApiRef.current.updateRows([{
       id: rowData.rowId,
       clp: rowData.clp,
       usd: rowData.usd,
       change: rowData.change,
       money: rowData.money,
-      impurityWeight: 0,
+      impurityWeight: rowData.impurityWeight,
       toPay: rowData.toPay,
+      net: rowData.net,
+      gross: rowData.gross
     }])
     setOpenEditDialog(false)
   }
@@ -157,6 +160,7 @@ export default function DispatchsGrid(props) {
       headerClassName: 'data-grid-last-column-header',
       type: 'actions', flex: 2, getActions: (params) => [
         <GridActionsCellItem
+          sx={{ display: params.row.open ? 'inline-block' : 'none' }}
           label='edit'
           icon={<EditIcon />}
           onClick={() => {
@@ -170,6 +174,8 @@ export default function DispatchsGrid(props) {
               money: params.row.money,
               toPay: params.row.toPay,
               net: params.row.net,
+              gross: params.row.gross,
+              impurityWeight: params.row.impurityWeight
 
             })
             setOpenEditDialog(true)
@@ -203,11 +209,8 @@ export default function DispatchsGrid(props) {
                 openSnack('El precio en pesos no esta asignado ', 'error')
               } else {
                 closeDispatch(params.id, params.row.customerId, params.row.toPay)
-                
               }
             }
-
-
           }}
         />,
 
@@ -289,8 +292,81 @@ export default function DispatchsGrid(props) {
                   inputProps={{ min: 0 }}
                 />
               </Grid>
+              <Grid item>
+                <TextField
+                  label='Impurezas %'
+                  value={rowData.impurityPercent}
+                  type='number'
+                  variant="outlined"
+                  onChange={(e) => {
+                    setRowData({
+                      ...rowData,
+                      impurityPercent: e.target.value,
+                      impurityWeight: (rowData.net * e.target.value) / 100
+                    })
+                  }}
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                  }}
+                  inputProps={{ min: 0, step: 0.01, max: 100 }}
+                  size={'small'}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  label='Impurezas kg'
+                  value={rowData.impurityWeight}
+                  type='number'
+                  InputProps={
+                    {
+                      endAdornment: <InputAdornment position="end">kg</InputAdornment>,
+                      readOnly: true
+                    }
+                  }
+                  variant="outlined"
+                  size={'small'}
+                  fullWidth
 
-              <Grid item></Grid>
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  label='Bruto'
+                  value={rowData.gross}
+                  type='number'
+                  onChange={(e) => {setRowData({...rowData, gross: e.target.value })}}
+                  InputProps={
+                    {
+                      endAdornment: <InputAdornment position="end">kg</InputAdornment>,
+                    }
+                  }
+                  variant="outlined"
+                  size={'small'}
+                  fullWidth
+                  inputProps={{ min: 0, step: 0.01 }}
+
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  label='Neto'
+                  value={rowData.net}
+                  type='number'
+                  onChange={(e) =>{setRowData({...rowData, net: e.target.value})}}
+                  // calcPrice(receptionClp, e.target.value, receptionChange, receptionMoney)
+                  InputProps={
+                    {
+                      endAdornment: <InputAdornment position="end">kg</InputAdornment>,
+                    }
+                  }
+                  variant="outlined"
+                  size={'small'}
+                  fullWidth
+                  inputProps={{ min: 0, step: 0.01 }}
+
+                />
+              </Grid>
             </Grid>
 
           </DialogContent>
@@ -326,6 +402,10 @@ function rowDataDefault() {
     usd: 0,
     money: 'CLP',
     close: false,
+    impurityWeight: 0,
+    impurityPercent: 0,
+    net: 0,
+    gross: 0,
   })
 }
 

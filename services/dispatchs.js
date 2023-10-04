@@ -155,7 +155,9 @@ function update(
     change,
     money,
     impurity_weight,
-    to_pay
+    to_pay,
+    net,
+    gross
 ) {
     let data = {
         id,
@@ -164,7 +166,9 @@ function update(
         change,
         money,
         impurity_weight,
-        to_pay
+        to_pay,
+        net,
+        gross
     }
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
     const dispatch = new Promise((resolve, reject) => {
