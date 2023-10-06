@@ -85,7 +85,7 @@ export default function ReceptionsGrid(props) {
     }
 
     const editReception = () => {
-        let clp = parseInt(rowData.clp)
+        let clp = parseFloat(rowData.clp)
         let usd = parseFloat(rowData.usd)
         let change = parseInt(rowData.change)
         let money = rowData.money
@@ -431,7 +431,7 @@ export default function ReceptionsGrid(props) {
                                         startAdornment: <InputAdornment position="start">$</InputAdornment>,
                                         endAdornment: <InputAdornment position="end">CLP</InputAdornment>,
                                     }}
-                                    inputProps={{ min: 0 }}
+                                    inputProps={{ min: 0,   step: 0.01 }}
                                 />
                             </Grid>
                             <Grid item sx={{ display: rowData.showUsd ? 'inline-block' : 'none' }}>
