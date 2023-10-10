@@ -50,29 +50,32 @@ export default function ReceptionToPrint(props) {
 
         <Divider sx={{ marginTop: 1, marginBottom: 1, backgroundColor: 'black' }} />
         <Box display='flex' justifyContent={'center'} flexDirection={'row'}>
-          <Typography fontSize={14} align='center'>Recepción: {receptionData.id}</Typography>
-          <Typography align='center' paddingLeft={1} display={'inline-flex'}> {receptionData.open ? '' : <LockIcon fontSize={'small'} />}</Typography>
-          <Typography align='center' paddingLeft={1} display={'inline-flex'}> {receptionData.settlement ? <DoneAllIcon fontSize={'small'} /> : ''}</Typography>
+          <Typography fontWeight="bold" fontSize={14} align='center'>Recepción: {receptionData.id}</Typography>
+          <Typography fontWeight="bold" align='center' paddingLeft={1} display={'inline-flex'}> {receptionData.open ? '' : <LockIcon fontSize={'small'} />}</Typography>
+          <Typography  fontWeight="bold"align='center' paddingLeft={1} display={'inline-flex'}> {receptionData.settlement ? <DoneAllIcon fontSize={'small'} /> : ''}</Typography>
         </Box>
         <Divider sx={{ marginTop: 1, marginBottom: 1, backgroundColor: 'black' }} />
         <Box display='flex' justifyContent='space-between' flexDirection={'column'}>
-          <Typography fontSize={10}>Fecha: {moment(receptionData.createdAt).format('DD-MM-YYYY HH:mm')}</Typography>
-          <Typography fontSize={10}>Productor: {receptionData.Producer.name}</Typography>
-          <Typography fontSize={10}>Rut: {receptionData.Producer.rut}</Typography>
-          <Typography fontSize={10}>Guía: {receptionData.guide}</Typography>
-          <Typography fontSize={10}>Variedad: {receptionData.Variety.name}</Typography>
-          <Typography fontSize={10}>Tipo: {receptionData.Type.name}</Typography>
+          <Typography fontSize={10} fontWeight="bold">Fecha: {moment(receptionData.createdAt).format('DD-MM-YYYY HH:mm')}</Typography>
+          <Typography fontSize={10} fontWeight="bold">Productor: {receptionData.Producer.name}</Typography>
+          <Typography fontSize={10} fontWeight="bold">Rut: {receptionData.Producer.rut}</Typography>
+          <Typography fontSize={10} fontWeight="bold">Guía: {receptionData.guide}</Typography>
+          <Typography fontSize={10} fontWeight="bold">Variedad: {receptionData.Variety.name}</Typography>
+          <Typography fontSize={10} fontWeight="bold">Tipo: {receptionData.Type.name}</Typography>
           <Typography
             sx={{  display: receptionData.money == 'CLP' ? 'block' : 'none'  }}
             fontSize={10}
+            fontWeight="bold"
           >Precio por kg: {receptionData.clp.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</Typography>
           <Typography
             sx={{ display: receptionData.money == 'USD' ? 'block' : 'none' }}
             fontSize={10}
+            fontWeight="bold"
           >
             Precio en dolar: {receptionData.usd.toLocaleString('es-CL', { style: 'currency', currency: 'USD' })}
           </Typography>
           <Typography
+          fontWeight="bold"
             sx={{ display: showToPay == true ? 'block' : 'none' }}
             fontSize={10}
           >
@@ -83,14 +86,14 @@ export default function ReceptionToPrint(props) {
         <Divider sx={{ marginTop: 1, marginBottom: 1, backgroundColor: 'black' }} />
 
         <Box display='flex' justifyContent='space-between' flexDirection={'column'}>
-          <Typography fontSize={10}>Bandejas: {
+          <Typography fontSize={10} fontWeight="bold">Bandejas: {
             new Intl.NumberFormat('es-CL', {
               style: 'decimal',
               minimumFractionDigits: 0,
               maximumFractionDigits: 0,
             }).format(receptionData.trays_quanty) + ' unds'
           }</Typography>
-          <Typography fontSize={10}>Bruto: {
+          <Typography fontSize={10} fontWeight="bold">Bruto: {
             new Intl.NumberFormat('es-CL', {
               style: 'decimal',
               minimumFractionDigits: 2,
@@ -98,6 +101,7 @@ export default function ReceptionToPrint(props) {
             }).format(receptionData.gross) + ' kg'
           }</Typography>
           <Typography
+          fontWeight="bold"
             sx={{ display: receptionData.impurity_weight > 0 ? 'block' : 'none' }}
             fontSize={10}>
             Impurezas: {
@@ -107,7 +111,7 @@ export default function ReceptionToPrint(props) {
                 maximumFractionDigits: 2,
               }).format(receptionData.impurity_weight) + ' kg'
             }</Typography>
-          <Typography fontSize={10}>Neto: {
+          <Typography fontSize={10} fontWeight="bold">Neto: {
             new Intl.NumberFormat('es-CL', {
               style: 'decimal',
               minimumFractionDigits: 2,
@@ -115,6 +119,7 @@ export default function ReceptionToPrint(props) {
             }).format(receptionData.net) + ' kg'
           }</Typography>
           <Typography
+          fontWeight="bold"
             sx={{ display: receptionData.to_pay > 0 ? 'block' : 'none' }}
             fontSize={10}>A pagar: {
               receptionData.to_pay.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
@@ -123,7 +128,7 @@ export default function ReceptionToPrint(props) {
         <Divider sx={{ marginTop: 1, marginBottom: 1, backgroundColor: 'black' }} />
 
         <Box display='flex' justifyContent='space-between' flexDirection={'column'}>
-          <Typography fontSize={14}  >Packs: </Typography>
+          <Typography fontSize={14}  fontWeight="bold">Packs: </Typography>
           {
             receptionData.Packs.map((pack, index) => (
               <Box key={index} display='flex' justifyContent={'space-around'} flexDirection={'row'}>
@@ -131,7 +136,7 @@ export default function ReceptionToPrint(props) {
                   {pack.id + ':'}
                 </Typography>
                 <Box display='flex' justifyContent={'space-around'} flexDirection={'column'}>
-              <Typography fontSize={10}>
+              <Typography fontSize={10} fontWeight="bold">
                 {pack.Tray.name + ' '}
                 {
                   new Intl.NumberFormat('es-CL', {
@@ -142,7 +147,7 @@ export default function ReceptionToPrint(props) {
                 }
                 </Typography>
 
-                <Typography fontSize={10}>
+                <Typography fontSize={10} fontWeight="bold">
                 {
                   new Intl.NumberFormat('es-CL', {
                     style: 'decimal',
@@ -152,7 +157,7 @@ export default function ReceptionToPrint(props) {
                 }
                 </Typography>
 
-                <Typography fontSize={10}>
+                <Typography fontSize={10} fontWeight="bold">
                 {
                   new Intl.NumberFormat('es-CL', {
                     style: 'decimal',
@@ -173,10 +178,10 @@ export default function ReceptionToPrint(props) {
         <Box  
         sx={{ display: returnedTraysData.length > 0 ? 'block' : 'none' }}
         justifyContent='space-between' flexDirection={'column'}>
-          <Typography fontSize={14}  >Bandejas devueltas: {totalReturneds}</Typography>
+          <Typography fontSize={14}  fontWeight="bold">Bandejas devueltas: {totalReturneds}</Typography>
           {
             returnedTraysData.map((tray, index) => (
-              <Typography key={index} fontSize={10}>{tray.Tray.name}: {tray.quanty}</Typography>
+              <Typography key={index} fontSize={10} fontWeight="bold">{tray.Tray.name}: {tray.quanty}</Typography>
             ))
           }
         </Box>

@@ -129,7 +129,7 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 reception: initialState.reception,
-                currentPallets: initialState.currentPallets
+                // currentPallets: initialState.currentPallets
             }
         case 'SET_RECEPTION_SHOW_PRICES':
             return { ...state, reception: { ...state.reception, showPrices: action.value } }

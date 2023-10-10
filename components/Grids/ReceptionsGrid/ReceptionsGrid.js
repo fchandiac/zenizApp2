@@ -22,6 +22,7 @@ import ReceptionToPrint from '../../NewReception/ReceptionToPrint'
 
 
 
+
 const receptions = require('../../../services/receptions')
 const variesties = require('../../../services/varieties')
 const types = require('../../../services/types')
@@ -92,7 +93,7 @@ export default function ReceptionsGrid(props) {
         let showUsd = rowData.showUsd
         let variety = rowData.variety
         let type = rowData.type
-        let toPay = rowData.toPay
+        let toPay = parseFloat(rowData.toPay)
         let impurityWeight = rowData.impurityWeight
         let net = rowData.net 
 
@@ -110,6 +111,11 @@ export default function ReceptionsGrid(props) {
         net = net - impurityWeight
         toPay = net * clp
 
+        clp = clp.toFixed(2)
+        usd = usd.toFixed(2)
+        change = change.toFixed(2)
+        toPay = toPay.toFixed(2)
+    
         receptions.update(
             rowData.id,
             clp,
@@ -262,8 +268,8 @@ export default function ReceptionsGrid(props) {
         { field: 'typeName', headerName: 'Tipo', flex: .3, hide: true, headerClassName: 'row-header-tiny' },
         { field: 'guide', headerName: 'Guía', flex: .3, hide: true, headerClassName: 'row-header-tiny', },
         {
-            field: 'clp', headerName: 'Precio', flex: .3, hide: false, headerClassName: 'row-header-tiny',
-            valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+            field: 'clp', headerName: 'Precio', flex: .38, hide: false, headerClassName: 'row-header-tiny',
+            valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 2  })
         },
         {
             field: 'usd', headerName: 'Dolar', flex: .35, hide: false, headerClassName: 'row-header-tiny',
@@ -318,7 +324,8 @@ export default function ReceptionsGrid(props) {
         },
         {
             field: 'toPay', headerName: 'A Pagar', flex: .4, headerClassName: 'row-header-tiny',
-            valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+            valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 2  })
+         
         },
         {
             field: 'settlementId', headerName: 'Liquidación', flex: .3, hide: true, headerClassName: 'row-header-tiny'
@@ -467,7 +474,7 @@ export default function ReceptionsGrid(props) {
                                         startAdornment: <InputAdornment position="start">$</InputAdornment>,
                                         endAdornment: <InputAdornment position="end">CLP</InputAdornment>,
                                     }}
-                                    inputProps={{ min: 0 }}
+                                    inputProps={{ min: 0, step: 0.01 }}
                                 />
                             </Grid>
                             <Grid item >

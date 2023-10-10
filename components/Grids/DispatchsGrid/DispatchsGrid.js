@@ -73,6 +73,8 @@ export default function DispatchsGrid(props) {
       toPay = result * rowData.net
     }
 
+    console.log('result', result)
+
     setRowData({ ...rowData, clp: result, usd: usd, change: change, toPay: toPay })
   }
 
@@ -109,11 +111,11 @@ export default function DispatchsGrid(props) {
     { field: 'guide', headerName: 'Guia', flex: 1, headerClassName: 'row-header-tiny' },
     {
       field: 'clp', headerName: 'CLP', flex: 1, headerClassName: 'row-header-tiny',
-      valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+      valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 2  })
     },
     {
       field: 'usd', headerName: 'USD', flex: 1, headerClassName: 'row-header-tiny',
-      valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+      valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'USD' })
     },
     { field: 'change', headerName: 'Cambio', flex: 1, headerClassName: 'row-header-tiny' },
     { field: 'money', headerName: 'Moneda', flex: 1, headerClassName: 'row-header-tiny' },
@@ -153,7 +155,10 @@ export default function DispatchsGrid(props) {
           maximumFractionDigits: 2,
         }).format(params.value) + ' kg'
     },
-    { field: 'toPay', headerName: 'A Pagar', flex: 1, headerClassName: 'row-header-tiny' },
+    {
+      field: 'toPay', headerName: 'A Pagar', flex: 1, headerClassName: 'row-header-tiny',
+      valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 2  })
+    },
     {
       field: 'actions',
       headerName: '',
@@ -253,7 +258,7 @@ export default function DispatchsGrid(props) {
                     startAdornment: <InputAdornment position="start">$</InputAdornment>,
                     endAdornment: <InputAdornment position="end">CLP</InputAdornment>,
                   }}
-                  inputProps={{ min: 0 }}
+                  inputProps={{ min: 0, step: 0.01 }}
                 />
               </Grid>
               <Grid item sx={{ display: rowData.showUsd ? 'inline-block' : 'none' }}>
@@ -269,10 +274,8 @@ export default function DispatchsGrid(props) {
                   InputProps={{
                     startAdornment: <InputAdornment position="start">$</InputAdornment>,
                     endAdornment: <InputAdornment position="end">USD</InputAdornment>,
-
                   }}
                   inputProps={{ min: 0, step: 0.01 }}
-
                 />
               </Grid>
               <Grid item sx={{ display: rowData.showUsd ? 'inline-block' : 'none' }}>
@@ -335,7 +338,7 @@ export default function DispatchsGrid(props) {
                   label='Bruto'
                   value={rowData.gross}
                   type='number'
-                  onChange={(e) => {setRowData({...rowData, gross: e.target.value })}}
+                  onChange={(e) => { setRowData({ ...rowData, gross: e.target.value }) }}
                   InputProps={
                     {
                       endAdornment: <InputAdornment position="end">kg</InputAdornment>,
@@ -353,7 +356,7 @@ export default function DispatchsGrid(props) {
                   label='Neto'
                   value={rowData.net}
                   type='number'
-                  onChange={(e) =>{setRowData({...rowData, net: e.target.value})}}
+                  onChange={(e) => { setRowData({ ...rowData, net: e.target.value }) }}
                   // calcPrice(receptionClp, e.target.value, receptionChange, receptionMoney)
                   InputProps={
                     {
@@ -364,7 +367,6 @@ export default function DispatchsGrid(props) {
                   size={'small'}
                   fullWidth
                   inputProps={{ min: 0, step: 0.01 }}
-
                 />
               </Grid>
             </Grid>

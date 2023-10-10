@@ -31,14 +31,7 @@ export default function TraysMovementsGrid(props) {
         { field: 'producerName', headerName: 'Productor', flex: 1 },
         {
             field: 'receptionId', headerName: 'Recepción', flex: 1,
-            renderCell: (params) => {
-                return params.value === '' ?
-                    <Box sx={{ display: 'flex', justifyContent: 'center', color: '#757575' }}>
-                        <DeleteIcon />
-                    </Box> :
-                    params.value
-
-            }
+           
         },
         { field: 'quanty', headerName: 'Cantidad', flex: 1, type: 'number' },
         {
@@ -90,6 +83,8 @@ export default function TraysMovementsGrid(props) {
                 return 'Devolución al productor'
             case 3:
                 return 'Recepción'
+            case 4:
+                return 'Despacho'
             default:
                 return ''
         }
@@ -106,6 +101,8 @@ export default function TraysMovementsGrid(props) {
                 return 'data-grid-cell-red'
             case 3:
                 return 'data-grid-cell-green'
+            case 4:
+                return 'data-grid-cell-red'
             default:
                 return ''
         }
