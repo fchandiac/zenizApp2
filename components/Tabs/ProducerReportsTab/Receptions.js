@@ -62,6 +62,8 @@ export default function Receptions(props) {
         gross: reception.gross,
         net: reception.net,
         toPay: reception.to_pay,
+        clp: reception.clp,
+        usd: reception.usd,
       }))
 
       const producer = await producers.findOneById(producerId)
@@ -73,13 +75,15 @@ export default function Receptions(props) {
         start: moment(filterDates.start).format('DD-MM-YYYY'),
         end: moment(filterDates.end).format('DD-MM-YYYY'),
         receptions: receptionsToPrint,
-        
+
         traysQuanty: receptionsToPrint.reduce((acc, item) => acc + item.traysQuanty, 0),
         traysWeight: receptionsToPrint.reduce((acc, item) => acc + item.traysWeight, 0),
         impurityWeight: receptionsToPrint.reduce((acc, item) => acc + item.impurityWeight, 0),
         gross: receptionsToPrint.reduce((acc, item) => acc + item.gross, 0),
         net: receptionsToPrint.reduce((acc, item) => acc + item.net, 0),
         toPay: receptionsToPrint.reduce((acc, item) => acc + item.toPay, 0),
+        clp: receptionsToPrint.reduce((acc, item) => acc + item.clp, 0),
+        usd: receptionsToPrint.reduce((acc, item) => acc + item.usd, 0),
 
       })
 
@@ -101,35 +105,34 @@ export default function Receptions(props) {
       <Grid container spacing={1}>
         <Grid item xs={2}>
           <Grid container direction='column' spacing={1}>
-          <Grid item>
-            <DesktopDatePicker
-              label="Fecha incial"
-              inputFormat='DD-MM-YYYY'
-              value={filterDates.start}
-              onChange={(e) => {
-                console.log(e)
-                setFilterDates({ ...filterDates, start: e })
-              }}
-              renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
-            />
-          </Grid>
-          <Grid item>
-            <DesktopDatePicker
-              label="Fecha final"
-              inputFormat='DD-MM-YYYY'
-              value={filterDates.end}
-              onChange={(e) => { setFilterDates({ ...filterDates, end: e }) }}
-              renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
-            />
-          </Grid>
-          <Grid item textAlign={'right'}>
-            <IconButton
-              onClick={() => { setOpenPrintDialog(true)}}
-            >
-              <PrintIcon />
-            </IconButton>
-
-          </Grid>
+            <Grid item>
+              <DesktopDatePicker
+                label="Fecha incial"
+                inputFormat='DD-MM-YYYY'
+                value={filterDates.start}
+                onChange={(e) => {
+                  console.log(e)
+                  setFilterDates({ ...filterDates, start: e })
+                }}
+                renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
+              />
+            </Grid>
+            <Grid item>
+              <DesktopDatePicker
+                label="Fecha final"
+                inputFormat='DD-MM-YYYY'
+                value={filterDates.end}
+                onChange={(e) => { setFilterDates({ ...filterDates, end: e }) }}
+                renderInput={(params) => <TextField {...params} size={'small'} fullWidth />}
+              />
+            </Grid>
+            <Grid item textAlign={'right'}>
+              <IconButton
+                onClick={() => { setOpenPrintDialog(true) }}
+              >
+                <PrintIcon />
+              </IconButton>
+            </Grid>
           </Grid>
         </Grid>
         <Grid item xs={10}>

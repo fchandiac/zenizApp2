@@ -20,6 +20,7 @@ export default function ReceptionToPrint(props) {
     } else {
       const fetchData = async () => {
         const rec = await receptions.findOneById(receptionId)
+        console.log(rec)
         const trays = await traysMovements.findAllByReception(receptionId)
         let filterTrays =  trays.filter(tray => tray.type == 2)
 
@@ -165,6 +166,9 @@ export default function ReceptionToPrint(props) {
                     maximumFractionDigits: 2,
                   }).format(pack.net) + ' kg neto'
                 }
+                </Typography>
+                <Typography fontSize={10} fontWeight="bold">
+                  pallet {pack.pallet_id}
                 </Typography>
                 </Box>
 

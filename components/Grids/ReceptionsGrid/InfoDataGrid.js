@@ -49,8 +49,7 @@ function CustomPagination(props) {
     const apiRef = useGridApiContext()
     const page = useGridSelector(apiRef, gridPageSelector)
     const pageCount = useGridSelector(apiRef, gridPageCountSelector)
-
-
+    
     useEffect(() => {
         setGridApiRef(apiRef)
     }, [])
@@ -62,7 +61,7 @@ function CustomPagination(props) {
         totaltoPay += row[1]['toPay']
         totalNet += row[1]['net']
     })
-    let renderTotalToPay = renderMoneystr(totaltoPay)
+    let renderTotalToPay = totaltoPay.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 2  })
     let renderTotalNet = new Intl.NumberFormat('es-CL', {
         style: 'decimal',
         minimumFractionDigits: 2,

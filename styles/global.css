@@ -40,7 +40,9 @@ body {
   min-height: fit-content;
   max-width: 7rem;
   padding: .2rem;
+  margin: 0;
   text-align: right;
+  width: fit-content;
 }
 
 .row-header-tiny {
@@ -48,6 +50,7 @@ body {
   font-weight: bold;
   padding: .2rem;
   text-align: right;
+  width: fit-content;
 }
 
 .css-h2cton-MuiPaper-root-MuiTableContainer-root{

@@ -29,6 +29,8 @@ const types = require('../../../services/types')
 const producerAccounts = require('../../../services/producerAccounts')
 const packs = require('../../../services/packs')
 const records = require('../../../services/records')
+const pallets = require('../../../services/pallets')
+
 
 
 
@@ -228,6 +230,12 @@ export default function ReceptionsGrid(props) {
                 user.id,
             )
 
+            rowData.packs.forEach(async (pack) => {
+                //console.log('pack', pack)
+                await pallets.updateTrays(pack.pallet_id, (pack.quanty * -1))
+            })
+            // await pallets.updateTrays()
+
             gridApiRef.current.updateRows([{ id: rowData.rowId, _action: 'delete' }])
             setOpenDeleteDialog(false)
         } else {
@@ -235,6 +243,11 @@ export default function ReceptionsGrid(props) {
             const packs_ = rowData.packs
             packs_.forEach(async (pack) => {
                 await packs.destroy(pack.id)
+            })
+
+            rowData.packs.forEach(async (pack) => {
+                //console.log('pack', pack)
+                await pallets.updateTrays(pack.pallet_id, (pack.quanty * -1))
             })
 
             const lastMovement = await producerAccounts.findLastByProducerId(rowData.producerId)
@@ -255,8 +268,6 @@ export default function ReceptionsGrid(props) {
             )
             gridApiRef.current.updateRows([{ id: rowData.rowId, _action: 'delete' }])
             setOpenDeleteDialog(false)
-            
-
         }
     }
 

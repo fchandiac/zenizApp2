@@ -39,20 +39,22 @@ export default function ReceptionsReportToPrint(props) {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell className='row-header-tiny'>id</TableCell>
+                            <TableCell className='row-header-tiny' >id</TableCell>
                             <TableCell className='row-header-tiny'>Variedad</TableCell>
                             <TableCell className='row-header-tiny'>Bandejas</TableCell>
-                            <TableCell className='row-header-tiny'>Bandejas</TableCell>
+                   
                             <TableCell className='row-header-tiny'>Bruto</TableCell>
                             <TableCell className='row-header-tiny'>Impurezas</TableCell>
                             <TableCell className='row-header-tiny'>Neto</TableCell>
+                            <TableCell className='row-header-tiny'>Precio kg CLP</TableCell>
+                            <TableCell className='row-header-tiny'>Precio kg USD</TableCell>
                             {/* <TableCell className='row-header-tiny'>A pagar</TableCell> */}
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {data.map((item) => (
                             <TableRow key={item.id}>
-                                <TableCell className='row-tiny'>{item.id}</TableCell>
+                                <TableCell className='row-tiny' >{item.id}</TableCell>
                                 <TableCell className='row-tiny'>{item.varietyName}</TableCell>
                                 <TableCell className='row-tiny'>{
 
@@ -62,13 +64,7 @@ export default function ReceptionsReportToPrint(props) {
                                         maximumFractionDigits: 0,
                                     }).format(item.traysQuanty) + ' unds'
                                 }</TableCell>
-                                <TableCell className='row-tiny'>{
-                                    new Intl.NumberFormat('es-CL', {
-                                        style: 'decimal',
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    }).format(item.traysWeight) + ' kg'
-                                }</TableCell>
+                             
                                 <TableCell className='row-tiny'>{
                                     new Intl.NumberFormat('es-CL', {
                                         style: 'decimal',
@@ -90,6 +86,15 @@ export default function ReceptionsReportToPrint(props) {
                                         maximumFractionDigits: 2,
                                     }).format(item.net) + ' kg'
                                 }</TableCell>
+                                <TableCell className='row-tiny'>{
+                                    item.clp.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 2  })
+                                   
+                                }</TableCell>
+                                <TableCell className='row-tiny'>{
+                                    item.usd.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 2  })
+                                   
+                                }</TableCell>
+                                
                                 {/* <TableCell className='row-tiny'>{item.toPay.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</TableCell> */}
                             </TableRow>
                         ))}
@@ -104,13 +109,7 @@ export default function ReceptionsReportToPrint(props) {
                                 maximumFractionDigits: 0,
                             }).format(totals.traysQuanty) + ' unds'
                             }</TableCell>
-                            <TableCell sx={{backgroundColor:'#eeeeee'}} className='row-tiny'>
-                                {new Intl.NumberFormat('es-CL', {
-                                    style: 'decimal',
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                }).format(totals.traysWeight) + ' kg'}
-                            </TableCell>
+                   
                             <TableCell sx={{backgroundColor:'#eeeeee'}} className='row-tiny'>
                                 {new Intl.NumberFormat('es-CL', {
                                     style: 'decimal',
@@ -131,6 +130,10 @@ export default function ReceptionsReportToPrint(props) {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                 }).format(totals.net) + ' kg'}
+                            </TableCell>
+                            <TableCell sx={{backgroundColor:'#eeeeee'}} className='row-tiny'>
+                            </TableCell>
+                            <TableCell sx={{backgroundColor:'#eeeeee'}} className='row-tiny'>
                             </TableCell>
                             {/* <TableCell>{totals.toPay.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</TableCell> */}
                         </TableRow>
