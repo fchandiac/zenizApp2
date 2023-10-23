@@ -1,10 +1,30 @@
 import { Grid, Typography, Box, Divider, Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material'
 import moment from 'moment'
-import React from 'react'
+import React, {useState, useEffect} from 'react'
+
+const settlements = require('../../../services/settlements')
+
+
 
 export default function SettlementToPrint(props) {
-    const { settlement } = props
-    console.log('settlementToPrint', settlement)
+    const { settlement_id} = props
+    const [settlement, setSettlement] = useState(settlementDataDefault())
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const settlementToPrint_ = await settlements.findOneById(settlement_id)
+            setSettlement(settlementToPrint_)
+            console.log('settlementToPrint_', settlementToPrint_)
+          
+        }
+
+        fetchData()
+    }, [])
+
+    
+
+
+
     const calculateTotals = (data) => {
         const totals = {
             traysQuanty: 0,
@@ -25,7 +45,7 @@ export default function SettlementToPrint(props) {
         });
 
         return totals;
-    };
+    }
 
     const table = ({ data }) => {
         const totals = calculateTotals(data)
@@ -90,7 +110,7 @@ export default function SettlementToPrint(props) {
                         ))}
 
                         <TableRow>
-                            <TableCell sx={{backgroundColor: '#eeeeee'}} className='row-tiny'>Totales</TableCell>
+                            <TableCell sx={{backgroundColor: '#eeeeee', textAlign: 'right'}} className='row-tiny'>TOTALES</TableCell>
                             <TableCell sx={{backgroundColor: '#eeeeee'}} className='row-tiny'></TableCell>
                             <TableCell sx={{backgroundColor: '#eeeeee'}} className='row-tiny'>{totals.traysQuanty} unds</TableCell>
                             <TableCell sx={{backgroundColor: '#eeeeee'}} className='row-tiny'>{totals.traysWeight.toFixed(2)} kg</TableCell>
@@ -118,9 +138,23 @@ export default function SettlementToPrint(props) {
                 <Typography variant={'caption'}>{'Fecha: ' + moment(settlement.createdAt).format('DD-MM-YYYY HH:mm')}</Typography>
             </Box>
             <Box flexDirection={'column'} paddingBottom={1}>
-                {table({ data: settlement.receptions })}
+                {table({ data: settlement.Receptions })}
             </Box>
 
         </>
     )
+}
+
+
+function settlementDataDefault() {
+    return{
+        id: 0,
+        producerName: '',
+        producerRut: '',
+        amount: 0,
+        description: '',
+        createdAt: '',
+        Receptions: []
+
+    }
 }

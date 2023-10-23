@@ -17,6 +17,7 @@ export default function Settlements() {
     useEffect(() => {
         const fetchData = async () => {
             const settlementsByDates = await settlements_.findAllBetweenDates(filterDates.start, filterDates.end)
+            
             let formattedSettlements =  settlementsByDates.map(settlement => ({
                 id: settlement.id,
                 producerName: settlement.Producer.name,
@@ -26,8 +27,9 @@ export default function Settlements() {
                 description: settlement.description,
                 receptions: settlement.Receptions,
                 createdAt: settlement.createdAt,
-
             }))
+
+            console.log('settlementsByDates',formattedSettlements )
             setSettlementsList(formattedSettlements)
         }
             

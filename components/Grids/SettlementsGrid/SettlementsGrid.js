@@ -13,7 +13,6 @@ import {
 } from '@mui/material'
 import { useAppContext } from '../../../appProvider'
 import moment from 'moment'
-import AppDataGrid from '../../Karmextron/DataGrid/DataGrid'
 import PrintDialog from '../../PrintDialog/PrintDialog'
 import SettlementToPrint from './SettlementToPrint'
 
@@ -24,6 +23,8 @@ export default function SettlementsGrid(props) {
     const [openPrintDialog, setOpenPrintDialog] = useState(false)
     const [rowData, setRowData] = useState(rowDataDefault())
 
+    console.log('settlementsList', settlementsList)
+
     const columns = [
         { field: 'id', headerName: 'Id', flex: .5, type: 'number', valueFormatter: (params) => params.value },
         { field: 'producerName', headerName: 'Productor', flex: 1 },
@@ -33,7 +34,7 @@ export default function SettlementsGrid(props) {
             valueFormatter: (params) => params.value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
         },
         { field: 'description', headerName: 'Descripción', flex: 1 },
-        { field: 'cratedAt', headerName: 'Fecha', flex: 1, valueFormatter: (params) => (moment(params.value).format('DD-MM-YYYY HH:mm')) },
+        { field: 'createdAt', headerName: 'Fecha', flex: 1, valueFormatter: (params) => moment(params.value).format('DD-MM-YYYY HH:mm')},
         {
             field: 'actions',
             headerName: '',
@@ -75,7 +76,7 @@ export default function SettlementsGrid(props) {
 
             >
         
-                    <SettlementToPrint settlement={rowData} />
+                    <SettlementToPrint settlement_id={rowData.id} />
  
             </PrintDialog>
         </>

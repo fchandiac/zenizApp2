@@ -7,7 +7,8 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import InfoDataGrid from '../../Karmextron/InfoDataGrid/InfoDataGrid'
 import PrintDialog from '../../PrintDialog/PrintDialog'
-import SettlementToPrint from '../SettlementsGrid/SettlementToPrint' 
+import SettlementToPrint from '../SettlementsGrid/SettlementToPrint'
+
 
 
 const receptions = require('../../../services/receptions')
@@ -23,6 +24,7 @@ export default function SettlementDialog(props) {
     const [balance, setBalance] = useState(0)
     const [openPrintDialog, setOpenPrintDialog] = useState(false)
     const [settlementData, setSettlementData] = useState({})
+    const [settlement_id, setSettlement_id] = useState(0)
 
 
     useEffect(() => {
@@ -74,11 +76,13 @@ export default function SettlementDialog(props) {
     }
 
     const debit = () => {
-        let debit =balance < 0 ? 0 : balance * -1
+        let debit = balance < 0 ? 0 : balance
         return debit
     }
 
     const newSettlement = async () => {
+
+        console.log(receptionsList)
         let currentBalance = balance
         console.log(currentBalance)
         const newSettlement = await settlements.create(producer_id, currentBalance, 'Liquidación')
@@ -92,26 +96,19 @@ export default function SettlementDialog(props) {
             settlementDescription()
         )
 
-        const findNewSettlement = await settlements.findOneById(newSettlement.id)
-        
-        let formatSettlement = () => ({
-            id: findNewSettlement.id,
-            producerId: findNewSettlement.ProducerId,
-            producerName: findNewSettlement.Producer.name,
-            amount: findNewSettlement.amount,
-            description: findNewSettlement.description,
-            receptions: findNewSettlement.Receptions,
-            createdAt: findNewSettlement.createdAt,
-        })
-        setSettlementData(formatSettlement)
+        setSettlement_id(newSettlement.id)
+
+
 
         receptionsList.map(async (reception) => {
+            // await receptions.updateSettlement(reception.id, newSettlement.id)
             await receptions.updateSettlement(reception.id, newSettlement.id)
         })
-        
+
         setAccountsGridState(!accountsGridState)
         setOpen(false)
         setOpenPrintDialog(true)
+
     }
 
 
@@ -216,10 +213,10 @@ export default function SettlementDialog(props) {
                                                 />
                                             </Grid>
                                             <Grid item>
-                                                <Button 
-                                                variant='contained' 
-                                                fullWidth
-                                                onClick={() => {newSettlement()}}
+                                                <Button
+                                                    variant='contained'
+                                                    fullWidth
+                                                    onClick={() => { newSettlement() }}
                                                 >
                                                     Liquidar
                                                 </Button>
@@ -257,9 +254,9 @@ export default function SettlementDialog(props) {
                 title={'Liquidación'}
                 dialogWidth={'lg'}
             >
-                <SettlementToPrint settlement={settlementData} />
+                <SettlementToPrint settlement_id={settlement_id} />
             </PrintDialog>
-                
+
         </>
     )
 }
