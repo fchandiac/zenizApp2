@@ -31,6 +31,7 @@ export default function SettlementDialog(props) {
         const fetchData = async () => {
             const data = await receptions.findAllByProducerBetweenDates(producer_id, filterDates.start, filterDates.end)
             let filterData = data.filter((reception) => (reception.settlement === false && reception.open === false))
+
             let formattedData = filterData.map((reception) => ({
                 id: reception.id,
                 producerId: reception.ProducerId,
@@ -40,7 +41,6 @@ export default function SettlementDialog(props) {
                 toPay: reception.to_pay,
                 createdAt: reception.createdAt,
             }))
-
             setReceptionsList(formattedData)
 
             if (moment(filterDates.start).format('DD-MM-YYYY') == moment(filterDates.end).format('DD-MM-YYYY')) {
@@ -49,12 +49,24 @@ export default function SettlementDialog(props) {
                 setGridTitle('Recepciones cerradas a liquidar del ' + moment(filterDates.start).format('DD-MM-YYYY') + ' al ' + moment(filterDates.end).format('DD-MM-YYYY'))
             }
 
-            const producerBalance = await producerAccounts.producerAccountBalance(producer_id)
-            setBalance(producerBalance)
+       
         }
         fetchData()
 
     }, [open, filterDates])
+
+    useEffect(() => {
+        let balance = 0
+
+        if (receptionsList.length > 0) {
+
+        balance = receptionsList.reduce((acc, reception) => {
+                return acc + reception.toPay;
+            }, 0)}
+
+        setBalance(balance)
+
+    }, [receptionsList])
 
     const destroy = (id) => {
         let filteredReceptions = receptionsList.filter((reception) => reception.id !== id)

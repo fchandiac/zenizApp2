@@ -9,6 +9,8 @@ import DispatachPalletCard from '../components/Cards/DispatchPalletCard/Dispatac
 import { set } from 'date-fns'
 import PrintDialog from '../components/PrintDialog/PrintDialog'
 import DistpatchToPrint from '../components/Grids/DispatchsGrid/DistpatchToPrint'
+import useTrays from '../components/Hooks/useTrays/useTrays'
+import { tr } from 'date-fns/locale'
 
 
 const pallets = require('../services/pallets')
@@ -60,6 +62,8 @@ export default function newDispatch() {
   } = useAppContext()
   const [palletInput, setPalletInput] = useState('')
   const [dispatchWeight, setDispatchWeight] = useState('')
+
+  const {dispatchTrayMovement} = useTrays()
 
   const [customerInput, setCustomerInput] = useState('')
   const [customerOptions, setCustomerOptions] = useState([])
@@ -260,18 +264,21 @@ export default function newDispatch() {
     console.log('TRAYS', traysTotalsArray)
 
     traysTotalsArray.forEach(async (tray) => {
-      const tray_ = await traysService.findOneById(tray.tray_id)
-      let currentBalance = tray_.stock - parseInt(tray.total);
-      await traysService.updateStock(tray_.id, currentBalance);
+      // await dispatchTrayMovement(
+      //   tray.tray_id,
+      //   tray.total,
+      //   dispatchCustomer.id,
+      //   newDispatch.id
+      // )
+      // const tray_ = await traysService.findOneById(tray.tray_id)
+      // let currentBalance = tray_.stock - parseInt(tray.total);
+      // await traysService.updateStock(tray_.id, currentBalance);
 
-      await traysMovements.create(
-        tray_.id,
-        null,
-        null,
+      await dispatchTrayMovement(
+        tray.tray_id,
         tray.total,
-        4,
-        currentBalance,
-        'Despacho ' + newDisptatchId,
+        dispatchCustomer.id,
+        newDispatch.id
       )
     })
 
@@ -282,13 +289,6 @@ export default function newDispatch() {
     setNewDispatchId(newDispatch.id)
     setOpenPrintDialog(true)
     resetDispatch()
-
-
-
-
-
-
-
 
 
   }

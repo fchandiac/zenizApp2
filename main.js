@@ -12,8 +12,8 @@ const rawDataConfig = fs.readFileSync(filePathConfig)
 const config = JSON.parse(rawDataConfig)
 
 ///// --------> NODE ENV <-------/////////
-//const env = process.env.NODE_ENV
-const env = 'build'
+const env = process.env.NODE_ENV
+//const env = 'build'
 ///// --------------------------/////////
 
 

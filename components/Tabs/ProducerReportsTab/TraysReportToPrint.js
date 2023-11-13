@@ -2,6 +2,24 @@ import { TableContainer, Table, TableHead, TableRow, TableBody, TableCell, Typog
 import moment from 'moment/moment'
 import React from 'react'
 
+const rowTinyStyle = {
+    fontSize: '.65rem',
+    minHeight: 'fit-content',
+    maxWidth: '7rem',
+    padding: '.2rem',
+    margin: 0,
+    textAlign: 'right',
+    width: 'fit-content',
+}
+
+const rowHeaderTinyStyle = {
+    fontSize: '.65rem',
+    fontWeight: 'bold',
+    padding: '.2rem',
+    textAlign: 'right',
+    width: 'fit-content',
+}
+
 export default function TraysReportToPrint(props) {
     const { reportData } = props
 
@@ -27,25 +45,25 @@ export default function TraysReportToPrint(props) {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell className='row-header-tiny'>id</TableCell>
-                            <TableCell className='row-header-tiny'>Bandeja</TableCell>
-                            <TableCell className='row-header-tiny'>Tipo</TableCell>
-                            <TableCell className='row-header-tiny'>Descripción</TableCell>
-                            <TableCell className='row-header-tiny'>Cantidad</TableCell>
-                            <TableCell className='row-header-tiny'>Saldo</TableCell>
-                            <TableCell className='row-header-tiny'>Fecha</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>id</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Bandeja</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Tipo</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Descripción</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Cantidad</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Saldo</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Fecha</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {data.map((item) => (
                             <TableRow key={item.id}>
-                                <TableCell className='row-tiny'>{item.id}</TableCell>
-                                <TableCell className='row-tiny'>{item.trayName}</TableCell>
-                                <TableCell className='row-tiny'>{setType(item.type)}</TableCell>
-                                <TableCell className='row-tiny'>{item.description}</TableCell>
-                                <TableCell className='row-tiny'>{item.quanty}</TableCell>
-                                <TableCell className='row-tiny'>{item.balance}</TableCell>
-                                <TableCell className='row-tiny'>{moment(item.createdAt).format('DD-MM-YYYY HH:mm')}</TableCell>
+                                <TableCell style={rowTinyStyle}>{item.id}</TableCell>
+                                <TableCell style={rowTinyStyle}>{item.trayName}</TableCell>
+                                <TableCell style={rowTinyStyle}>{setType(item.type)}</TableCell>
+                                <TableCell style={rowTinyStyle}>{item.description}</TableCell>
+                                <TableCell style={rowTinyStyle}>{item.quanty}</TableCell>
+                                <TableCell style={rowTinyStyle}>{item.balance}</TableCell>
+                                <TableCell style={rowTinyStyle}>{moment(item.createdAt).format('DD-MM-YYYY HH:mm')}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

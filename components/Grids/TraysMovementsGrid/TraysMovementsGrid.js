@@ -30,8 +30,13 @@ export default function TraysMovementsGrid(props) {
         { field: 'trayName', headerName: 'Bandeja', flex: 1 },
         { field: 'producerName', headerName: 'Productor', flex: 1 },
         {
-            field: 'receptionId', headerName: 'Recepción', flex: 1,
-           
+            field: 'receptionId', headerName: 'Recepción', flex: 1, hide: true,
+            valueFormatter: (params) => params.value == null ? '' : params.value
+        },
+        { field: 'customerName', headerName: 'Cliente', flex: 1, },
+        {
+            field: 'dispatchId', headerName: 'Despacho', flex: 1, hide: true,
+            valueFormatter: (params) => params.value == null ? '' : params.value
         },
         { field: 'quanty', headerName: 'Cantidad', flex: 1, type: 'number' },
         {
@@ -51,7 +56,7 @@ export default function TraysMovementsGrid(props) {
                 <GridActionsCellItem
                     label='print'
                     icon={<PrintIcon />}
-                    onClick={() => { 
+                    onClick={() => {
                         setRowData({
                             id: params.row.id,
                             trayId: params.row.trayId,
@@ -66,7 +71,7 @@ export default function TraysMovementsGrid(props) {
                             createdAt: params.row.createdAt
                         })
                         setOpenPrintDialog(true)
-                     }}
+                    }}
                 />
             ]
 

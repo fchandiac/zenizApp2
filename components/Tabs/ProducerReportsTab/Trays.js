@@ -24,6 +24,7 @@ export default function Trays(props) {
   const [traysOptions, setTraysOptions] = useState([])
 
   useEffect(() => {
+    
     const fetchData = async () => {
       const traysData = await trays.findAll()
       const traysOptions = traysData.map(tray => ({
@@ -38,9 +39,13 @@ export default function Trays(props) {
   }, [])
 
   useEffect(() => {
+    console.log('ProducerId', producerId)
     const fetchData = async () => {
       const movs = await traysMovements.findAllByProducerByTray(reportData.tray.id, producerId)
-      let filterMovs = movs.filter(mov => (mov.type == 3 || mov.type == 2))
+      console.log('reportData.tray.id', reportData.tray.id)
+      console.log('Movs', movs)
+      // let filterMovs = movs.filter(mov => (mov.type == 3 || mov.type == 2))
+      let filterMovs = movs
       let balance = 0
 
       console.log('Balance', balance )
@@ -48,7 +53,7 @@ export default function Trays(props) {
       filterMovs.reverse()
 
       filterMovs.map(mov => {
-        if (mov.type == 2) {
+        if (mov.type == 1 || mov.type == 4 || mov.type == 2) {
           mov.quanty = mov.quanty * -1
         }
         mov.balance = 0
@@ -109,7 +114,13 @@ export default function Trays(props) {
               }}
               value={reportData.tray}
               onChange={(e, newValue) => {
-                setReportData({ ...reportData, tray: newValue })
+                if (newValue === null) {
+                  newValue = {id:0, key: 0, label: ''}
+                  setReportData({ ...reportData, tray: newValue })
+                } else {
+                  setReportData({ ...reportData, tray: newValue })
+                }
+                
 
               }}
               getOptionLabel={(option) => option.label}

@@ -2,8 +2,27 @@ import { TableContainer, Table, TableHead, TableRow, TableBody, TableCell, Typog
 import moment from 'moment'
 import React from 'react'
 
+
+const rowTinyStyle = {
+    fontSize: '.65rem',
+    minHeight: 'fit-content',
+    maxWidth: '7rem',
+    padding: '.2rem',
+    margin: 0,
+    textAlign: 'right',
+    width: 'fit-content',
+}
+
+const rowHeaderTinyStyle = {
+    fontSize: '.65rem',
+    fontWeight: 'bold',
+    padding: '.2rem',
+    textAlign: 'right',
+    width: 'fit-content',
+}
+
 export default function ReceptionsReportToPrint(props) {
-    const { reportData } = props
+    const { reportData, global } = props
     console.log('reportData', reportData)
 
     const calculateTotals = (data) => {
@@ -39,24 +58,24 @@ export default function ReceptionsReportToPrint(props) {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell className='row-header-tiny' >id</TableCell>
-                            <TableCell className='row-header-tiny'>Variedad</TableCell>
-                            <TableCell className='row-header-tiny'>Bandejas</TableCell>
-                   
-                            <TableCell className='row-header-tiny'>Bruto</TableCell>
-                            <TableCell className='row-header-tiny'>Impurezas</TableCell>
-                            <TableCell className='row-header-tiny'>Neto</TableCell>
-                            <TableCell className='row-header-tiny'>Precio kg CLP</TableCell>
-                            <TableCell className='row-header-tiny'>Precio kg USD</TableCell>
+                            <TableCell style={rowHeaderTinyStyle} className='row-header-tiny' >id</TableCell>
+                            <TableCell style={rowHeaderTinyStyle} className='row-header-tiny'>Variedad</TableCell>
+                            <TableCell style={rowHeaderTinyStyle} className='row-header-tiny'>Bandejas</TableCell>
+
+                            <TableCell style={rowHeaderTinyStyle} className='row-header-tiny'>Bruto</TableCell>
+                            <TableCell style={rowHeaderTinyStyle} className='row-header-tiny'>Impurezas</TableCell>
+                            <TableCell style={rowHeaderTinyStyle} className='row-header-tiny'>Neto</TableCell>
+                            <TableCell style={rowHeaderTinyStyle} className='row-header-tiny'>Precio kg CLP</TableCell>
+                            <TableCell style={rowHeaderTinyStyle} className='row-header-tiny'>Precio kg USD</TableCell>
                             {/* <TableCell className='row-header-tiny'>A pagar</TableCell> */}
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {data.map((item) => (
                             <TableRow key={item.id}>
-                                <TableCell className='row-tiny' >{item.id}</TableCell>
-                                <TableCell className='row-tiny'>{item.varietyName}</TableCell>
-                                <TableCell className='row-tiny'>{
+                                <TableCell style={rowTinyStyle} >{item.id}</TableCell>
+                                <TableCell style={rowTinyStyle} >{item.varietyName}</TableCell>
+                                <TableCell style={rowTinyStyle} >{
 
                                     new Intl.NumberFormat('es-CL', {
                                         style: 'decimal',
@@ -64,76 +83,76 @@ export default function ReceptionsReportToPrint(props) {
                                         maximumFractionDigits: 0,
                                     }).format(item.traysQuanty) + ' unds'
                                 }</TableCell>
-                             
-                                <TableCell className='row-tiny'>{
+
+                                <TableCell style={rowTinyStyle} className='row-tiny'>{
                                     new Intl.NumberFormat('es-CL', {
                                         style: 'decimal',
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
                                     }).format(item.gross) + ' kg'
                                 }</TableCell>
-                                <TableCell className='row-tiny'>{
+                                <TableCell style={rowTinyStyle} className='row-tiny'>{
                                     new Intl.NumberFormat('es-CL', {
                                         style: 'decimal',
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
                                     }).format(item.impurityWeight) + ' kg'
                                 }</TableCell>
-                                <TableCell className='row-tiny'>{
+                                <TableCell style={rowTinyStyle} className='row-tiny'>{
                                     new Intl.NumberFormat('es-CL', {
                                         style: 'decimal',
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
                                     }).format(item.net) + ' kg'
                                 }</TableCell>
-                                <TableCell className='row-tiny'>{
-                                    item.clp.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 2  })
-                                   
+                                <TableCell style={rowTinyStyle} className='row-tiny'>{
+                                    item.clp.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 2 })
+
                                 }</TableCell>
-                                <TableCell className='row-tiny'>{
-                                    item.usd.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 2  })
-                                   
+                                <TableCell style={rowTinyStyle} className='row-tiny'>{
+                                    item.usd.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 2 })
+
                                 }</TableCell>
-                                
+
                                 {/* <TableCell className='row-tiny'>{item.toPay.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</TableCell> */}
                             </TableRow>
                         ))}
 
                         <TableRow>
-                            <TableCell sx={{backgroundColor:'#eeeeee'}} className='row-tiny'>TOTALES</TableCell>
-                            <TableCell sx={{backgroundColor:'#eeeeee'}} className='row-tiny'></TableCell>
-                            <TableCell sx={{backgroundColor:'#eeeeee'}} className='row-tiny'>{
-                            new Intl.NumberFormat('es-CL', {
-                                style: 'decimal',
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0,
-                            }).format(totals.traysQuanty) + ' unds'
+                            <TableCell style={rowTinyStyle} sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'>TOTALES</TableCell>
+                            <TableCell style={rowTinyStyle} sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'></TableCell>
+                            <TableCell style={rowTinyStyle} sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'>{
+                                new Intl.NumberFormat('es-CL', {
+                                    style: 'decimal',
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0,
+                                }).format(totals.traysQuanty) + ' unds'
                             }</TableCell>
-                   
-                            <TableCell sx={{backgroundColor:'#eeeeee'}} className='row-tiny'>
+
+                            <TableCell style={rowTinyStyle} sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'>
                                 {new Intl.NumberFormat('es-CL', {
                                     style: 'decimal',
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                 }).format(totals.gross) + ' kg'}
                             </TableCell>
-                            <TableCell sx={{backgroundColor:'#eeeeee'}} className='row-tiny'>
+                            <TableCell style={rowTinyStyle} sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'>
                                 {new Intl.NumberFormat('es-CL', {
                                     style: 'decimal',
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                 }).format(totals.impurityWeight) + ' kg'}
                             </TableCell>
-                            <TableCell sx={{backgroundColor:'#eeeeee'}} className='row-tiny'>
+                            <TableCell style={rowTinyStyle} sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'>
                                 {new Intl.NumberFormat('es-CL', {
                                     style: 'decimal',
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                 }).format(totals.net) + ' kg'}
                             </TableCell>
-                            <TableCell sx={{backgroundColor:'#eeeeee'}} className='row-tiny'>
+                            <TableCell style={rowTinyStyle} sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'>
                             </TableCell>
-                            <TableCell sx={{backgroundColor:'#eeeeee'}} className='row-tiny'>
+                            <TableCell style={rowTinyStyle} sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'>
                             </TableCell>
                             {/* <TableCell>{totals.toPay.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</TableCell> */}
                         </TableRow>
@@ -154,8 +173,8 @@ export default function ReceptionsReportToPrint(props) {
                 justifyContent="space-between"
             >
                 <Box flexDirection={'column'} paddingTop={1} display={'flex'}>
-                    <Typography variant={'caption'}>{'Productor: ' + reportData.producerName}</Typography>
-                    <Typography variant={'caption'}>{'Rut: ' + reportData.producerRut}</Typography>
+                    <Typography sx={{display: global? 'none': 'block'}} variant={'caption'}>{'Productor: ' + reportData.producerName}</Typography>
+                    <Typography sx={{display: global? 'none': 'block'}} variant={'caption'}>{'Rut: ' + reportData.producerRut}</Typography>
                     <Typography variant={'caption'}>{'Fecha inicial: ' + reportData.start}</Typography>
                     <Typography variant={'caption'}>{'Fecha final: ' + reportData.end}</Typography>
                 </Box>

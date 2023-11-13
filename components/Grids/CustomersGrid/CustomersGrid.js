@@ -5,10 +5,12 @@ import { GridActionsCellItem } from '@mui/x-data-grid'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import InfoDataGrid from '../../Karmextron/InfoDataGrid/InfoDataGrid'
 import { useAppContext } from '../../../appProvider'
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid } from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, Paper, TextField, InputAdornment } from '@mui/material'
 import CustomerAccountGrid from '../CustomerAccountsGrid/CustomerAccountGrid'
 
 const customers = require('../../../services/customers')
+const customerAccounts = require('../../../services/customerAccounts')
+const customerAdvances = require('../../../services/customerAdvances')
 
 
 export default function CustomersGrid(props) {
@@ -18,6 +20,9 @@ export default function CustomersGrid(props) {
     const [gridApiRef, setGridApiRef] = useState(null)
     const [rowData, setRowData] = useState(rowDataDefault())
     const [openAccountDialog, setOpenAccountDialog] = useState(false)
+    const [advanceData, setAdvanceData] = useState({ producerId: 0, amount: 0, description: '' })
+    const [updateCustomerAcountGrid, setUpdateCustomerAcountGrid] = useState(false) 
+    
 
     useEffect(() => {
         const fetchData = async () => {
@@ -26,6 +31,23 @@ export default function CustomersGrid(props) {
         }
         fetchData()
     }, [update])
+
+    const newAdvance = async () => {
+        const newAdvance = await customerAdvances.create(rowData.id, advanceData.amount, advanceData.description)
+        const lastCustomerAccount = await customerAccounts.findLastByCustomerId(rowData.id)
+        const lastBalance = lastCustomerAccount ? lastCustomerAccount.balance : 0
+        await customerAccounts.create(
+            rowData.id,
+            0,
+            parseInt(advanceData.amount),
+            parseInt(lastBalance) - parseInt(advanceData.amount),
+            newAdvance.id,
+            1,
+            'Anticipo ' + newAdvance.id,
+        )
+        setUpdateCustomerAcountGrid(!updateCustomerAcountGrid)
+        setAdvanceData({ producerId: 0, amount: 0, description: '' })
+    }
 
     const columns = [
         { field: 'id', headerName: 'Id', flex: .5, type: 'number' },
@@ -84,7 +106,53 @@ export default function CustomersGrid(props) {
             <Dialog open={openAccountDialog} maxWidth={'lg'} fullWidth>
                 <DialogTitle sx={{ padding: 2 }}> Cuenta cliente</DialogTitle>
                 <DialogContent sx={{ padding: 1 }}>
-                    <CustomerAccountGrid />
+                    <Grid container spacing={1}>
+                        <Grid item xs={3} md={3}>
+                            <Paper sx={{ padding: 1 }} variant='outlined'>
+                                <Typography>
+                                    Nuevo Anticipo
+                                </Typography>
+                                <form onSubmit={(e) => { e.preventDefault(); newAdvance()  }}>
+                                    <Grid container spacing={1} direction={'column'} paddingTop={1}>
+                                        <Grid item>
+                                            <TextField
+                                                label='Monto'
+                                                variant='outlined'
+                                                size='small'
+                                                type='number'
+                                                value={advanceData.amount}
+                                                onChange={(e) => setAdvanceData({ ...advanceData, amount: e.target.value })}
+                                                InputProps={{
+                                                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                                }}
+                                                fullWidth
+                                                required
+                                            />
+                                        </Grid>
+                                        <Grid item>
+                                            <TextField
+                                                label='Descripción'
+                                                variant='outlined'
+                                                size='small'
+                                                value={advanceData.description}
+                                                onChange={(e) => setAdvanceData({ ...advanceData, description: e.target.value })}
+                                                fullWidth
+                                                rows={4}
+                                                multiline
+                                            />
+                                        </Grid>
+                                        <Grid item textAlign={'right'}>
+                                            <Button variant='contained' type={'submit'}>Guardar</Button>
+                                        </Grid>
+                                    </Grid>
+                                </form>
+
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={9} md={9}>
+                            <CustomerAccountGrid customer_id={rowData.id} updateCustomerAcountGrid={updateCustomerAcountGrid} />
+                        </Grid>
+                    </Grid>
 
                 </DialogContent>
                 <DialogActions sx={{ padding: 2 }}>

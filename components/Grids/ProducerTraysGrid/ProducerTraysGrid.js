@@ -9,13 +9,15 @@ export default function ProducerTraysGrid(props) {
     const setType = (type) => {
         switch (type) {
             case 0:
-                return 'Entrada'
+                return 'Ingreso'
             case 1:
                 return 'Egreso'
             case 2:
-                return 'Devolución al productor'
+                return 'Devolución en recepción'
             case 3:
                 return 'Recepción'
+            case 4:
+                return 'Despacho'
             default:
                 return ''
         }
@@ -38,7 +40,7 @@ export default function ProducerTraysGrid(props) {
     rows = {movs}
     columns = {columns}
     title = {title}
-    height = {'70vh'}
+    height = {'66vh'}
     setGridApiRef ={setGridApiRef}
     />
 

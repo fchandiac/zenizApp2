@@ -2,13 +2,22 @@
 const config= require('../config.js')
 const server_url = config.serverUrl
 
-function create(tray_id, producer_id, reception_id, quanty, type, balance, description) {
+function create(
+    tray_id, 
+    producer_id, 
+    reception_id, 
+    customer_id,
+    dispatch_id,
+    quanty, 
+    type, 
+    balance, 
+    description) {
     // let server_url = ipcRenderer.sendSync('server-url', 'sync')
     const tray = new Promise((resolve, reject) => {
         fetch(server_url + 'traysMovements/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tray_id, producer_id, reception_id, quanty, type, balance, description })
+            body: JSON.stringify({ tray_id, producer_id, reception_id, customer_id, dispatch_id, quanty, type, balance, description })
         }).then(res => {
             res.json().then(res => {
                 if (res.code === 0) {

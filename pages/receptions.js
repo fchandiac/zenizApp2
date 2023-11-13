@@ -39,6 +39,7 @@ export default function otherPage() {
         impurityWeight: reception.impurity_weight,
         gross: reception.gross,
         net: reception.net,
+        originalNet: reception.original_net,
         packs: reception.Packs,
         toPay: reception.to_pay,
         open: reception.open,
@@ -146,7 +147,7 @@ export default function otherPage() {
         title={'Reporte de recepciones'}
         dialogWidth={'lg'}
       >
-      <ReceptionsReportToPrint reportData={reportData} />
+      <ReceptionsReportToPrint reportData={reportData} global={true} />
       </PrintDialog>
     </>
   )

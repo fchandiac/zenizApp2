@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react'
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker'
 import { Grid, TextField, Autocomplete, Paper, Select, MenuItem, FormControl, InputLabel, Box, InputAdornment, Button } from '@mui/material'
 import moment from 'moment'
-import { set } from 'date-fns'
 import TraysMovementsGrid from '../../Grids/TraysMovementsGrid/TraysMovementsGrid'
+import useTrays from '../../Hooks/useTrays/useTrays'
 
 
 const trays = require('../../../services/trays')
 const traysMovements = require('../../../services/traysMovements')
+const customers = require('../../../services/customers')
+const producers = require('../../../services/producers')
 
 export default function Movements() {
   const [filterDates, setFilterDates] = useState({ start: moment(new Date).format('YYYY-MM-DD'), end: moment(new Date).format('YYYY-MM-DD 23:59') })
@@ -17,6 +19,12 @@ export default function Movements() {
   const [tray, setTray] = useState({ id: 0, key: 0, label: '' })
   const [movementData, setMovementData] = useState(movementDataDefault())
   const [movementsList, setMovementsList] = useState([])
+  const [customerInput, setCustomerInput] = useState('')
+  const [customerOptions, setCustomerOptions] = useState([])
+  const [producerInput, setProducerInput] = useState('')
+  const [producerOptions, setProducerOptions] = useState([])
+  const {newInputMovement, newOutMovement} = useTrays()
+
 
 
   useEffect(() => {
@@ -34,6 +42,33 @@ export default function Movements() {
 
   useEffect(() => {
     const fetchData = async () => {
+      const producersList = await producers.findAll()
+      let data = producersList.map(producer => ({
+        id: producer.id,
+        label: producer.name,
+        key: producer.id
+      }))
+      setProducerOptions(data)
+    }
+    fetchData()
+  }, [])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const customersList = await customers.findAll()
+      console.log(customersList)
+      let data = customersList.map(customer => ({
+        id: customer.id,
+        label: customer.name,
+        key: customer.id
+      }))
+      setCustomerOptions(data)
+    }
+    fetchData()
+  }, [])
+
+  useEffect(() => {
+    const fetchData = async () => {
       const movs = await traysMovements.findAllByTrayBetweenDate(tray.id, filterDates.start, filterDates.end)
       console.log(movs)
 
@@ -43,8 +78,10 @@ export default function Movements() {
         trayName: mov.Tray.name,
         producer: mov.Producer == null ? {} : mov.Producer,
         producerName: mov.Producer == null ? '' : mov.Producer.name,
-        reception: mov.Reception == null ? {} : mov.Reception,
         receptionId: mov.reception_id == null ? '' : mov.reception_id,
+        customer: mov.Customer == null ? {} : mov.Customer,
+        customerName: mov.Customer == null ? '' : mov.Customer.name,
+        dispatchId: mov.dispatch_id == null ? '' : mov.dispatch_id,
         quanty: mov.quanty,
         type: mov.type,
         balance: mov.balance,
@@ -57,17 +94,25 @@ export default function Movements() {
   }, [tray, filterDates])
 
   const newMovement = async () => {
-    const tray = await trays.findOneById(movementData.tray.id)
-    let currentBalance = tray == null ? 0 : tray.stock
+
+    let producerId = movementData.producer == null ? null : movementData.producer.id
+    let customerId = movementData.customer == null ? null : movementData.customer.id
+
+    console.log('movementData', movementData)
     if (movementData.type === 0) {
-      currentBalance = tray.stock + parseInt(movementData.amount)
+      await newInputMovement(
+        movementData.tray.id, 
+        producerId,
+        customerId,
+        parseInt(movementData.amount), movementData.description)
     } else if (movementData.type === 1) {
-      currentBalance = tray.stock - parseInt(movementData.amount)
+      await newOutMovement(
+        movementData.tray.id, 
+        producerId,
+        customerId,
+        parseInt(movementData.amount), 
+        movementData.description)
     }
-    const newMov = await traysMovements.create(movementData.tray.id, null, null, movementData.amount, movementData.type, currentBalance, movementData.description)
-    await trays.updateStock(movementData.tray.id, currentBalance)
-
-
 
     setTray({ id: movementData.tray.id, key: movementData.tray.id, label: movementData.tray.label })
     setFilterDates({ start: moment(new Date).format('YYYY-MM-DD'), end: moment(new Date).format('YYYY-MM-DD 23:59') })
@@ -181,14 +226,48 @@ export default function Movements() {
                         onInputChange={(e, newInputValue) => {
                           setTrayInput2(newInputValue)
                         }}
-                        value={tray}
+                        
+                        value={movementData.tray}
                         onChange={(e, newValue) => {
                           setMovementData({ ...movementData, tray: newValue })
 
                         }}
                         getOptionLabel={(option) => option.label}
                         options={traysOptions}
-                        renderInput={(params) => <TextField {...params} label='Bandeja' size={'small'} fullWidth />}
+                        renderInput={(params) => <TextField {...params} label='Bandeja' size={'small'} fullWidth required/>}
+                        
+                      />
+                    </Grid>
+                    <Grid item>
+                      <Autocomplete
+                        inputValue={customerInput}
+                        onInputChange={(e, newInputValue) => {
+                          setCustomerInput(newInputValue)
+                        }}
+                        value={movementData.customer}
+                        onChange={(e, newValue) => {
+                          setMovementData({ ...movementData, customer: newValue, producer: { id: 0, key: 0, label: '' } })
+
+                        }}
+                        getOptionLabel={(option) => option.label}
+                        options={customerOptions}
+                        renderInput={(params) => <TextField {...params} label='Cliente' size={'small'} fullWidth />}
+                      />
+                    </Grid>
+                    <Grid item>
+                      <Autocomplete
+                        inputValue={producerInput}
+                        onInputChange={(e, newInputValue) => {
+                          setProducerInput(newInputValue)
+                        }}
+                        value={movementData.producer}
+                        onChange={(e, newValue) => {
+                          setMovementData({ ...movementData, producer: newValue, customer: { id: 0, key: 0, label: '' } })
+
+                        }}
+                        getOptionLabel={(option) => option.label}
+                        options={producerOptions}
+                        renderInput={(params) => <TextField {...params} label='Productor' size={'small'} fullWidth />}
                       />
                     </Grid>
                     <Grid item textAlign={'right'}>
@@ -214,6 +293,8 @@ export default function Movements() {
 function movementDataDefault() {
   return ({
     tray: { id: 0, key: 0, label: '' },
+    customer: { id: 0, key: 0, label: '' },
+    producer: { id: 0, key: 0, label: '' },
     amount: 0,
     type: 0,
     description: ''

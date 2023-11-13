@@ -97,7 +97,7 @@ export default function ReceptionsGrid(props) {
         let type = rowData.type
         let toPay = parseFloat(rowData.toPay)
         let impurityWeight = rowData.impurityWeight
-        let net = rowData.net 
+        let net = rowData.originalNet
 
         console.log('clp', clp)
 
@@ -154,6 +154,7 @@ export default function ReceptionsGrid(props) {
     }
 
     const closeReception = async () => {
+        let toPay = parseInt(rowData.toPay)
         const closeReception = await receptions.closeReception(rowData.id)
 
         const lastMovement = await producerAccounts.findLastByProducerId(rowData.producerId)
@@ -162,15 +163,15 @@ export default function ReceptionsGrid(props) {
 
         let newBalance = 0
         if (lastMovement == null) {
-            newBalance = rowData.toPay
+            newBalance = toPay
         } else {
-            newBalance = lastMovement.balance + rowData.toPay
+            newBalance = lastMovement.balance + toPay
         }
 
 
         const newCredit = await producerAccounts.create(
             rowData.producerId,
-            rowData.toPay,
+            toPay,
             0,
             newBalance,
             rowData.id,
@@ -190,6 +191,7 @@ export default function ReceptionsGrid(props) {
     }
 
     const setRow = (params) => {
+       
         setRowData({
             rowId: params.id,
             id: params.row.id,
@@ -210,6 +212,7 @@ export default function ReceptionsGrid(props) {
             impurityWeight: params.row.impurityWeight,
             gross: params.row.gross,
             net: params.row.net,
+            originalNet: params.row.originalNet,
             packs: params.row.packs,
             toPay: params.row.toPay,
             open: params.row.open,
@@ -273,6 +276,7 @@ export default function ReceptionsGrid(props) {
 
     const columns = [
         { field: 'id', headerName: 'Id', flex: .3, type: 'number', headerClassName: 'row-header-tiny', valueFormatter: (params) => params.value },
+        {field: 'originalNet', headerName: 'Neto Original', flex: .3, hide: true, headerClassName: 'row-header-tiny', valueFormatter: (params) => params.value },
         { field: 'producerName', headerName: 'Productor', flex: .8, headerClassName: 'row-header-tiny' },
         { field: 'producerRut', headerName: 'Rut', flex: .5, headerClassName: 'row-header-tiny' },
         { field: 'varietyName', headerName: 'Variedad', flex: .5, headerClassName: 'row-header-tiny' },
@@ -532,7 +536,7 @@ export default function ReceptionsGrid(props) {
                                         setRowData({
                                             ...rowData,
                                             impuritypercent: e.target.value,
-                                            impurityWeight: (rowData.net * e.target.value) / 100
+                                            impurityWeight: (rowData.originalNet * e.target.value) / 100
                                         })
 
                                     }}
@@ -657,6 +661,7 @@ function rowDataDefault() {
         impurityWeight: 0,
         gross: '',
         net: '',
+        originalNet: 0,
         packs: [],
         showUsd: false,
         toPay: '',

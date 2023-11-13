@@ -77,4 +77,27 @@ function findAll() {
 
 
 
-export { findLastByCustomerId, create, findAll}
+function findAllByCustomerId(customer_id) {
+    let data = {customer_id}
+    // let server_url = ipcRenderer.sendSync('server-url', 'sync')
+    const customerAccounts = new Promise((resolve, reject) => {
+        fetch(server_url + 'customerAccounts/findAllByCustomerId', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => { reject(err) })
+    })
+    return customerAccounts
+}
+
+
+
+export { findLastByCustomerId, create, findAll, findAllByCustomerId}

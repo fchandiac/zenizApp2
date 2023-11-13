@@ -12,6 +12,7 @@ import PacksGrid from './PacksGrid'
 import PrintDialog from '../PrintDialog/PrintDialog'
 import ReceptionToPrint from './ReceptionToPrint'
 import ReturnedTrays from './ReturnedTrays'
+import useTrays from '../Hooks/useTrays/useTrays'
 
 const utils = require('../../utils')
 
@@ -86,6 +87,8 @@ export default function NewReception() {
 
     const [lastReceptionId, setLastReceptionId] = useState(0)
     const [newProducerState, setNewProducerState] = useState(false)
+
+    const {receptionTrayMovement, backInReceptionTrayMovement} = useTrays()
 
     const [producerData, setProducerData] = useState({
         id: 0,
@@ -225,7 +228,6 @@ export default function NewReception() {
 
     const packsPromises = (receptionId) => reception.packs.map(async (pack) => {
 
-
         const newPack = await packs.create(
             pack.pallet.id,
             pack.tray.id,
@@ -237,47 +239,14 @@ export default function NewReception() {
             pack.gross,
             pack.net,
         )
-        const tray_ = await trays.findOneById(pack.tray.id);
-        let currentBalance = tray_.stock + parseInt(pack.quanty);
-        await trays.updateStock(tray_.id, currentBalance);
 
-        await traysMovements.create(
-            tray_.id,
-            reception.producer.id,
-            receptionId,
-            pack.quanty,
-            3,
-            currentBalance,
-            'Recibidas recepción ' + receptionId + ' pack ' + newPack.id
-        )
-
+        await receptionTrayMovement(pack.tray.id, pack.quanty, reception.producer.id, receptionId, newPack.id)
         console.log('ON PACKS')
-
     })
 
     const returnedPromises = (receptionId) => returnetTrays.map(async (tray) => {
-
-
-        console.log('returned')
-        const tray_ = await trays.findOneById(tray.tray.id)
-        let currentBalance = tray_.stock - parseInt(tray.quanty)
-
-        await trays.updateStock(tray_.id, currentBalance)
-
-        await traysMovements.create(
-            tray_.id,
-            reception.producer.id,
-            receptionId,
-            tray.quanty,
-            2,
-            currentBalance,
-            'Devueltas en recepción ' + receptionId
-        )
-
+        await backInReceptionTrayMovement(tray.tray.id, tray.quanty, reception.producer.id, receptionId)
         console.log('RETURNED')
-
-
-
     })
 
 
