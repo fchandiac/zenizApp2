@@ -10,8 +10,6 @@ import { set } from 'date-fns'
 import PrintDialog from '../components/PrintDialog/PrintDialog'
 import DistpatchToPrint from '../components/Grids/DispatchsGrid/DistpatchToPrint'
 import useTrays from '../components/Hooks/useTrays/useTrays'
-import { tr } from 'date-fns/locale'
-
 
 const pallets = require('../services/pallets')
 const customers = require('../services/customers')
@@ -218,11 +216,6 @@ export default function newDispatch() {
 
     let packs = []
 
-
-
-
-
-
     dispatchPallets.forEach(async (pallet) => {
       packs.push(pallet.packs)
       const updateDispatch = await pallets.updateDisptach(
@@ -261,18 +254,8 @@ export default function newDispatch() {
 
     let traysTotalsArray = Array.from(traysTotals).map(([tray_id, total]) => ({ tray_id, total }))
 
-    console.log('TRAYS', traysTotalsArray)
 
     traysTotalsArray.forEach(async (tray) => {
-      // await dispatchTrayMovement(
-      //   tray.tray_id,
-      //   tray.total,
-      //   dispatchCustomer.id,
-      //   newDispatch.id
-      // )
-      // const tray_ = await traysService.findOneById(tray.tray_id)
-      // let currentBalance = tray_.stock - parseInt(tray.total);
-      // await traysService.updateStock(tray_.id, currentBalance);
 
       await dispatchTrayMovement(
         tray.tray_id,
@@ -284,10 +267,7 @@ export default function newDispatch() {
 
     //////////////////////
 
-
-
     setNewDispatchId(newDispatch.id)
-    setOpenPrintDialog(true)
     resetDispatch()
 
 

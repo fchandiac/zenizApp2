@@ -5,6 +5,24 @@ import React, { useEffect, useState } from 'react'
 
 const dispatchs = require('../../../services/dispatchs')
 
+const rowTinyStyle = {
+    fontSize: '.65rem',
+    minHeight: 'fit-content',
+    maxWidth: '7rem',
+    padding: '.2rem',
+    margin: 0,
+    textAlign: 'right',
+    width: 'fit-content',
+}
+
+const rowHeaderTinyStyle = {
+    fontSize: '.65rem',
+    fontWeight: 'bold',
+    padding: '.2rem',
+    textAlign: 'right',
+    width: 'fit-content',
+}
+
 
 export default function DistpatchToPrint(props) {
     const { dispatchId } = props
@@ -103,41 +121,41 @@ export default function DistpatchToPrint(props) {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell className='row-header-tiny'>Id pallet</TableCell>
-                            <TableCell className='row-header-tiny'>Bandeja</TableCell>
-                            <TableCell className='row-header-tiny'>Bandejas</TableCell>
-                            <TableCell className='row-header-tiny'>Bandejas</TableCell>
-                            <TableCell className='row-header-tiny'>Neto recepción</TableCell>
-                            <TableCell className='row-header-tiny'>Merma</TableCell>
-                            <TableCell className='row-header-tiny'>Neto despacho</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Id pallet</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Bandeja</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Bandejas</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Bandejas</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Neto recepción</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Merma</TableCell>
+                            <TableCell style={rowHeaderTinyStyle}>Neto despacho</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {data.map((item) => (
                             <TableRow key={item.id}>
-                                <TableCell className='row-tiny'>{item.id}</TableCell>
-                                <TableCell className='row-tiny'>{item.trayName}</TableCell>
-                                <TableCell className='row-tiny'>{
+                                <TableCell style={rowTinyStyle}>{item.id}</TableCell>
+                                <TableCell style={rowTinyStyle}>{item.trayName}</TableCell>
+                                <TableCell style={rowTinyStyle}>{
                                     new Intl.NumberFormat('es-CL', {
                                         style: 'decimal',
                                         minimumFractionDigits: 0,
                                         maximumFractionDigits: 0,
                                     }).format(item.traysQuanty) + ' unds'
                                 }</TableCell>
-                                <TableCell className='row-tiny'>{item.traysWeight}</TableCell>
-                                <TableCell className='row-tiny'>{item.receptionNet}</TableCell>
-                                <TableCell className='row-tiny'>{item.decrease}</TableCell>
-                                <TableCell className='row-tiny'>{item.dispatchNet}</TableCell>
+                                <TableCell style={rowTinyStyle}>{item.traysWeight}</TableCell>
+                                <TableCell style={rowTinyStyle}>{item.receptionNet}</TableCell>
+                                <TableCell style={rowTinyStyle}>{item.decrease}</TableCell>
+                                <TableCell style={rowTinyStyle}>{item.dispatchNet}</TableCell>
                             </TableRow>
                         ))}
                         {/* Fila de totales */}
                         <TableRow>
                             <TableCell colSpan={2} sx={{ backgroundColor: '#eeeeee' }} className='row-header-tiny'>Totales:</TableCell>
-                            <TableCell sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'>{total.totalTraysQuanty}</TableCell>
-                            <TableCell sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'>{total.totalTraysWeight}</TableCell>
-                            <TableCell sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'>{total.totalReceptionNet}</TableCell>
-                            <TableCell sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'>{total.totalDecrease}</TableCell>
-                            <TableCell sx={{ backgroundColor: '#eeeeee' }} className='row-tiny'>{total.totalDispatchNet}</TableCell>
+                            <TableCell sx={{ backgroundColor: '#eeeeee' }} style={rowTinyStyle}>{total.totalTraysQuanty}</TableCell>
+                            <TableCell sx={{ backgroundColor: '#eeeeee' }} style={rowTinyStyle}>{total.totalTraysWeight}</TableCell>
+                            <TableCell sx={{ backgroundColor: '#eeeeee' }} style={rowTinyStyle}>{total.totalReceptionNet}</TableCell>
+                            <TableCell sx={{ backgroundColor: '#eeeeee' }} style={rowTinyStyle}>{total.totalDecrease}</TableCell>
+                            <TableCell sx={{ backgroundColor: '#eeeeee' }} style={rowTinyStyle}>{total.totalDispatchNet}</TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>
