@@ -263,6 +263,29 @@ function destroy(id) {
 }
 
 
+function updateCreatedAt(id, createdAt) {
+    let data = {id, createdAt}
+    const reception = new Promise((resolve, reject) => {
+        fetch(server_url + 'receptions/updateCreatedAt', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+              res.json().then(res => {
+                if (res.code === 0) {
+                    reject(res.data)
+                } else {
+                    resolve(res.data)
+                }
+            })
+        }).catch(err => {
+            reject(err)
+        })
+    })
+    return reception
+}
+
+
             
 
 
@@ -276,5 +299,6 @@ export {
     findAllByProducerBetweenDates, 
     updateSettlement,
     findOneById,
-    destroy
+    destroy,
+    updateCreatedAt
 }

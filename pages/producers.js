@@ -13,7 +13,6 @@ export default function producers() {
     setUpdateGrid(!updateGrid)
   }
 
-
   return (
     <>
     <ProducersTab 

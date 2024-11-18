@@ -72,7 +72,7 @@ export default function TrayMovementToPrint(props) {
                 <Typography fontSize={12}>Bandeja: {movement.trayName}</Typography>
                 <Typography fontSize={12}>Movimiento: {movement.type}</Typography>
                 <Typography fontSize={12}>Cantidad: {movement.quanty}</Typography>
-                <Typography fontSize={12}>Saldo: {movement.balance}</Typography>
+                {/* <Typography fontSize={12}>Saldo: {movement.balance}</Typography> */}
                 <Typography fontSize={12}>Fecha: {movement.date}</Typography>
             </Box>
      

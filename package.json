@@ -1,87 +1,88 @@
 {
-    "name": "zeniz_app",
-    "version": "1.1.15",
-    "description": "",
-    "main": "main.js",
-    "scripts": {
-        "dev": "NODE_ENV=development electron .",
-        "build": "next build",
-        "start": "NODE_ENV=production electron .",
-        "out": "next export",
-        "test-app": "NODE_ENV=build electron .",
-        "pack-mac": "electron-builder --mac",
-        "pack-win": "electron-builder --win",
-        "pack-win32": "electron-builder --win --ia32",
-        "remote": "electron --remote-debugging-port=9222 .",
-        "debug": "electron --inspect=5858 .",
-        "wdio": "wdio run wdio.conf.js"
+  "name": "zeniz_app",
+  "version": "1.2.23",
+  "description": "",
+  "main": "main.js",
+
+  "scripts": {
+    "dev": "NODE_ENV=development electron .",
+    "build": "next build",
+    "start": "NODE_ENV=production electron .",
+    "out": "next export",
+    "test-app": "NODE_ENV=build electron .",
+    "pack-mac": "electron-builder --mac",
+    "pack-win": "electron-builder --win",
+    "pack-win32": "electron-builder --win --ia32",
+    "remote": "electron --remote-debugging-port=9222 .",
+    "debug": "electron --inspect=5858 .",
+    "wdio": "wdio run wdio.conf.js"
+  },
+  "author": "felipe Chandía Castillo",
+  "license": "ISC",
+  "dependencies": {
+    "@emotion/react": "^11.9.3",
+    "@emotion/styled": "^11.9.3",
+    "@mui/icons-material": "^5.8.4",
+    "@mui/material": "^5.8.4",
+    "@mui/x-data-grid": "^5.12.2",
+    "@mui/x-date-pickers": "^5.0.13",
+    "bluebird": "latest",
+    "cors": "^2.8.5",
+    "date-fns": "^2.29.3",
+    "downloadjs": "^1.4.7",
+    "exceljs": "^4.3.0",
+    "express": "^4.18.1",
+    "file-saver": "^2.0.5",
+    "iconv-lite": "^0.6.3",
+    "moment": "^2.29.4",
+    "mysql2": "^2.3.3",
+    "next": "12.1.6",
+    "react": "^18.1.0",
+    "react-barcode": "^1.4.6",
+    "react-dom": "^18.1.0",
+    "react-number-format": "^5.3.0",
+    "react-to-print": "^2.14.13"
+  },
+  "devDependencies": {
+    "@wdio/cli": "^8.13.14",
+    "@wdio/local-runner": "^8.13.13",
+    "@wdio/mocha-framework": "^8.13.13",
+    "@wdio/spec-reporter": "^8.12.2",
+    "chromedriver": "^115.0.0",
+    "electron": "^22.0.0",
+    "electron-builder": "^24.6.3",
+    "wdio-chromedriver-service": "^8.1.1"
+  },
+  "build": {
+    "buildDependenciesFromSource": true,
+    "appId": "com.karmika.cl.app",
+    "files": [
+      "**/*",
+      "!images{,/**/*}",
+      "!pages{,/**/*}",
+      "!components{,/**/*}",
+      "!styles{,/**/*}",
+      "!**/node_modules",
+      "!build{,/**/*}",
+      "!dist{,/**/*}",
+      "!**/*.{iml,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,suo,xproj,cc,d.ts,pdb}",
+      "**/electron-builder.{yaml,yml,json,json5,toml}",
+      "!**/{.git,.hg,.svn,CVS,RCS,SCCS,__pycache__,.DS_Store,thumbs.db,.gitignore,.gitkeep,.gitattributes,.npmignore,.idea,.vs,.flowconfig,.jshintrc,.eslintrc,.circleci,.yarn-integrity,.yarn-metadata.json,yarn-error.log,yarn.lock,package-lock.json,npm-debug.log,appveyor.yml,.travis.yml,circle.yml,.nyc_output}"
+    ],
+    "asarUnpack": [
+      "config.json"
+    ],
+    "mac": {
+      "target": "dmg"
     },
-    "author": "felipe Chandía Castillo",
-    "license": "ISC",
-    "dependencies": {
-        "@emotion/react": "^11.9.3",
-        "@emotion/styled": "^11.9.3",
-        "@mui/icons-material": "^5.8.4",
-        "@mui/material": "^5.8.4",
-        "@mui/x-data-grid": "^5.12.2",
-        "@mui/x-date-pickers": "^5.0.13",
-        "bluebird": "latest",
-        "cors": "^2.8.5",
-        "date-fns": "^2.29.3",
-        "downloadjs": "^1.4.7",
-        "exceljs": "^4.3.0",
-        "express": "^4.18.1",
-        "file-saver": "^2.0.5",
-        "iconv-lite": "^0.6.3",
-        "moment": "^2.29.4",
-        "mysql2": "^2.3.3",
-        "next": "12.1.6",
-        "react": "^18.1.0",
-        "react-barcode": "^1.4.6",
-        "react-dom": "^18.1.0",
-        "react-number-format": "^5.3.0",
-        "react-to-print": "^2.14.13"
+    "win": {
+      "target": "nsis"
     },
-    "devDependencies": {
-        "@wdio/cli": "^8.13.14",
-        "@wdio/local-runner": "^8.13.13",
-        "@wdio/mocha-framework": "^8.13.13",
-        "@wdio/spec-reporter": "^8.12.2",
-        "chromedriver": "^115.0.0",
-        "electron": "^22.0.0",
-        "electron-builder": "^24.6.3",
-        "wdio-chromedriver-service": "^8.1.1"
-    },
-    "build": {
-        "buildDependenciesFromSource": true,
-        "appId": "com.karmika.cl.app",
-        "files": [
-            "**/*",
-            "!images{,/**/*}",
-            "!pages{,/**/*}",
-            "!components{,/**/*}",
-            "!styles{,/**/*}",
-            "!**/node_modules",
-            "!build{,/**/*}",
-            "!dist{,/**/*}",
-            "!**/*.{iml,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,suo,xproj,cc,d.ts,pdb}",
-            "**/electron-builder.{yaml,yml,json,json5,toml}",
-            "!**/{.git,.hg,.svn,CVS,RCS,SCCS,__pycache__,.DS_Store,thumbs.db,.gitignore,.gitkeep,.gitattributes,.npmignore,.idea,.vs,.flowconfig,.jshintrc,.eslintrc,.circleci,.yarn-integrity,.yarn-metadata.json,yarn-error.log,yarn.lock,package-lock.json,npm-debug.log,appveyor.yml,.travis.yml,circle.yml,.nyc_output}"
-        ],
-        "asarUnpack": [
-            "config.json"
-        ],
-        "mac": {
-            "target": "dmg"
-        },
-        "win": {
-            "target": "nsis"
-        },
-        "nsis": {
-            "oneClick": false,
-            "perMachine": true,
-            "allowToChangeInstallationDirectory": true,
-            "uninstallDisplayName": "App Uninstall"
-        }
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "uninstallDisplayName": "App Uninstall"
     }
+  }
 }

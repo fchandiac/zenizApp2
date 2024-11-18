@@ -44,7 +44,8 @@ export default function otherPage() {
         toPay: reception.to_pay,
         open: reception.open,
         settlement: reception.settlement,
-        settlementId: reception.settlement_id
+        settlementId: reception.settlement_id,
+        createdAt: reception.createdAt,
       }))
       setReceptionsList(data)
 
